@@ -2,8 +2,8 @@ package com.imperium.realms;
 
 import com.minecolonies.api.colony.IColony;
 import com.minecolonies.api.colony.IColonyView;
-import com.minecolonies.api.colony.buildings.views.AbstractBuildingView;
 import com.minecolonies.core.colony.buildings.AbstractBuilding;
+import com.minecolonies.core.colony.buildings.views.AbstractBuildingView;
 import net.minecraft.core.BlockPos;
 import org.jetbrains.annotations.NotNull;
 
