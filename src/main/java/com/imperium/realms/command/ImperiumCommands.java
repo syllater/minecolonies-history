@@ -172,7 +172,7 @@ public final class ImperiumCommands {
                     proposal.statusId(),
                     proposal.expiresDay(),
                     proposal.resolvedBy().isBlank() ? "-" : proposal.resolvedBy(),
-                    proposal.resolvedDay()), false);
+                    proposal.resolvedDay() < 0L ? "-" : Long.toString(proposal.resolvedDay())), false);
         }
         source.sendSuccess(() -> Component.translatable(
                 "imperium_realms.message.parliament_instructions"), false);
