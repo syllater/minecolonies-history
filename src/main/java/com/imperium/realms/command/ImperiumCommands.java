@@ -107,7 +107,8 @@ public final class ImperiumCommands {
                 state.knowledgePoints(),
                 state.stability(),
                 state.legitimacy(),
-                state.taxCollectionEfficiencyPercent()), false);
+                state.taxCollectionEfficiencyPercent(),
+                state.diplomaticInfluence()), false);
         return 1;
     }
 
