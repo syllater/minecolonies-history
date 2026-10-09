@@ -9,10 +9,12 @@ import org.slf4j.Logger;
 @Mod(ImperiumRealms.MOD_ID)
 public final class ImperiumRealms {
     public static final String MOD_ID = "imperium_realms";
-
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public ImperiumRealms(final IEventBus modEventBus) {
+        ImperialJobRegistry.register(modEventBus);
+        ImperialBlockRegistry.register(modEventBus);
+        ImperialBuildingRegistry.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
     }
 
