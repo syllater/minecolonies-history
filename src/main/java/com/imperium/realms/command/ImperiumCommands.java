@@ -97,7 +97,8 @@ public final class ImperiumCommands {
                 state.taxRatePercent(),
                 state.economicPolicy().id(),
                 state.knowledgePoints(),
-                state.stability()), false);
+                state.stability(),
+                state.legitimacy()), false);
         return 1;
     }
 
