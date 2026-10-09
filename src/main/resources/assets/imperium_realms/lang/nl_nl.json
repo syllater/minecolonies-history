@@ -25,12 +25,12 @@
   "imperium_realms.gui.invest100": "100 kronen",
   "block.imperium_realms.blockhutimperialarchive": "Keizerlijk Archief",
   "com.imperium_realms.building.imperial_archive": "Keizerlijk Archief",
-  "com.imperium_realms.building.imperial_archive.desc": "Een plaats waar geleerden kennis bewaren en het rijk adviseren. Voor de bouw is een schema van het Keizerlijk Archief nodig.",
+  "com.imperium_realms.building.imperial_archive.desc": "Een bestuurlijke en wetenschappelijke hut voor filosofen en belastinginners. Voor de bouw is een schema van het Keizerlijk Archief nodig.",
   "com.imperium_realms.job.philosopher": "Filosoof",
   "imperium_realms.message.player_required": "Je moet dit commando als speler binnen een MineColonies-kolonie gebruiken.",
   "imperium_realms.message.enter_colony": "Ga binnen een MineColonies-kolonie staan om het keizerlijke kasboek te openen.",
   "imperium_realms.message.ledger_missing": "Het keizerlijke kasboek kon voor deze kolonie niet worden geïnitialiseerd.",
-  "imperium_realms.message.status": "§6Keizerlijk Kasboek — %1$s §7| §eSchatkist: §f%2$d kronen §7| §eBevolking: §f%3$d §7| §eBelasting: §f%4$d%% §7| §eBeleid: §f%5$s §7| §eKennis: §f%6$d §7| §eStabiliteit: §f%7$d/100 §7| §eLegitimiteit: §f%8$d/100",
+  "imperium_realms.message.status": "§6Keizerlijk Kasboek — %1$s §7| §eSchatkist: §f%2$d kronen §7| §eBevolking: §f%3$d §7| §eBelasting: §f%4$d%% §7| §eBeleid: §f%5$s §7| §eKennis: §f%6$d §7| §eStabiliteit: §f%7$d/100 §7| §eLegitimiteit: §f%8$d/100 §7| §eBelastingefficiëntie: §f%9$d%%",
   "imperium_realms.message.tax_unchanged": "Belastingtarief niet gewijzigd. Kies een tarief van 0 tot 25 procent.",
   "imperium_realms.message.tax_rate": "Belastingtarief ingesteld op %1$d%% voor %2$s.",
   "imperium_realms.message.tax_proposal_invalid": "Kan geen belastingvoorstel van %1$d%% indienen: het tarief is ongeldig, al actief of er bestaat al een gelijk voorstel. Huidig tarief: %2$d%%.",
@@ -56,5 +56,6 @@
   "imperium_realms.message.invest_multiple": "Investeringen moeten een veelvoud van 10 kronen zijn.",
   "imperium_realms.message.treasury_insufficient": "Er staan onvoldoende kronen in de schatkist.",
   "imperium_realms.message.invest_success": "%1$d kronen geïnvesteerd in %2$d kennispunt(en). Saldo schatkist: %3$d kronen.",
-  "imperium_realms.message.permission_denied": "Je hebt toestemming nodig om koloniewoningen te beheren of operatorrechten om de keizerlijke economie te wijzigen."
+  "imperium_realms.message.permission_denied": "Je hebt toestemming nodig om koloniewoningen te beheren of operatorrechten om de keizerlijke economie te wijzigen.",
+  "com.imperium_realms.job.tax_collector": "Belastinginner"
 }
