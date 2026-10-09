@@ -52,6 +52,8 @@ public final class ImperiumCommands {
                                 .executes(context -> invest(
                                         context.getSource(),
                                         IntegerArgumentType.getInteger(context, "crowns")))))
+                .then(Commands.literal("army")
+                        .executes(context -> showArmy(context.getSource())))
                 .then(Commands.literal("politics")
                         .executes(context -> showPolitics(context.getSource())))
                 .then(Commands.literal("diplomacy")
@@ -310,6 +312,24 @@ public final class ImperiumCommands {
                 crowns,
                 points,
                 context.state().treasuryCrowns()), true);
+        return 1;
+    }
+
+    private static int showArmy(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) {
+            return 0;
+        }
+
+        final EmpireState state = context.state();
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.army_status",
+                state.colonyName(),
+                state.siegeEngineeringPoints(),
+                state.fieldMedicinePoints(),
+                state.cavalryDrillPoints()), false);
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.army_help"), false);
         return 1;
     }
 
