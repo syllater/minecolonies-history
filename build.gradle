@@ -71,6 +71,29 @@ neoForge {
     }
 }
 
+// Generate versioned, compressed NBT blueprints into a resource directory before
+// processResources runs. This keeps the editable, original building definition
+// in source control while the Minecraft-compatible binary is deterministic.
+def generatedBlueprintResources = layout.buildDirectory.dir('generated/imperium-blueprints')
+def pythonExecutable = System.getProperty('os.name').toLowerCase(java.util.Locale.ROOT).contains('windows')
+        ? 'python' : 'python3'
+
+sourceSets.main.resources.srcDir(generatedBlueprintResources)
+
+tasks.register('generateImperiumBlueprints', Exec) {
+    group = 'build'
+    description = 'Generates original Structurize schematics for Imperial Archive and Guard Tower.'
+    inputs.file(layout.projectDirectory.file('tools/generate_blueprints.py'))
+    outputs.dir(generatedBlueprintResources)
+    commandLine pythonExecutable,
+            layout.projectDirectory.file('tools/generate_blueprints.py').asFile.absolutePath,
+            generatedBlueprintResources.get().asFile.absolutePath
+}
+
+tasks.named('processResources') {
+    dependsOn(tasks.named('generateImperiumBlueprints'))
+}
+
 dependencies {
     // MineColonies is a required integration target. Compile-only dependencies
     // provide API types; runtimeOnly makes the actual mods available to runClient.
