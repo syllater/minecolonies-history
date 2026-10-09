@@ -4,6 +4,8 @@ import com.imperium.realms.building.BuildingImperialArchive;
 import com.imperium.realms.colony.EmpireStateSavedData;
 import com.imperium.realms.colony.JobPhilosopher;
 import com.imperium.realms.colony.MineColoniesIntegration;
+import com.minecolonies.api.entity.ai.JobStatus;
+import com.minecolonies.api.entity.citizen.VisibleCitizenStatus;
 import com.minecolonies.api.entity.ai.statemachine.AITarget;
 import com.minecolonies.api.entity.ai.statemachine.states.AIWorkerState;
 import com.minecolonies.api.entity.ai.statemachine.states.IAIState;
@@ -11,8 +13,8 @@ import com.minecolonies.api.entity.ai.statemachine.tickratestatemachine.IStateSu
 import com.minecolonies.core.entity.ai.workers.AbstractEntityAIInteract;
 
 /**
- * The Philosopher works at the Imperial Archive. After reaching its work hut,
- * the worker records a research point once per in-game minute.
+ * The Philosopher works at the Imperial Archive during the day. A successful
+ * work cycle produces one knowledge point at most once every 1,200 game ticks.
  */
 public final class EntityAIWorkPhilosopher
         extends AbstractEntityAIInteract<JobPhilosopher, BuildingImperialArchive> {
@@ -33,13 +35,17 @@ public final class EntityAIWorkPhilosopher
         return BuildingImperialArchive.class;
     }
 
-    @Override
-    protected IAIState decide() {
-        return canStudy() ? AIWorkerState.PREPARING : AIWorkerState.IDLE;
+    private IAIState idleState() {
+        if (shouldWorkNow()) {
+            markWorking();
+            return AIWorkerState.PREPARING;
+        }
+        markIdle();
+        return AIWorkerState.IDLE;
     }
 
     private IAIState prepare() {
-        if (!canStudy()) {
+        if (!canStudy() || !shouldWorkNow()) {
             markIdle();
             return AIWorkerState.IDLE;
         }
@@ -48,7 +54,7 @@ public final class EntityAIWorkPhilosopher
     }
 
     private IAIState work() {
-        if (!canStudy()) {
+        if (!canStudy() || !shouldWorkNow()) {
             markIdle();
             return AIWorkerState.IDLE;
         }
@@ -69,5 +75,22 @@ public final class EntityAIWorkPhilosopher
 
     private boolean canStudy() {
         return building != null && worker != null && worker.isAlive();
+    }
+
+    private boolean shouldWorkNow() {
+        return world == null || world.isDay();
+    }
+
+    private void markWorking() {
+        if (worker != null && worker.getCitizenData() != null) {
+            worker.getCitizenData().setJobStatus(JobStatus.WORKING);
+            worker.getCitizenData().setVisibleStatus(VisibleCitizenStatus.WORKING);
+        }
+    }
+
+    private void markIdle() {
+        if (worker != null && worker.getCitizenData() != null) {
+            worker.getCitizenData().setJobStatus(JobStatus.IDLE);
+        }
     }
 }
