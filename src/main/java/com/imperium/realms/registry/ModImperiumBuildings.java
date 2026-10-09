@@ -34,6 +34,15 @@ public final class ModImperiumBuildings {
                                     true,
                                     building -> 1),
                             () -> WorkerBuildingModuleView::new))
+                    .addBuildingModuleProducer(new BuildingEntry.ModuleProducer<>(
+                            "imperium_tax_collector_worker",
+                            () -> new WorkerBuildingModule(
+                                    ModImperiumJobs.TAX_COLLECTOR.get(),
+                                    Skill.Knowledge,
+                                    Skill.Stamina,
+                                    true,
+                                    building -> 1),
+                            () -> WorkerBuildingModuleView::new))
                     .createBuildingEntry());
 
     private ModImperiumBuildings() {
