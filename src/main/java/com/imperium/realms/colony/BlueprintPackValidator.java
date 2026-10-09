@@ -45,7 +45,7 @@ public final class BlueprintPackValidator {
 
     private static final List<BlueprintSpec> SPECS = List.of(
             new BlueprintSpec("buildings/imperial_archive/imperialarchive1.blueprint", 7, 5, 7,
-                    ModBlocks.IMPERIAL_ARCHIVE),
+                    () -> ModBlocks.IMPERIAL_ARCHIVE.get()),
             new BlueprintSpec("buildings/imperial_archive/imperialarchive2.blueprint", 7, 6, 7,
                     () -> ModBlocks.IMPERIAL_ARCHIVE.get()),
             new BlueprintSpec("buildings/imperial_archive/imperialarchive3.blueprint", 9, 7, 9,
@@ -55,7 +55,7 @@ public final class BlueprintPackValidator {
             new BlueprintSpec("buildings/imperial_archive/imperialarchive5.blueprint", 11, 9, 11,
                     () -> ModBlocks.IMPERIAL_ARCHIVE.get()),
             new BlueprintSpec("buildings/imperial_guard_tower/imperialguardtower1.blueprint", 7, 5, 7,
-                    ModBlocks.IMPERIAL_GUARD_TOWER),
+                    () -> ModBlocks.IMPERIAL_GUARD_TOWER.get()),
             new BlueprintSpec("buildings/imperial_guard_tower/imperialguardtower2.blueprint", 7, 7, 7,
                     () -> ModBlocks.IMPERIAL_GUARD_TOWER.get()),
             new BlueprintSpec("buildings/imperial_guard_tower/imperialguardtower3.blueprint", 9, 8, 9,
@@ -63,7 +63,7 @@ public final class BlueprintPackValidator {
             new BlueprintSpec("buildings/imperial_guard_tower/imperialguardtower4.blueprint", 9, 9, 9,
                     () -> ModBlocks.IMPERIAL_GUARD_TOWER.get()),
             new BlueprintSpec("buildings/imperial_guard_tower/imperialguardtower5.blueprint", 11, 11, 11,
-                    ModBlocks.IMPERIAL_GUARD_TOWER.get()));
+                    () -> ModBlocks.IMPERIAL_GUARD_TOWER.get()));
 
     private static MinecraftServer trackedServer;
     private static int ticksWaited;
