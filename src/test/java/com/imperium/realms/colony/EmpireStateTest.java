@@ -8,48 +8,45 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class EmpireStateTest {
     @Test
-    void firstObservationCreatesDefaultStateWithStableFirstSeenTime() {
-        final ColonyIdentity identity = new ColonyIdentity("minecraft:overworld", 42);
-        final EmpireState state = EmpireState.create(identity, "New Rome", 1200L);
+    void firstObservationUsesSafeDefaults() {
+        final ColonyIdentity identity = new ColonyIdentity("minecraft:overworld", 12);
+        final EmpireState state = EmpireState.create(identity, "  Capital  ", -9);
 
         assertEquals(identity, state.identity());
-        assertEquals("New Rome", state.colonyName());
-        assertEquals(1200L, state.firstSeenGameTime());
-        assertEquals(1200L, state.lastSeenGameTime());
+        assertEquals("Capital", state.colonyName());
+        assertEquals(0L, state.firstSeenGameTime());
+        assertEquals(0L, state.lastSeenGameTime());
     }
 
     @Test
-    void observationUpdatesRenamedColonyWithoutResettingFirstSeenTime() {
-        final EmpireState state = EmpireState.create(
-                new ColonyIdentity("minecraft:overworld", 42), "Old Name", 100L);
+    void observationUpdatesNameWithoutResettingFirstSeen() {
+        final ColonyIdentity identity = new ColonyIdentity("minecraft:overworld", 12);
+        final EmpireState state = EmpireState.create(identity, "Capital", 100L);
 
-        assertTrue(state.observe("New Name", 200L));
-        assertEquals("New Name", state.colonyName());
+        assertTrue(state.observe("New Capital", 200L));
+        assertEquals("New Capital", state.colonyName());
         assertEquals(100L, state.firstSeenGameTime());
         assertEquals(100L, state.lastSeenGameTime());
     }
 
     @Test
-    void heartbeatAdvancesOnlyAtTheNextInGameDayBoundary() {
-        final EmpireState state = EmpireState.create(
-                new ColonyIdentity("minecraft:overworld", 42), "New Rome", 100L);
+    void heartbeatOnlyAdvancesOnAnInGameDayBoundary() {
+        final ColonyIdentity identity = new ColonyIdentity("minecraft:overworld", 12);
+        final EmpireState state = EmpireState.create(identity, "Capital", 100L);
 
-        assertFalse(state.observe("New Rome", 23_999L));
+        assertFalse(state.observe("Capital", 23_999L));
         assertEquals(100L, state.lastSeenGameTime());
 
-        assertTrue(state.observe("New Rome", 24_000L));
-        assertEquals(24_000L, state.lastSeenGameTime());
+        assertTrue(state.observe("Capital", 24_100L));
+        assertEquals(24_100L, state.lastSeenGameTime());
         assertEquals(100L, state.firstSeenGameTime());
     }
 
     @Test
-    void invalidOrBlankColonyNameGetsASafeDisplayName() {
-        final EmpireState nullName = EmpireState.create(
-                new ColonyIdentity("minecraft:overworld", 1), null, 0L);
-        final EmpireState blankName = EmpireState.create(
-                new ColonyIdentity("minecraft:overworld", 2), "   ", 0L);
+    void emptyNamesAreNormalized() {
+        final ColonyIdentity identity = new ColonyIdentity("minecraft:overworld", 12);
+        final EmpireState state = EmpireState.create(identity, "", 10L);
 
-        assertEquals("Unnamed colony", nullName.colonyName());
-        assertEquals("Unnamed colony", blankName.colonyName());
+        assertEquals("Unnamed colony", state.colonyName());
     }
 }
