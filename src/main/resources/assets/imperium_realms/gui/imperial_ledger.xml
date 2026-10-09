@@ -1,0 +1,32 @@
+<window size="420 264" lightbox="true" type="FULLSCREEN_VANILLA"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/ldtteam/BlockUI/version/main/src/main/resources/assets/blockui/gui/block_ui.xsd">
+    <text id="title" size="390 18" pos="15 7" color="black" textalign="MIDDLE" label="$(gui.imperium.ledger.title)"/>
+    <text id="subtitle" size="390 16" pos="15 26" color="black" textalign="MIDDLE" label="$(gui.imperium.ledger.subtitle)"/>
+
+    <button id="status" size="190 20" pos="15 47" label="$(gui.imperium.ledger.status)"/>
+    <button id="politics" size="190 20" pos="215 47" label="$(gui.imperium.ledger.politics)"/>
+
+    <button id="tax_10" size="190 20" pos="15 70" label="$(gui.imperium.ledger.tax_10)"/>
+    <button id="tax_20" size="190 20" pos="215 70" label="$(gui.imperium.ledger.tax_20)"/>
+
+    <button id="tax_30" size="190 20" pos="15 93" label="$(gui.imperium.ledger.tax_30)"/>
+    <button id="collect_taxes" size="190 20" pos="215 93" label="$(gui.imperium.ledger.collect_taxes)"/>
+
+    <button id="policy_balanced" size="190 20" pos="15 116" label="$(gui.imperium.ledger.policy_balanced)"/>
+    <button id="policy_works" size="190 20" pos="215 116" label="$(gui.imperium.ledger.policy_works)"/>
+
+    <button id="policy_scholarship" size="190 20" pos="15 139" label="$(gui.imperium.ledger.policy_scholarship)"/>
+    <button id="parliament_status" size="190 20" pos="215 139" label="$(gui.imperium.ledger.parliament_status)"/>
+
+    <button id="propose_works" size="190 20" pos="15 162" label="$(gui.imperium.ledger.propose_works)"/>
+    <button id="propose_scholarship" size="190 20" pos="215 162" label="$(gui.imperium.ledger.propose_scholarship)"/>
+
+    <button id="propose_tax_relief" size="190 20" pos="15 185" label="$(gui.imperium.ledger.propose_tax_relief)"/>
+    <button id="vote_yes" size="190 20" pos="215 185" label="$(gui.imperium.ledger.vote_yes)"/>
+
+    <button id="vote_no" size="190 20" pos="15 208" label="$(gui.imperium.ledger.vote_no)"/>
+    <button id="resolve" size="190 20" pos="215 208" label="$(gui.imperium.ledger.resolve)"/>
+
+    <button id="close" size="190 20" pos="115 236" label="$(gui.imperium.ledger.close)"/>
+</window>

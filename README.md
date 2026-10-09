@@ -1,49 +1,54 @@
 # Imperium: European Realms
 
-A Minecraft Java Edition 1.21.1 NeoForge addon that expands MineColonies toward a historical-fantasy European empire simulator.
+A Minecraft Java Edition 1.21.1 NeoForge addon that extends MineColonies toward a European empire simulator.
 
 ## Requirements
 
-- Minecraft Java Edition 1.21.1 development toolchain.
-- Java 21.
-- MineColonies and its required dependency set.
-- NeoForge 21.1.x.
-- The Gradle Wrapper included in this repository.
+- Java 21
+- Minecraft 1.21.1
+- NeoForge 21.1.x
+- MineColonies and its required dependency set (required, not optional)
 
-The addon requires MineColonies. It is not intended to start without it.
-
-## Build and test
-
-On Linux/macOS:
+## Build
 
 ```bash
 ./gradlew --no-daemon clean build
 ```
 
-On Windows:
+The distributable JAR is written to `build/libs/`.
 
-```bat
-gradlew.bat --no-daemon clean build
-```
-
-The mod JAR is written to `build/libs/`.
-
-To launch the development client:
+## Launch the development client
 
 ```bash
 ./gradlew runClient
 ```
 
-The repository's GitHub Actions workflow runs `clean build` on pushes and pull requests, and uploads the generated JAR when the build succeeds.
+## In-game controls
 
-## Milestone 2 status
+Press **O** to open the BlockUI Imperial Ledger. Its buttons send normal `/imperium` commands to the server. The server verifies colony membership and MineColonies permissions before applying changes.
 
-Milestone 2 adds the initial server-side MineColonies lookup adapter and Imperium-owned world persistence for metadata keyed by dimension and colony ID. This does not yet implement custom MineColonies buildings or professions; those require their complete registered block/building/job/view/AI/schematic integration in later milestones.
+Examples:
+
+- `/imperium status`
+- `/imperium taxes rate 10`
+- `/imperium politics`
+- `/imperium parliament status`
+- `/imperium parliament propose public_works_act`
+- `/imperium parliament vote yes`
+- `/imperium parliament resolve`
+
+## Current implemented systems
+
+- MineColonies colony lookup and separate Imperium SavedData indexed by dimension + colony ID.
+- Treasury, tax rates and administrative policy with daily taxation/upkeep.
+- Parliament proposals, votes, majority outcomes and three initial acts.
+- Daily citizen-approval/unrest simulation and four domestic faction support shares.
+- English and Dutch player-facing strings.
 
 ## Project documents
 
-- `PROJECT_GOAL.md`: project goal.
-- `ROADMAP.md`: milestone plan.
-- `STATUS.md`: current verified state.
-- `COMPATIBILITY.md`: dependency compatibility notes.
-- `docs/MINECOLONIES_INTEGRATION.md`: integration boundary and persistence design.
+- `PROJECT_GOAL.md`: long-term goal.
+- `ROADMAP.md`: implementation plan.
+- `STATUS.md`: current verification state.
+- `COMPATIBILITY.md`: dependency baseline and API references.
+- `docs/MINECOLONIES_INTEGRATION.md`: colony integration design.
