@@ -17,7 +17,7 @@ public final class EmpireState {
     private static final long SCHOLAR_WORK_INTERVAL_TICKS = 1_200L;
     private static final int MAX_STORED_PROPOSALS = 20;
 
-    public enum TaxProposalResolution {
+    public enum ProposalResolution {
         PASSED,
         REJECTED,
         EXPIRED,
@@ -302,6 +302,38 @@ public final class EmpireState {
         return Optional.of(proposal);
     }
 
+    public Optional<ParliamentProposal> createPolicyProposal(
+            final String proposer,
+            final EconomicPolicy proposedPolicy,
+            final long currentDay) {
+        Objects.requireNonNull(proposedPolicy, "proposedPolicy");
+        if (proposedPolicy == economicPolicy
+                || nextProposalId <= 0L
+                || nextProposalId == Long.MAX_VALUE) {
+            return Optional.empty();
+        }
+
+        for (final ParliamentProposal existing : parliamentProposals) {
+            if (existing.isOpen()
+                    && existing.type() == ParliamentProposal.Type.ECONOMIC_POLICY
+                    && existing.proposedPolicy() == proposedPolicy) {
+                return Optional.empty();
+            }
+        }
+
+        final ParliamentProposal proposal = ParliamentProposal.createPolicyProposal(
+                nextProposalId++,
+                proposer,
+                taxRatePercent,
+                economicPolicy,
+                proposedPolicy,
+                currentDay,
+                stability);
+        parliamentProposals.add(proposal);
+        trimProposals();
+        return Optional.of(proposal);
+    }
+
     public Optional<ParliamentProposal> findProposal(final long proposalId) {
         return parliamentProposals.stream()
                 .filter(proposal -> proposal.id() == proposalId)
@@ -328,31 +360,36 @@ public final class EmpireState {
         return changed;
     }
 
-    public TaxProposalResolution resolveTaxProposal(
+    public ProposalResolution resolveProposal(
             final long proposalId,
             final boolean emperorAssents,
-            final long currentDay) {
+            final long currentDay,
+            final String emperorName) {
         final ParliamentProposal proposal = findProposal(proposalId).orElse(null);
         if (proposal == null) {
-            return TaxProposalResolution.NOT_FOUND;
+            return ProposalResolution.NOT_FOUND;
         }
         if (!proposal.isOpen()) {
-            return TaxProposalResolution.ALREADY_RESOLVED;
+            return ProposalResolution.ALREADY_RESOLVED;
         }
 
-        final ParliamentProposal.Status status =
-                proposal.resolveByEmperor(emperorAssents, currentDay, taxRatePercent);
+        final ParliamentProposal.Status status = proposal.resolveByEmperor(
+                emperorAssents, currentDay, taxRatePercent, economicPolicy, emperorName);
         if (status == ParliamentProposal.Status.EXPIRED) {
-            return TaxProposalResolution.EXPIRED;
+            return ProposalResolution.EXPIRED;
         }
         if (status != ParliamentProposal.Status.PASSED) {
-            return TaxProposalResolution.REJECTED;
+            return ProposalResolution.REJECTED;
         }
-        if (!setTaxRatePercent(proposal.proposedTaxRate())) {
-            // Defensive guard: a parallel or stale bill must never rewrite state.
-            return TaxProposalResolution.REJECTED;
+
+        final boolean applied = proposal.type() == ParliamentProposal.Type.TAX_RATE
+                ? setTaxRatePercent(proposal.proposedTaxRate())
+                : setEconomicPolicy(proposal.proposedPolicy());
+        if (!applied) {
+            // Defensive guard: a stale or duplicate bill must not alter state.
+            return ProposalResolution.REJECTED;
         }
-        return TaxProposalResolution.PASSED;
+        return ProposalResolution.PASSED;
     }
 
     private void trimProposals() {
