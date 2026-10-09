@@ -61,6 +61,10 @@ The MineColonies release metadata names the following as required:
 
 Imperium declares Structurize, BlockUI, Domum Ornamentum and MultiPiston as runtime dependencies for the development client. MultiPiston's Maven artifact ID is `multipiston` (not the mod ID `multi-piston`). Domum Ornamentum's POM resolves JEI API artifacts, so the build includes Jared's Maven repository (`https://maven.blamejared.com/`).
 
+## Repository-resolution note
+
+CI showed that ModDevGradle adds project-level repositories, which means the build cannot rely solely on `settings.gradle` dependency repositories. The LDTTeam Maven, NeoForge Maven, Jared's Maven, CurseMaven and Maven Central repositories are therefore declared explicitly in `build.gradle` as well as being documented in the settings.
+
 ## Known verification limitation
 
 The connected environment has GitHub file read/write operations but no local shell. No claim is made here that `./gradlew test`, `./gradlew build`, or `./gradlew runClient` succeeded. A GitHub Actions workflow has been added to run the unit tests and build on branch updates.
