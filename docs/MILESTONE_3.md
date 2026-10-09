@@ -1,39 +1,48 @@
-# Milestone 3 — First Playable Vertical Slice
-
-## Economic model
-
-Each MineColonies colony is associated with an Imperium-owned EmpireState stored in overworld SavedData. The identity is the dimension resource ID plus MineColonies colony ID, so a changed colony name does not create a new record.
-
-- Treasury is stored in crowns and capped at 1,000,000,000.
-- Tax rate is 0–25 percent; default is 5 percent.
-- Daily tax turns are keyed to overworld game time and persisted per colony to prevent duplicate charges after reloads.
-- Policies: balanced (baseline), mercantile (+25% tax yield), welfare (-25% tax yield and +2 stability/day), austerity (+50% tax yield and -2 stability/day).
-- Crowns may be invested in knowledge at a rate of 10 crowns per knowledge point.
-- Stability ranges from 0 to 100.
-- The Philosopher generates one knowledge point at most every 1,200 game ticks while at an Imperial Archive and during daytime.
-
-These are deliberately modest first-slice rules. Further production, upkeep, corruption, events, citizen happiness and political approval will be layered in later milestones.
-
-## Commands
-
-- /imperium status
-- /imperium tax <0..25>
-- /imperium policy <balanced|mercantile|welfare|austerity>
-- /imperium invest <10..100000>
-
-Command mutations execute on the server. Financial/policy mutations require operator permission or MineColonies colony MANAGE_HUTS permission. Responses are localized in English and Dutch.
+# First Playable Systems — Technical Notes
 
 ## MineColonies integration
 
-The Philosopher is a custom JobEntry using MineColonies' AI state machine and a WorkerBuildingModule on the Imperial Archive. The Archive hut uses the public MineColonies block/building registry pattern. The crafting item has a recipe and placeholder model.
+Each MineColonies colony is associated with an Imperium-owned `EmpireState` stored in overworld SavedData, keyed by dimension resource ID plus MineColonies colony ID. Imperium avoids MineColonies-private NBT. Taxation, policy mutations, parliamentary results and diplomacy are server-authoritative.
 
-## Schematic blocker
+## Economic and political state
 
-A custom MineColonies hut needs its matching Structurize blueprint pack and metadata to complete construction through the builder. This branch currently declares schematic name imperialarchive but does not yet contain a proven level-1 blueprint. The building registry is therefore not considered a complete playable hut until schematic assets and an in-world build test are added.
+The model currently tracks:
+- Treasury in crowns, with a defined upper bound.
+- Tax rate (0–25%), economic policies and daily tax turns.
+- Tax Collector efficiency (0–25%) and Philosopher knowledge production.
+- Stability and legitimacy.
+- Merchant, commoner, nobility and scholar approval.
+- Civil unrest with calm, strike and revolt states; these can affect daily tax income.
+- Parliament bills for taxes and policies, with four modeled faction votes, imperial assent/veto, expiry, and a resolution audit.
+- Diplomatic influence and relationships keyed to real colony identity.
+- Specialist military training scores for siege engineering, field medicine and cavalry drill.
 
-## Acceptance tests
+## Custom MineColonies content
 
-- EmpireStateTest covers defaults, daily tax idempotency, policy effect, tax bounds, investment and scholarship timing.
-- ./gradlew test build must pass.
-- Headless ./gradlew runClient must reach the startup marker.
-- Runtime acceptance also needs a world save/reload and an actual MineColonies Builder completing the Imperial Archive blueprint.
+The Imperial Archive and Imperial Guard Tower use MineColonies hut anchors and BuildingEntry registrations. The Archive hosts the Philosopher, Tax Collector and Diplomat. The Guard Tower uses native MineColonies guard-management modules and custom guard types that inherit existing MineColonies role AI/equipment behavior.
+
+## Structurize blueprint generation
+
+The repository now includes `tools/generate_blueprints.py`, a standard-library-only generator invoked by the Gradle task `generateImperiumBlueprints`. It writes a Structurize pack under:
+
+```text
+blueprints/imperium_realms/imperium_european/
+  pack.json
+  icon.png
+  buildings/imperial_archive/imperialarchive1.blueprint ... imperialarchive5.blueprint
+  buildings/imperial_guard_tower/imperialguardtower1.blueprint ... imperialguardtower5.blueprint
+```
+
+Each file uses compressed NBT Blueprint v1, a stable block palette, packed block indices, required-mod metadata, and a primary offset at the MineColonies hut anchor. The geometry is authored in the generator from vanilla/full-block and Imperium hut-anchor states, not copied from third-party structures. Build-time sanity checks verify GZIP/NBT markers, required fields and the anchor block.
+
+This removes the previous missing-blueprint blocker for packaging. It does **not** itself prove that a MineColonies Builder can place every tier correctly in a live world; the in-world survival construction, upgrade and save/reload test remains a release acceptance check.
+
+## Commands and translations
+
+Vanilla command entry points are available for the ledger, tax/policy bills, parliamentary status/resolution, politics, diplomacy and army training status. English and Dutch translations are included. A dedicated BlockUI screen has not replaced every command entry point yet.
+
+## Verification
+
+- `./gradlew --no-daemon clean build` must generate/package the blueprint pack and pass unit tests.
+- Headless `./gradlew runClient` must reach its startup marker.
+- Runtime acceptance still requires launching an existing/new MineColonies colony, placing an Imperial Archive and Guard Tower, assigning the intended workers/guards, upgrading through levels, and saving/reloading the world.
