@@ -43,6 +43,15 @@ public final class ModImperiumBuildings {
                                     true,
                                     building -> 1),
                             () -> WorkerBuildingModuleView::new))
+                    .addBuildingModuleProducer(new BuildingEntry.ModuleProducer<>(
+                            "imperium_diplomat_worker",
+                            () -> new WorkerBuildingModule(
+                                    ModImperiumJobs.DIPLOMAT.get(),
+                                    Skill.Knowledge,
+                                    Skill.Stamina,
+                                    true,
+                                    building -> 1),
+                            () -> WorkerBuildingModuleView::new))
                     .createBuildingEntry());
 
     private ModImperiumBuildings() {
