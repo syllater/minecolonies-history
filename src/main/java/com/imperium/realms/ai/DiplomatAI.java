@@ -20,6 +20,11 @@ public final class DiplomatAI extends AbstractEntityAIInteract<JobDiplomat, Impe
                 new AITarget<IAIState>(AIWorkerState.DECIDE, this::performDiplomaticWork, 240));
     }
 
+    @Override
+    public Class<ImperialChancery> getExpectedBuildingClass() {
+        return ImperialChancery.class;
+    }
+
     private IAIState startWorkingAtChancery() {
         if (!walkToBuilding()) return getState();
         return AIWorkerState.DECIDE;
