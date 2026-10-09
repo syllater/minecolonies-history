@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "imperium_realms:block/imperial_chancery" },
+    "facing=east":  { "model": "imperium_realms:block/imperial_chancery", "y": 90 },
+    "facing=south": { "model": "imperium_realms:block/imperial_chancery", "y": 180 },
+    "facing=west":  { "model": "imperium_realms:block/imperial_chancery", "y": 270 }
+  }
+}
