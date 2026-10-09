@@ -2,51 +2,55 @@
 
 ## Milestone 0 — Repository and Compatibility
 
-Status: baseline project exists. The target-version dependency choices are now pinned as candidates in Gradle, but their resolution must be confirmed by CI.
+Status: minimal NeoForge baseline exists. Dependency metadata and relevant MineColonies API declarations have been inspected against the exact 1.21.1 release source tag. Dependency resolution/build verification is now delegated to the newly added GitHub Actions build workflow.
 
 ## Milestone 1 — Technical Foundation
 
-Status: minimal NeoForge baseline exists. This milestone was not independently signed off before the user requested continuing work on Milestone 2. Any foundation changes needed for integration are kept narrow.
+Status: baseline entrypoint, Gradle metadata, English/Dutch starter language files, CI build workflow and JUnit test infrastructure exist. This remains a minimal foundation; there are no gameplay buildings or professions yet.
 
 ## Milestone 2 — MineColonies Integration
 
-Implementation present:
-- Public API adapter for server-side colony lookup by position.
-- Discovery of loaded colonies by level.
-- Stable colony identity: dimension + MineColonies colony ID.
-- Separate Imperium-owned world SavedData with schema version.
-- Idempotent initialization for new and already-existing colonies.
-- Name refresh that does not reset first-seen time.
-- Focused unit tests for identity/state logic.
-- CI workflow for `test` and `build`, with a JAR artifact.
-- Headless client startup smoke-test job that looks for the client initialization marker.
+Implemented on branch `milestone-2/colony-integration`:
+- Public API adapter for server-side colony lookup at a world position.
+- Identity model keyed by dimension ID + MineColonies colony ID.
+- Imperium-owned, overworld SavedData for records across all dimensions.
+- Idempotent first-observation of loaded colonies.
+- Periodic server-side discovery of colonies in each ticking server level.
+- Safe observation updates that do not reset first-seen time or overwrite the entire record.
+- Schema-versioned serialized records.
+- Unit tests for identity validation and basic first-seen/observation rules.
+- Required runtime metadata and development dependencies for MineColonies, Structurize, BlockUI, Domum Ornamentum and MultiPiston.
+- GitHub Actions workflow intended to compile, test and upload the JAR.
 
-Still required before acceptance:
-- Successful resolution of the pinned Maven dependencies.
-- Successful compilation against the exact MineColonies 1.21.1 release artifact.
-- Successful execution of unit tests.
-- Confirm the latest build/test run is green after repository configuration was restored.
-- Confirm the client smoke job reached its startup marker.
-- Review CI results and correct any failures.
-- Runtime validation in a loaded MineColonies world, including save/reload.
-- Explicit check of existing-colony and new-colony discovery.
-- Document whether the actual build and client launch succeeded.
-- Verify save/reload behavior with a real MineColonies colony; the headless main-menu smoke test does not cover it.
+Not claimed complete yet:
+- The branch must pass the remote Gradle build and tests.
+- The code has not been launched in Minecraft in this session.
+- No custom MineColonies worker or hut has been implemented in this milestone.
+- SavedData load/save behaviour still needs runtime or focused integration verification.
+
+Acceptance:
+- Dependency resolution succeeds on the actual Gradle build.
+- Code compiles against the pinned 1.21.1 artifacts.
+- Tests pass.
+- Server-side colony lookup and scanning work.
+- Existing records are not reset on repeated scans.
+- Imperium data is saved independently of MineColonies internal NBT.
+- Build creates the mod JAR.
 
 ## Milestone 3 — First Playable Vertical Slice
 
-Not started. Begins only after Milestone 2 passes its acceptance criteria and the user approves:
-- One genuinely buildable imperial building.
-- One registered MineColonies profession.
-- One policy with a real effect.
+After Milestone 2 is reviewed and approved:
+- One truly buildable new MineColonies building.
+- One complete registered profession.
+- One working policy.
 - One treasury transaction.
-- One GUI route with server-side validation.
-- Save/load behaviour.
+- One GUI with server-side validation.
+- Save/load for the slice.
 
 ## Later Milestones
 
 - Milestone 4: Parliament and politics.
-- Milestone 5: Economy and citizen professions.
+- Milestone 5: Economy and remaining citizen professions.
 - Milestone 6: Military system.
 - Milestone 7: Buildings and visual progression.
 - Milestone 8: Empire simulation and strategy.
