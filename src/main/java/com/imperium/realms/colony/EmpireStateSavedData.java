@@ -18,7 +18,7 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 8;
+    private static final int SCHEMA_VERSION = 9;
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -202,6 +202,13 @@ public final class EmpireStateSavedData extends SavedData {
                         civicDisorder,
                         entry.contains("last_civic_disorder_change_day")
                                 ? entry.getLong("last_civic_disorder_change_day") : -1L);
+                state.restoreMilitaryTraining(
+                        entry.contains("siege_engineering_points")
+                                ? entry.getLong("siege_engineering_points") : 0L,
+                        entry.contains("field_medicine_points")
+                                ? entry.getLong("field_medicine_points") : 0L,
+                        entry.contains("cavalry_drill_points")
+                                ? entry.getLong("cavalry_drill_points") : 0L);
                 data.colonies.put(identity, state);
             } catch (IllegalArgumentException exception) {
                 // Skip malformed records instead of failing the whole world load.
@@ -264,6 +271,9 @@ public final class EmpireStateSavedData extends SavedData {
             entry.putInt("unrest", state.unrest());
             entry.putString("civic_disorder", state.civicDisorder().name());
             entry.putLong("last_civic_disorder_change_day", state.lastCivicDisorderChangeDay());
+            entry.putLong("siege_engineering_points", state.siegeEngineeringPoints());
+            entry.putLong("field_medicine_points", state.fieldMedicinePoints());
+            entry.putLong("cavalry_drill_points", state.cavalryDrillPoints());
             entry.putLong("last_tax_day", state.lastTaxDay());
 
             final ListTag factionApproval = new ListTag();
