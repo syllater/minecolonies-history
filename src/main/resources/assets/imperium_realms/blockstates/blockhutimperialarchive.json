@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "imperium_realms:block/blockhutimperialarchive" },
+    "facing=east": { "model": "imperium_realms:block/blockhutimperialarchive", "y": 90 },
+    "facing=south": { "model": "imperium_realms:block/blockhutimperialarchive", "y": 180 },
+    "facing=west": { "model": "imperium_realms:block/blockhutimperialarchive", "y": 270 }
+  }
+}
