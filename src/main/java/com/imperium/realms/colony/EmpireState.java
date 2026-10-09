@@ -3,6 +3,8 @@ package com.imperium.realms.colony;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -17,6 +19,9 @@ public final class EmpireState {
     private static final long SCHOLAR_WORK_INTERVAL_TICKS = 1_200L;
     private static final long TAX_COLLECTOR_WORK_INTERVAL_TICKS = 1_200L;
     private static final int MAX_TAX_COLLECTION_EFFICIENCY_PERCENT = 25;
+    private static final long DIPLOMAT_WORK_INTERVAL_TICKS = 2_400L;
+    public static final long MAX_DIPLOMATIC_INFLUENCE = 1_000L;
+    private static final int MAX_DIPLOMATIC_RELATIONS = 256;
     private static final int MAX_STORED_PROPOSALS = 20;
 
     public enum ProposalResolution {
@@ -42,6 +47,9 @@ public final class EmpireState {
     private long lastScholarWorkTick = -1L;
     private long lastTaxCollectorWorkTick = -1L;
     private int taxCollectionEfficiencyPercent;
+    private long diplomaticInfluence;
+    private long lastDiplomatWorkTick = -1L;
+    private final Map<ColonyIdentity, Integer> diplomaticRelations = new LinkedHashMap<>();
 
     private long nextProposalId = 1L;
     private final List<ParliamentProposal> parliamentProposals = new ArrayList<>();
@@ -128,6 +136,32 @@ public final class EmpireState {
             final int legitimacy,
             final int taxCollectionEfficiencyPercent,
             final long lastTaxCollectorWorkTick) {
+        this(identity, colonyName, firstSeenGameTime, lastSeenGameTime, treasuryCrowns,
+                taxRatePercent, economicPolicy, knowledgePoints, stability, lastTaxDay,
+                lastScholarWorkTick, nextProposalId, loadedProposals, legitimacy,
+                taxCollectionEfficiencyPercent, lastTaxCollectorWorkTick, 0L, -1L, Map.of());
+    }
+
+    EmpireState(
+            final ColonyIdentity identity,
+            final String colonyName,
+            final long firstSeenGameTime,
+            final long lastSeenGameTime,
+            final long treasuryCrowns,
+            final int taxRatePercent,
+            final EconomicPolicy economicPolicy,
+            final long knowledgePoints,
+            final int stability,
+            final long lastTaxDay,
+            final long lastScholarWorkTick,
+            final long nextProposalId,
+            final List<ParliamentProposal> loadedProposals,
+            final int legitimacy,
+            final int taxCollectionEfficiencyPercent,
+            final long lastTaxCollectorWorkTick,
+            final long diplomaticInfluence,
+            final long lastDiplomatWorkTick,
+            final Map<ColonyIdentity, Integer> loadedDiplomaticRelations) {
         this.identity = Objects.requireNonNull(identity, "identity");
         this.colonyName = normalizeName(colonyName);
         this.firstSeenGameTime = Math.max(0L, firstSeenGameTime);
@@ -143,6 +177,17 @@ public final class EmpireState {
         this.taxCollectionEfficiencyPercent = clamp(
                 taxCollectionEfficiencyPercent, 0, MAX_TAX_COLLECTION_EFFICIENCY_PERCENT);
         this.lastTaxCollectorWorkTick = Math.max(-1L, lastTaxCollectorWorkTick);
+        this.diplomaticInfluence = clamp(diplomaticInfluence, 0L, MAX_DIPLOMATIC_INFLUENCE);
+        this.lastDiplomatWorkTick = Math.max(-1L, lastDiplomatWorkTick);
+        if (loadedDiplomaticRelations != null) {
+            for (final Map.Entry<ColonyIdentity, Integer> relation : loadedDiplomaticRelations.entrySet()) {
+                if (relation.getKey() != null && !identity.equals(relation.getKey())
+                        && diplomaticRelations.size() < MAX_DIPLOMATIC_RELATIONS) {
+                    diplomaticRelations.put(relation.getKey(), clamp(
+                            relation.getValue() == null ? 0 : relation.getValue(), -100, 100));
+                }
+            }
+        }
         this.nextProposalId = Math.max(1L, nextProposalId);
 
         if (loadedProposals != null) {
@@ -213,6 +258,79 @@ public final class EmpireState {
 
     public int taxCollectionEfficiencyPercent() {
         return taxCollectionEfficiencyPercent;
+    }
+
+    public long diplomaticInfluence() {
+        return diplomaticInfluence;
+    }
+
+    public long lastDiplomatWorkTick() {
+        return lastDiplomatWorkTick;
+    }
+
+    public Map<ColonyIdentity, Integer> diplomaticRelations() {
+        return Collections.unmodifiableMap(new LinkedHashMap<>(diplomaticRelations));
+    }
+
+    public int relationScore(final ColonyIdentity target) {
+        return diplomaticRelations.getOrDefault(Objects.requireNonNull(target, "target"), 0);
+    }
+
+    public static String relationStatusId(final int score) {
+        if (score >= 75) {
+            return "allied";
+        }
+        if (score >= 40) {
+            return "friendly";
+        }
+        if (score >= 15) {
+            return "cordial";
+        }
+        if (score <= -50) {
+            return "hostile";
+        }
+        if (score <= -15) {
+            return "unfriendly";
+        }
+        return "neutral";
+    }
+
+    /** A Diplomat files reports at most once every 2,400 ticks for the colony. */
+    public boolean recordDiplomatWork(final long gameTime) {
+        final long safeTime = Math.max(0L, gameTime);
+        if (diplomaticInfluence >= MAX_DIPLOMATIC_INFLUENCE
+                || (lastDiplomatWorkTick >= 0L
+                    && (safeTime < lastDiplomatWorkTick
+                        || safeTime - lastDiplomatWorkTick < DIPLOMAT_WORK_INTERVAL_TICKS))) {
+            return false;
+        }
+        diplomaticInfluence++;
+        lastDiplomatWorkTick = safeTime;
+        return true;
+    }
+
+    /**
+     * Spend 10 diplomatic influence to improve a single directional relation by
+     * five points. Relations are capped at 100 and self-relations are rejected.
+     */
+    public boolean improveDiplomaticRelations(final ColonyIdentity target) {
+        Objects.requireNonNull(target, "target");
+        if (identity.equals(target) || diplomaticInfluence < 10L) {
+            return false;
+        }
+
+        final Integer current = diplomaticRelations.get(target);
+        if (current == null && diplomaticRelations.size() >= MAX_DIPLOMATIC_RELATIONS) {
+            return false;
+        }
+        final int score = current == null ? 0 : current;
+        if (score >= 100) {
+            return false;
+        }
+
+        diplomaticInfluence -= 10L;
+        diplomaticRelations.put(target, Math.min(100, score + 5));
+        return true;
     }
 
     public long nextProposalId() {
