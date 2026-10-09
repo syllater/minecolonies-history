@@ -1,57 +1,53 @@
 # Roadmap
 
-## Milestone 0 - Repository and Compatibility
+## Milestone 0 — Repository and Compatibility
 
-Acceptance criteria:
+Status: baseline created and built in the original local environment, according to the existing checkpoint. Exact API integration verification then remained pending.
 
-- Repository inspected.
-- Required project documentation created.
-- Java, Gradle, NeoForge, MineColonies, Structurize, and BlockUI compatibility recorded.
-- Minimal NeoForge project build verified.
-- User approval requested before moving on.
+## Milestone 1 — Technical Foundation
 
-Status: complete, awaiting user approval.
+Status: not separately implemented as a milestone. The existing baseline contains the minimal mod entrypoint, Gradle configuration, metadata and starter translations. Any additional foundation required by Milestone 2 is implemented as narrowly as possible.
 
-## Milestone 1 - Technical Foundation
+## Milestone 2 — MineColonies Integration
 
-Planned scope after approval:
-
-- Mod initialization hardening.
-- Registries for future blocks, items, menus, networking, and configs.
-- Baseline common/server/client config structure.
-- Baseline persistent data architecture.
-- Baseline networking architecture with server validation.
-- Test infrastructure.
-- Initial translation keys.
-
-## Milestone 2 - MineColonies Integration
-
-Planned scope:
-
+Scope:
 - Inspect selected MineColonies APIs.
-- Safe colony lookup and empire-data initialization.
-- Basic MineColonies-compatible building/work integration plan.
-- Persistence without overwriting existing colony data.
+- Provide a safe server-side colony lookup.
+- Introduce empire state keyed to colony identity.
+- Ensure existing and new colonies are initialized idempotently.
+- Add tests for identity, data defaults and migration/serialization behaviour.
+- Record direct limitations of the upstream extension APIs.
 
-## Milestone 3 - First Playable Vertical Slice
+Progress:
+- Public upstream signatures for `IMinecoloniesAPI`, `IColonyManager`, `IColony`, `ICitizenData`, `IJob`, `JobEntry.Builder` and `BuildingEntry.Builder` have been inspected.
+- A separate Imperium-owned world SavedData design is documented.
+- Actual direct integration code and local compile verification are still required before this milestone can be considered complete.
 
-Planned scope:
+Acceptance:
+- The selected dependencies resolve in Gradle.
+- Integration code compiles against the exact selected artifacts.
+- Server-side colony lookup by position works.
+- Existing and new colony data are handled idempotently.
+- Imperium data survives save/load and is not placed in private MineColonies NBT.
+- Tests cover colony identity and saved data behaviour.
+- The build succeeds.
 
-- One buildable imperial building.
+## Milestone 3 — First Playable Vertical Slice
+
+After Milestone 2 is approved:
+- One truly buildable imperial building.
 - One registered profession.
 - One policy.
 - One treasury transaction.
 - One GUI path with server-side validation.
-- Persistent save/load for the slice.
+- Save/load for the slice.
 
 ## Later Milestones
 
-Milestones 4 through 10 remain as specified in the project goal:
-
-- Parliament and politics.
-- Economy and citizen professions.
-- Military system.
-- Buildings and visual progression.
-- Empire simulation and strategy.
-- Multiplayer compatibility and hardening.
-- Release.
+- Milestone 4: Parliament and politics.
+- Milestone 5: Economy and citizen professions.
+- Milestone 6: Military system.
+- Milestone 7: Buildings and visual progression.
+- Milestone 8: Empire simulation and strategy.
+- Milestone 9: Multiplayer compatibility and hardening.
+- Milestone 10: Release.
