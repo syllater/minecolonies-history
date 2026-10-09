@@ -62,7 +62,7 @@ final class EmpireStateTest {
         assertEquals(10L, state.collectDailyTaxes(1L, 10L));
         assertEquals(10L, state.treasuryCrowns());
         assertEquals(0L, state.collectDailyTaxes(1L, 10L));
-        assertEquals(20L, state.collectDailyTaxes(2L, 10L));
+        assertEquals(10L, state.collectDailyTaxes(2L, 10L)); // the method returns this turn's deposit
         assertEquals(20L, state.treasuryCrowns());
     }
 
