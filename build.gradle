@@ -32,6 +32,17 @@ repositories {
             includeGroup 'com.ldtteam'
         }
     }
+    maven {
+        name = 'LDTTeam - Mods Maven'
+        url = uri('https://ldtteam.jfrog.io/ldtteam/mods-maven/')
+        content {
+            includeGroup 'com.ldtteam'
+        }
+    }
+    maven {
+        name = "Jared's Maven"
+        url = uri('https://maven.blamejared.com/')
+    }
     mavenCentral()
 }
 
