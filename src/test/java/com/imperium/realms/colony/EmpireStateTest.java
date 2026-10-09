@@ -16,6 +16,10 @@ final class EmpireStateTest {
         assertEquals("Capital", state.colonyName());
         assertEquals(0L, state.firstSeenGameTime());
         assertEquals(0L, state.lastSeenGameTime());
+        assertEquals(0L, state.treasuryCrowns());
+        assertEquals(5, state.taxRatePercent());
+        assertEquals(EconomicPolicy.BALANCED, state.economicPolicy());
+        assertEquals(50, state.stability());
     }
 
     @Test
@@ -48,5 +52,77 @@ final class EmpireStateTest {
         final EmpireState state = EmpireState.create(identity, "", 10L);
 
         assertEquals("Unnamed colony", state.colonyName());
+    }
+
+    @Test
+    void dailyTaxesAreCollectedOnlyOncePerDay() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 1), "Capital", 0L);
+
+        assertEquals(10L, state.collectDailyTaxes(1L, 10L));
+        assertEquals(10L, state.treasuryCrowns());
+        assertEquals(0L, state.collectDailyTaxes(1L, 10L));
+        assertEquals(20L, state.collectDailyTaxes(2L, 10L));
+        assertEquals(20L, state.treasuryCrowns());
+    }
+
+    @Test
+    void policyChangesTaxAndStabilityEffects() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 2), "Port", 0L);
+        assertTrue(state.setEconomicPolicy(EconomicPolicy.WELFARE));
+        assertEquals(7L, state.collectDailyTaxes(1L, 10L));
+        assertEquals(52, state.stability());
+
+        assertTrue(state.setEconomicPolicy(EconomicPolicy.AUSTERITY));
+        assertEquals(15L, state.collectDailyTaxes(2L, 10L));
+        assertEquals(50, state.stability());
+    }
+
+    @Test
+    void taxRateRejectsValuesOutsideThePermittedRange() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 3), "Port", 0L);
+
+        assertFalse(state.setTaxRatePercent(-1));
+        assertFalse(state.setTaxRatePercent(26));
+        assertEquals(5, state.taxRatePercent());
+        assertTrue(state.setTaxRatePercent(12));
+        assertEquals(12, state.taxRatePercent());
+    }
+
+    @Test
+    void investmentDebitsTreasuryAndAddsKnowledge() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 4), "Capital", 0L);
+        assertTrue(state.creditTreasury(100L));
+        assertTrue(state.investInKnowledge(20L));
+        assertEquals(80L, state.treasuryCrowns());
+        assertEquals(2L, state.knowledgePoints());
+        assertFalse(state.investInKnowledge(25L));
+        assertFalse(state.investInKnowledge(90L));
+        assertEquals(80L, state.treasuryCrowns());
+    }
+
+    @Test
+    void philosopherCanGenerateKnowledgeOnlyOncePerMinute() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 5), "Archive", 0L);
+
+        assertTrue(state.recordScholarWork(100L));
+        assertFalse(state.recordScholarWork(1_299L));
+        assertTrue(state.recordScholarWork(1_300L));
+        assertEquals(2L, state.knowledgePoints());
+    }
+
+    @Test
+    void treasuryCannotBeOverdrawnOrOverflowItsCap() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 6), "Capital", 0L);
+
+        assertFalse(state.debitTreasury(1L));
+        assertTrue(state.creditTreasury(EmpireState.MAX_TREASURY));
+        assertFalse(state.creditTreasury(1L));
+        assertEquals(EmpireState.MAX_TREASURY, state.treasuryCrowns());
     }
 }
