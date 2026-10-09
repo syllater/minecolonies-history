@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Validates the packaged Structurize pack from the actual server-side loader.
@@ -39,12 +40,12 @@ public final class BlueprintPackValidator {
             int sizeX,
             int sizeY,
             int sizeZ,
-            Block anchor) {
+            Supplier<? extends Block> anchor) {
     }
 
     private static final List<BlueprintSpec> SPECS = List.of(
             new BlueprintSpec("buildings/imperial_archive/imperialarchive1.blueprint", 7, 5, 7,
-                    ModBlocks.IMPERIAL_ARCHIVE.get()),
+                    ModBlocks.IMPERIAL_ARCHIVE),
             new BlueprintSpec("buildings/imperial_archive/imperialarchive2.blueprint", 7, 6, 7,
                     ModBlocks.IMPERIAL_ARCHIVE.get()),
             new BlueprintSpec("buildings/imperial_archive/imperialarchive3.blueprint", 9, 7, 9,
@@ -54,7 +55,7 @@ public final class BlueprintPackValidator {
             new BlueprintSpec("buildings/imperial_archive/imperialarchive5.blueprint", 11, 9, 11,
                     ModBlocks.IMPERIAL_ARCHIVE.get()),
             new BlueprintSpec("buildings/imperial_guard_tower/imperialguardtower1.blueprint", 7, 5, 7,
-                    ModBlocks.IMPERIAL_GUARD_TOWER.get()),
+                    ModBlocks.IMPERIAL_GUARD_TOWER),
             new BlueprintSpec("buildings/imperial_guard_tower/imperialguardtower2.blueprint", 7, 7, 7,
                     ModBlocks.IMPERIAL_GUARD_TOWER.get()),
             new BlueprintSpec("buildings/imperial_guard_tower/imperialguardtower3.blueprint", 9, 8, 9,
@@ -114,10 +115,11 @@ public final class BlueprintPackValidator {
                 }
 
                 final BlockPos offset = blueprint.getPrimaryBlockOffset();
+                final Block expectedAnchor = spec.anchor().get();
                 final boolean correctAnchorOffset =
                         offset.getX() == spec.sizeX() / 2 && offset.getY() == 0 && offset.getZ() == 0;
                 final boolean containsAnchor = Arrays.stream(blueprint.getPalette())
-                        .anyMatch(blockState -> blockState.getBlock() == spec.anchor());
+                        .anyMatch(blockState -> blockState.getBlock() == expectedAnchor);
 
                 if (blueprint.getSizeX() != spec.sizeX()
                         || blueprint.getSizeY() != spec.sizeY()
@@ -129,7 +131,7 @@ public final class BlueprintPackValidator {
                             spec.path(),
                             blueprint.getSizeX(), blueprint.getSizeY(), blueprint.getSizeZ(),
                             offset,
-                            spec.sizeX(), spec.sizeY(), spec.sizeZ(), spec.anchor());
+                            spec.sizeX(), spec.sizeY(), spec.sizeZ(), expectedAnchor);
                     continue;
                 }
 
