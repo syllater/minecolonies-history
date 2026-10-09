@@ -32,6 +32,14 @@ public final class EmpireState {
         ALREADY_RESOLVED
     }
 
+    public enum CivicDisorder {
+        CALM,
+        STRIKE,
+        REVOLT
+    }
+
+    private static final String[] FACTION_IDS = {"merchants", "commons", "nobility", "scholars"};
+
     private final ColonyIdentity identity;
     private String colonyName;
     private final long firstSeenGameTime;
@@ -50,6 +58,10 @@ public final class EmpireState {
     private long diplomaticInfluence;
     private long lastDiplomatWorkTick = -1L;
     private final Map<ColonyIdentity, Integer> diplomaticRelations = new LinkedHashMap<>();
+    private final Map<String, Integer> factionApproval = new LinkedHashMap<>();
+    private int unrest;
+    private CivicDisorder civicDisorder = CivicDisorder.CALM;
+    private long lastCivicDisorderChangeDay = -1L;
 
     private long nextProposalId = 1L;
     private final List<ParliamentProposal> parliamentProposals = new ArrayList<>();
@@ -189,6 +201,9 @@ public final class EmpireState {
             }
         }
         this.nextProposalId = Math.max(1L, nextProposalId);
+        for (final String factionId : FACTION_IDS) {
+            factionApproval.put(factionId, 50);
+        }
 
         if (loadedProposals != null) {
             for (final ParliamentProposal proposal : loadedProposals) {
@@ -293,6 +308,54 @@ public final class EmpireState {
             return "unfriendly";
         }
         return "neutral";
+    }
+
+    public Map<String, Integer> factionApproval() {
+        return Collections.unmodifiableMap(new LinkedHashMap<>(factionApproval));
+    }
+
+    public int factionApproval(final String factionId) {
+        if (factionId == null) {
+            return 50;
+        }
+        return factionApproval.getOrDefault(factionId.trim().toLowerCase(java.util.Locale.ROOT), 50);
+    }
+
+    public int unrest() {
+        return unrest;
+    }
+
+    public CivicDisorder civicDisorder() {
+        return civicDisorder;
+    }
+
+    public long lastCivicDisorderChangeDay() {
+        return lastCivicDisorderChangeDay;
+    }
+
+    /**
+     * Restores political values during SavedData loading. Unknown faction keys
+     * are ignored, and all numeric values are bounded before entering gameplay.
+     */
+    void restorePoliticalSimulation(
+            final Map<String, Integer> loadedFactionApproval,
+            final int loadedUnrest,
+            final CivicDisorder loadedDisorder,
+            final long loadedLastChangeDay) {
+        for (final String factionId : FACTION_IDS) {
+            factionApproval.put(factionId, 50);
+        }
+        if (loadedFactionApproval != null) {
+            for (final String factionId : FACTION_IDS) {
+                final Integer value = loadedFactionApproval.get(factionId);
+                if (value != null) {
+                    factionApproval.put(factionId, clamp(value, 0, 100));
+                }
+            }
+        }
+        unrest = clamp(loadedUnrest, 0, 100);
+        civicDisorder = Objects.requireNonNullElse(loadedDisorder, CivicDisorder.CALM);
+        lastCivicDisorderChangeDay = Math.max(-1L, loadedLastChangeDay);
     }
 
     /** A Diplomat files reports at most once every 2,400 ticks for the colony. */
@@ -482,12 +545,19 @@ public final class EmpireState {
             legitimacy = clamp(legitimacy + citizenApprovalChange + taxBurdenChange, 0, 100);
         }
         stability = clamp(stability + stabilityChange, 0, 100);
+        updateFactionApproval(population, overallHappiness);
+        updateCivicDisorder(dayIndex, population, overallHappiness);
 
         final long safePopulation = Math.max(0L, Math.min(population, 1_000_000L));
         final long taxableBase = (safePopulation * taxRatePercent) / 5L;
         final long policyAdjusted = (taxableBase * economicPolicy.taxMultiplierPercent()) / 100L;
         final long efficientRevenue = (policyAdjusted * (100L + taxCollectionEfficiencyPercent)) / 100L;
-        final long deposited = Math.max(0L, Math.min(efficientRevenue, MAX_TREASURY - treasuryCrowns));
+        final long civicRevenue = switch (civicDisorder) {
+            case CALM -> efficientRevenue;
+            case STRIKE -> efficientRevenue / 2L;
+            case REVOLT -> efficientRevenue / 10L;
+        };
+        final long deposited = Math.max(0L, Math.min(civicRevenue, MAX_TREASURY - treasuryCrowns));
         treasuryCrowns += deposited;
         return deposited;
     }
@@ -627,6 +697,130 @@ public final class EmpireState {
             return "Unnamed colony";
         }
         return name.trim();
+    }
+
+    private void updateFactionApproval(final long population, final double overallHappiness) {
+        final int merchantTaxChange = taxRatePercent <= 5 ? 1
+                : taxRatePercent >= 20 ? -3
+                : taxRatePercent >= 12 ? -2 : 0;
+        int merchants = merchantTaxChange;
+        int commons = taxRatePercent >= 20 ? -3
+                : taxRatePercent >= 12 ? -2 : taxRatePercent <= 5 ? 1 : 0;
+        int nobility = taxRatePercent >= 20 ? -2 : taxRatePercent >= 15 ? -1 : 0;
+        int scholars = 0;
+
+        switch (economicPolicy) {
+            case BALANCED -> scholars += 1;
+            case MERCANTILE -> {
+                merchants += 2;
+                nobility += 1;
+            }
+            case WELFARE -> {
+                merchants -= 1;
+                commons += 2;
+                nobility -= 1;
+                scholars += 1;
+            }
+            case AUSTERITY -> {
+                merchants += 1;
+                commons -= 2;
+                nobility += 2;
+                scholars -= 2;
+            }
+        }
+
+        if (Double.isFinite(overallHappiness)) {
+            final int happinessChange = citizenApprovalChange(population, overallHappiness);
+            commons += happinessChange;
+            scholars += happinessChange;
+            if (overallHappiness >= 4.5 && population > 0L) {
+                merchants += 1;
+            } else if (overallHappiness < 2.5 || population <= 0L) {
+                merchants -= 1;
+                nobility -= 1;
+            }
+        }
+
+        adjustFactionApproval("merchants", merchants);
+        adjustFactionApproval("commons", commons);
+        adjustFactionApproval("nobility", nobility);
+        adjustFactionApproval("scholars", scholars);
+    }
+
+    private void adjustFactionApproval(final String factionId, final int change) {
+        factionApproval.put(factionId, clamp(factionApproval(factionId) + change, 0, 100));
+    }
+
+    private void updateCivicDisorder(
+            final long dayIndex,
+            final long population,
+            final double overallHappiness) {
+        int approvalTotal = 0;
+        for (final String factionId : FACTION_IDS) {
+            approvalTotal += factionApproval(factionId);
+        }
+        final int averageApproval = approvalTotal / FACTION_IDS.length;
+
+        int unrestChange;
+        if (averageApproval < 35) {
+            unrestChange = 3;
+        } else if (averageApproval < 50) {
+            unrestChange = 2;
+        } else if (averageApproval < 60) {
+            unrestChange = 1;
+        } else if (averageApproval >= 75) {
+            unrestChange = -3;
+        } else if (averageApproval >= 65) {
+            unrestChange = -2;
+        } else {
+            unrestChange = -1;
+        }
+
+        if (taxRatePercent >= 20) {
+            unrestChange += 2;
+        } else if (taxRatePercent <= 5) {
+            unrestChange -= 1;
+        }
+        if (economicPolicy == EconomicPolicy.WELFARE) {
+            unrestChange -= 1;
+        } else if (economicPolicy == EconomicPolicy.AUSTERITY) {
+            unrestChange += 1;
+        }
+        if (Double.isFinite(overallHappiness)) {
+            if (population <= 0L || overallHappiness < 1.5) {
+                unrestChange += 3;
+            } else if (overallHappiness < 2.5) {
+                unrestChange += 2;
+            } else if (overallHappiness >= 4.5) {
+                unrestChange -= 2;
+            }
+        }
+        if (stability < 30) {
+            unrestChange += 2;
+        } else if (stability >= 75) {
+            unrestChange -= 1;
+        }
+        if (legitimacy < 30) {
+            unrestChange += 2;
+        }
+        unrest = clamp(unrest + unrestChange, 0, 100);
+
+        final CivicDisorder previous = civicDisorder;
+        if (unrest >= 85 && legitimacy <= 25) {
+            civicDisorder = CivicDisorder.REVOLT;
+        } else if (previous == CivicDisorder.REVOLT) {
+            if (unrest <= 55 && legitimacy >= 35) {
+                civicDisorder = unrest <= 40 ? CivicDisorder.CALM : CivicDisorder.STRIKE;
+            }
+        } else if (unrest >= 65) {
+            civicDisorder = CivicDisorder.STRIKE;
+        } else if (unrest <= 40) {
+            civicDisorder = CivicDisorder.CALM;
+        }
+
+        if (civicDisorder != previous) {
+            lastCivicDisorderChangeDay = Math.max(0L, dayIndex);
+        }
     }
 
     private static int citizenApprovalChange(final long population, final double overallHappiness) {
