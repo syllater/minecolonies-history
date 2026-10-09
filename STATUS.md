@@ -5,52 +5,48 @@ Last updated: 2026-10-09 Europe/Amsterdam.
 ## Current State
 
 - Repository: https://github.com/syllater/minecolonies-history
-- Working branch for this effort: `milestone-2/colony-integration`
-- The GitHub-connected environment can inspect and commit repository files but cannot run a local shell or Gradle tasks.
-- Existing source remains a minimal NeoForge entrypoint.
+- Working branch: `milestone-2/colony-integration`
+- A GitHub Actions build/test workflow is configured at `.github/workflows/verify.yml`.
+- The connected tool environment can read/write GitHub repository content but cannot directly invoke a local shell.
 
 ## Current Milestone
 
 Milestone 2 — MineColonies Integration.
 
-## Completed in this investigation
+## Implemented in source
 
-- Inspected repository files and original Milestone 0 checkpoint.
-- Inspected public MineColonies API signatures in the upstream 1.21-era source.
-- Confirmed the public API surface includes `IMinecoloniesAPI.getInstance()`, `getColonyManager()`, and colony lookup methods in `IColonyManager`.
-- Confirmed `IColony` exposes colony ID, name, center, world and citizen manager.
-- Confirmed MineColonies has job and building registry entry builders, but a functional custom job/building requires more than a single registry registration.
-- Checked current upstream 1.21.1 release metadata for MineColonies, Structurize and BlockUI.
-- Created a dedicated branch: `milestone-2/colony-integration`.
+- `ColonyIdentity`: namespaced dimension + MineColonies colony ID, with validation and a deterministic storage key.
+- `EmpireState`: Imperium-owned per-colony state with first-seen and last-seen game times, safe colony display names and rename observation.
+- `EmpireStateSavedData`: versioned world SavedData persisted through the server overworld's data storage.
+- `MineColoniesIntegration`: public API adapter for server-side colony lookup by position, enumeration of colonies in a level and idempotent state initialization.
+- `MineColoniesLifecycleEvents`: periodic server-level scan for existing/new colonies.
+- Unit tests for identity uniqueness/validation and state observation semantics.
+- Pinned candidate 1.21.1 dependencies and the LDTTeam Maven repository.
+- GitHub Actions workflow to run `./gradlew --no-daemon test build` and upload the resulting mod JAR as an artifact.
 
-## Candidate versions found in upstream release metadata
+## API investigation
 
-- MineColonies: `1.21.1-1.1.1403`
-- Structurize: `1.21.1-1.0.835-snapshot`
-- BlockUI: `1.21.1-1.0.212-snapshot`
+Public APIs were inspected from the exact MineColonies source tag `v1.21.1-1.1.1403`, including `IMinecoloniesAPI`, `IColonyManager` and `IColony`. This is source inspection only; compile compatibility remains to be established by CI.
 
-The exact Gradle artifact coordinates and resolution of these candidates have not been verified from this environment.
+## Not yet verified
 
-## Not yet completed
+- Maven artifact resolution for all pinned coordinates.
+- Java compilation against the exact dependencies.
+- JUnit execution.
+- Generated mod JAR contents.
+- Actual game runtime behavior.
+- `./gradlew runClient`.
+- Dedicated-server startup with MineColonies and all required companions.
 
-- No direct MineColonies integration code has been added yet.
-- No MineColonies compile dependency has been resolved or compiled.
-- No SavedData implementation has been compiled.
-- No automated tests have been run during this session.
-- No `./gradlew build` was run during this session.
-- No `./gradlew runClient` was run during this session.
+## Current blocker
 
-## Known blockers / risks
-
-- The baseline's MineColonies version string predates the currently visible upstream release metadata and is only labelled as a candidate in the initial compatibility document.
-- The upstream MineColonies source snippets show some Minecraft/NeoForge-era imports from its build line; exact artifacts need to be used to catch any mismatch.
-- The project cannot be verified as a complete Milestone 2 integration until built in a shell-enabled checkout.
+The GitHub-connected environment cannot run local Gradle commands. The branch's GitHub Actions workflow should provide a real build/test result once GitHub executes it. If CI fails, fix the concrete failure and rerun CI before considering the milestone ready.
 
 ## Next actions
 
-1. Use the pinned 1.21.1 official release metadata to choose artifact coordinates and repositories.
-2. Add compile dependencies for only the APIs actually imported.
-3. Implement a server-side colony lookup adapter and Imperium-owned SavedData with safe serialization.
-4. Add unit/integration tests.
-5. Run `./gradlew build` and tests in a shell-enabled environment.
-6. Update this status with real results and request approval only after acceptance criteria are verifiably met.
+1. Check GitHub Actions for the latest branch run.
+2. Fix any dependency, compile, test or resource errors.
+3. Verify persistence and first-seen initialization in a real server/world test.
+4. Confirm the build JAR is produced.
+5. Run `./gradlew runClient` locally or through a suitable runner and inspect logs.
+6. Request user approval before Milestone 3.
