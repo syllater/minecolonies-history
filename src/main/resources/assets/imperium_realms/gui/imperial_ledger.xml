@@ -1,0 +1,31 @@
+<window size="420 258" lightbox="true" type="OVERSIZED_VANILLA">
+    <text id="title" pos="15 12" size="390 18" textalign="MIDDLE" color="white"
+          label="$(imperium_realms.gui.title)"/>
+    <text id="help" pos="18 32" size="384 20" textalign="MIDDLE" color="white"
+          label="$(imperium_realms.gui.help)"/>
+
+    <button id="status" pos="24 58" size="170 20" label="$(imperium_realms.gui.status)"/>
+    <button id="close" pos="226 58" size="170 20" label="$(imperium_realms.gui.close)"/>
+
+    <text id="taxLabel" pos="22 89" size="376 12" color="white"
+          label="$(imperium_realms.gui.tax_heading)"/>
+    <button id="tax0" pos="22 105" size="58 20" label="$(imperium_realms.gui.tax0)"/>
+    <button id="tax5" pos="84 105" size="58 20" label="$(imperium_realms.gui.tax5)"/>
+    <button id="tax10" pos="146 105" size="58 20" label="$(imperium_realms.gui.tax10)"/>
+    <button id="tax15" pos="208 105" size="58 20" label="$(imperium_realms.gui.tax15)"/>
+    <button id="tax20" pos="270 105" size="58 20" label="$(imperium_realms.gui.tax20)"/>
+    <button id="tax25" pos="332 105" size="58 20" label="$(imperium_realms.gui.tax25)"/>
+
+    <text id="policyLabel" pos="22 137" size="376 12" color="white"
+          label="$(imperium_realms.gui.policy_heading)"/>
+    <button id="policy_balanced" pos="22 153" size="88 20" label="$(imperium_realms.gui.policy_balanced)"/>
+    <button id="policy_mercantile" pos="114 153" size="88 20" label="$(imperium_realms.gui.policy_mercantile)"/>
+    <button id="policy_welfare" pos="206 153" size="88 20" label="$(imperium_realms.gui.policy_welfare)"/>
+    <button id="policy_austerity" pos="298 153" size="88 20" label="$(imperium_realms.gui.policy_austerity)"/>
+
+    <text id="investLabel" pos="22 185" size="376 12" color="white"
+          label="$(imperium_realms.gui.invest_heading)"/>
+    <button id="invest10" pos="22 201" size="88 20" label="$(imperium_realms.gui.invest10)"/>
+    <button id="invest50" pos="114 201" size="88 20" label="$(imperium_realms.gui.invest50)"/>
+    <button id="invest100" pos="206 201" size="88 20" label="$(imperium_realms.gui.invest100)"/>
+</window>
