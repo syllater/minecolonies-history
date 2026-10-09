@@ -292,4 +292,68 @@ final class EmpireStateTest {
         assertEquals(227L, state.treasuryCrowns());
     }
 
+    @Test
+    void diplomatGeneratesInfluenceAtMostOncePerWorkInterval() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 19), "Capital", 0L);
+
+        assertTrue(state.recordDiplomatWork(0L));
+        assertFalse(state.recordDiplomatWork(2_399L));
+        assertEquals(1L, state.diplomaticInfluence());
+        assertTrue(state.recordDiplomatWork(2_400L));
+        assertEquals(2L, state.diplomaticInfluence());
+    }
+
+    @Test
+    void diplomacyCostsInfluenceAndCannotTargetTheSameColony() {
+        final ColonyIdentity ownIdentity = new ColonyIdentity("minecraft:overworld", 20);
+        final ColonyIdentity target = new ColonyIdentity("minecraft:overworld", 21);
+        final EmpireState state = EmpireState.create(ownIdentity, "Capital", 0L);
+
+        assertFalse(state.improveDiplomaticRelations(ownIdentity));
+        assertEquals(0L, state.diplomaticInfluence());
+        for (long tick = 0L; tick < 10L * 2_400L; tick += 2_400L) {
+            assertTrue(state.recordDiplomatWork(tick));
+        }
+
+        assertEquals(10L, state.diplomaticInfluence());
+        assertTrue(state.improveDiplomaticRelations(target));
+        assertEquals(5, state.relationScore(target));
+        assertEquals(0L, state.diplomaticInfluence());
+        assertFalse(state.improveDiplomaticRelations(target));
+        assertEquals("neutral", EmpireState.relationStatusId(state.relationScore(target)));
+    }
+
+    @Test
+    void diplomaticRelationStatusUsesDeterministicThresholds() {
+        assertEquals("hostile", EmpireState.relationStatusId(-50));
+        assertEquals("unfriendly", EmpireState.relationStatusId(-15));
+        assertEquals("neutral", EmpireState.relationStatusId(0));
+        assertEquals("cordial", EmpireState.relationStatusId(15));
+        assertEquals("friendly", EmpireState.relationStatusId(40));
+        assertEquals("allied", EmpireState.relationStatusId(75));
+        assertEquals("allied", EmpireState.relationStatusId(150));
+    }
+
+    @Test
+    void diplomaticInfluenceAndRelationsAreBounded() {
+        final ColonyIdentity ownIdentity = new ColonyIdentity("minecraft:overworld", 22);
+        final ColonyIdentity target = new ColonyIdentity("minecraft:overworld", 23);
+        final EmpireState state = EmpireState.create(ownIdentity, "Capital", 0L);
+
+        for (long tick = 0L; tick < 1_100L * 2_400L; tick += 2_400L) {
+            state.recordDiplomatWork(tick);
+        }
+        assertEquals(EmpireState.MAX_DIPLOMATIC_INFLUENCE, state.diplomaticInfluence());
+
+        int steps = 0;
+        while (state.relationScore(target) < 100) {
+            assertTrue(state.improveDiplomaticRelations(target));
+            steps++;
+        }
+        assertEquals(20, steps);
+        assertEquals(100, state.relationScore(target));
+        assertFalse(state.improveDiplomaticRelations(target));
+    }
+
 }
