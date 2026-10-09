@@ -53,7 +53,7 @@ public final class ImperiumCommands {
                                 .then(Commands.literal("public_works")
                                         .executes(context -> setPolicy(context.getSource(), EmpirePolicy.PUBLIC_WORKS)))
                                 .then(Commands.literal("scholarship")
-                                        .executes(context -> setPolicy(context.getSource(), EmpirePolicy.SCHOLARSHIP))));
+                                        .executes(context -> setPolicy(context.getSource(), EmpirePolicy.SCHOLARSHIP)))));
     }
 
     private static int showStatus(final CommandSourceStack source) throws CommandSyntaxException {
@@ -73,7 +73,7 @@ public final class ImperiumCommands {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int setTaxRate(final CommandSourceStack source, final int percent) throws Exception {
+    private static int setTaxRate(final CommandSourceStack source, final int percent) throws CommandSyntaxException {
         final ServerPlayer player = source.getPlayerOrException();
         final Optional<IColony> colony = findManageableColony(source, player);
         if (colony.isEmpty()) {
@@ -95,7 +95,7 @@ public final class ImperiumCommands {
 
     private static int setPolicy(
             final CommandSourceStack source,
-            final EmpirePolicy policy) throws Exception {
+            final EmpirePolicy policy) throws CommandSyntaxException {
         final ServerPlayer player = source.getPlayerOrException();
         final Optional<IColony> colony = findManageableColony(source, player);
         if (colony.isEmpty()) {
@@ -119,7 +119,7 @@ public final class ImperiumCommands {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int collectTaxes(final CommandSourceStack source) throws Exception {
+    private static int collectTaxes(final CommandSourceStack source) throws CommandSyntaxException {
         final ServerPlayer player = source.getPlayerOrException();
         final Optional<IColony> colony = findManageableColony(source, player);
         if (colony.isEmpty()) {
