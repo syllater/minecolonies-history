@@ -7,6 +7,7 @@ Last updated: 2026-10-09 Europe/Amsterdam.
 - Repository: https://github.com/syllater/minecolonies-history
 - Working branch: `milestone-2/colony-integration`
 - A GitHub Actions build/test workflow is configured at `.github/workflows/verify.yml`.
+- First CI compile succeeded for `compileJava`, `processResources`, `jar` and `compileTestJava`; test execution then failed during runtime dependency resolution. The identified causes are being corrected: MultiPiston uses artifact ID `multipiston`, and the project needs Jared's Maven repository for JEI artifacts.
 - The connected tool environment can read/write GitHub repository content but cannot directly invoke a local shell.
 
 ## Current Milestone
@@ -40,7 +41,7 @@ Public APIs were inspected from the exact MineColonies source tag `v1.21.1-1.1.1
 
 ## Current blocker
 
-The GitHub-connected environment cannot run local Gradle commands. The branch's GitHub Actions workflow should provide a real build/test result once GitHub executes it. If CI fails, fix the concrete failure and rerun CI before considering the milestone ready.
+The GitHub-connected environment cannot run local Gradle commands. CI has demonstrated source compilation succeeds so far, but test/build is not green until dependency resolution is corrected. The branch's GitHub Actions workflow should provide a real build/test result once GitHub executes it. If CI fails, fix the concrete failure and rerun CI before considering the milestone ready.
 
 ## Next actions
 
