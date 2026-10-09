@@ -84,5 +84,15 @@
   "imperium_realms.faction.scholars": "Scholars",
   "imperium_realms.civic_disorder.calm": "Calm",
   "imperium_realms.civic_disorder.strike": "General strike",
-  "imperium_realms.civic_disorder.revolt": "Revolt"
+  "imperium_realms.civic_disorder.revolt": "Revolt",
+  "com.imperium_realms.building.imperial_guard_tower": "Imperial Guard Tower",
+  "com.imperium_realms.building.imperial_guard_tower.desc": "A specialist guard tower for Imperial Siege Engineers, Field Medics and Cavaliers. A matching Structurize blueprint pack is required for construction.",
+  "imperium_realms.job.imperial_siege_engineer": "Imperial Siege Engineer",
+  "imperium_realms.gui.guard.imperial_siege_engineer": "Hire Imperial Siege Engineer",
+  "imperium_realms.job.imperial_field_medic": "Imperial Field Medic",
+  "imperium_realms.gui.guard.imperial_field_medic": "Hire Imperial Field Medic",
+  "imperium_realms.job.imperial_cavalier": "Imperial Cavalier",
+  "imperium_realms.gui.guard.imperial_cavalier": "Hire Imperial Cavalier",
+  "imperium_realms.message.army_status": "§6Imperial Army — %1$s §7| §eSiege Engineering: §f%2$d §7| §eField Medicine: §f%3$d §7| §eCavalry Drill: §f%4$d",
+  "imperium_realms.message.army_help": "Specialist guard level-ups train these disciplines. Use an Imperial Guard Tower to hire the native MineColonies roles; custom Structurize blueprints are still required for survival construction."
 }
