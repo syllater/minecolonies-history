@@ -13,7 +13,7 @@ Last checked: 2026-10-09.
 | MineColonies | `1.1.1403-1.21.1` | Candidate artifact coordinate derived from the official 1.21.1 release and addon-template convention; Gradle resolution must verify it |
 | Structurize | `1.0.835-1.21.1-snapshot` | Candidate artifact coordinate from the 1.21.1 release line; Gradle resolution must verify it |
 | BlockUI | `1.0.212-1.21.1-snapshot` | Candidate artifact coordinate from the 1.21.1 release line; Gradle resolution must verify it |
-| Domum Ornamentum | `1.0.233-snapshot` | Candidate runtime dependency; Gradle resolution must verify it |
+| Domum Ornamentum | `1.0.233-snapshot` | Candidate runtime dependency; artifact ID is `multipiston`; Gradle resolution must verify it |
 | MultiPiston | `1.2.51-1.21.1-snapshot` | Candidate runtime dependency; Gradle resolution must verify it |
 
 ## Upstream evidence
@@ -59,7 +59,7 @@ The MineColonies release metadata names the following as required:
 - BlockUI: `1.0.199-1.21.1-snapshot` or above
 - Domum Ornamentum: `1.0.223-snapshot` or above
 
-Imperium declares them as runtime dependencies for the development client. The precise artifact coordinates remain subject to Gradle resolution.
+Imperium declares Structurize, BlockUI, Domum Ornamentum and MultiPiston as runtime dependencies for the development client. MultiPiston's Maven artifact ID is `multipiston` (not the mod ID `multi-piston`). Domum Ornamentum's POM resolves JEI API artifacts, so the build includes Jared's Maven repository (`https://maven.blamejared.com/`).
 
 ## Known verification limitation
 
