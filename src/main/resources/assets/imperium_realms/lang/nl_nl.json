@@ -84,5 +84,15 @@
   "imperium_realms.faction.scholars": "Geleerden",
   "imperium_realms.civic_disorder.calm": "Rustig",
   "imperium_realms.civic_disorder.strike": "Algemene staking",
-  "imperium_realms.civic_disorder.revolt": "Opstand"
+  "imperium_realms.civic_disorder.revolt": "Opstand",
+  "com.imperium_realms.building.imperial_guard_tower": "Keizerlijke Wachttoren",
+  "com.imperium_realms.building.imperial_guard_tower.desc": "Een wachttoren voor Keizerlijke Belegeraars, Veldartsen en Cavaleristen. Voor de bouw is een passend Structurize-schemabestand nodig.",
+  "imperium_realms.job.imperial_siege_engineer": "Keizerlijke Belegeringsingenieur",
+  "imperium_realms.gui.guard.imperial_siege_engineer": "Keizerlijke Belegeringsingenieur inhuren",
+  "imperium_realms.job.imperial_field_medic": "Keizerlijke Veldarts",
+  "imperium_realms.gui.guard.imperial_field_medic": "Keizerlijke Veldarts inhuren",
+  "imperium_realms.job.imperial_cavalier": "Keizerlijke Cavalerist",
+  "imperium_realms.gui.guard.imperial_cavalier": "Keizerlijke Cavalerist inhuren",
+  "imperium_realms.message.army_status": "§6Keizerlijk Leger — %1$s §7| §eBelegeringskunde: §f%2$d §7| §eVeldgeneeskunde: §f%3$d §7| §eCavalerietraining: §f%4$d",
+  "imperium_realms.message.army_help": "Specialistische wachters doen ervaring op met deze disciplines wanneer ze een level stijgen. Gebruik een Keizerlijke Wachttoren om de echte MineColonies-rollen in te huren; voor bouwen in survival zijn nog aangepaste Structurize-schemabestanden nodig."
 }
