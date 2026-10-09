@@ -18,7 +18,7 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 5;
+    private static final int SCHEMA_VERSION = 6;
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -146,7 +146,11 @@ public final class EmpireStateSavedData extends SavedData {
                         entry.contains("last_scholar_work_tick") ? entry.getLong("last_scholar_work_tick") : -1L,
                         entry.contains("next_proposal_id") ? entry.getLong("next_proposal_id") : 1L,
                         proposals,
-                        entry.contains("legitimacy") ? entry.getInt("legitimacy") : 50);
+                        entry.contains("legitimacy") ? entry.getInt("legitimacy") : 50,
+                        entry.contains("tax_collection_efficiency")
+                                ? entry.getInt("tax_collection_efficiency") : 0,
+                        entry.contains("last_tax_collector_work_tick")
+                                ? entry.getLong("last_tax_collector_work_tick") : -1L);
                 data.colonies.put(identity, state);
             } catch (IllegalArgumentException exception) {
                 // Skip malformed records instead of failing the whole world load.
@@ -202,6 +206,8 @@ public final class EmpireStateSavedData extends SavedData {
             entry.putLong("knowledge_points", state.knowledgePoints());
             entry.putInt("stability", state.stability());
             entry.putInt("legitimacy", state.legitimacy());
+            entry.putInt("tax_collection_efficiency", state.taxCollectionEfficiencyPercent());
+            entry.putLong("last_tax_collector_work_tick", state.lastTaxCollectorWorkTick());
             entry.putLong("last_tax_day", state.lastTaxDay());
             entry.putLong("last_scholar_work_tick", state.lastScholarWorkTick());
             entry.putLong("next_proposal_id", state.nextProposalId());
