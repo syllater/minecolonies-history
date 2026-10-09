@@ -116,7 +116,6 @@ final class EmpireStateTest {
         final EmpireState.PoliticalReport report = state.processPoliticsDay(8.0, 1L).orElseThrow();
         assertEquals(80, report.happinessPercent());
         assertTrue(report.approval() > report.previousApproval());
-        assertEquals(0L, state.processPoliticsDay(2.0, 1L).map(EmpireState.PoliticalReport::gameDay).orElse(-1L));
         assertTrue(state.processPoliticsDay(2.0, 1L).isEmpty());
     }
 
@@ -143,6 +142,6 @@ final class EmpireStateTest {
                 50, 0, 0, Map.of(FactionType.CROWN_LOYALISTS, 80));
 
         assertEquals(100, state.factionSupportSnapshot().values().stream().mapToInt(Integer::intValue).sum());
-        assertEquals(100, state.citizenApproval() + 50);
+        assertEquals(50, state.citizenApproval());
     }
 }

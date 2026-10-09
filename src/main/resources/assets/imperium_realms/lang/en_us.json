@@ -34,9 +34,5 @@
   "commands.imperium.parliament_law_passed": "%1$s passed with %2$s votes in favor and %3$s against. Its effect has been applied.",
   "commands.imperium.parliament_law_failed": "%1$s failed with %2$s votes in favor and %3$s against.",
   "commands.imperium.politics_status": "%1$s — Approval: %2$s%%; unrest: %3$s%%.",
-  "commands.imperium.faction_support": "%1$s support: %2$s%%.",
-  "faction.imperium.crown_loyalists": "Crown Loyalists",
-  "faction.imperium.merchants_guild": "Merchants' Guild",
-  "faction.imperium.commoners_assembly": "Commoners' Assembly",
-  "faction.imperium.scholars_circle": "Scholars' Circle"
+  "commands.imperium.faction_support": "%1$s support: %2$s%%."
 }
