@@ -356,4 +356,61 @@ final class EmpireStateTest {
         assertFalse(state.improveDiplomaticRelations(target));
     }
 
+    @Test
+    void highTaxesAndLowCitizenHappinessCanTriggerARevolt() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 24), "Unhappy Capital", 0L);
+        assertTrue(state.setTaxRatePercent(25));
+
+        for (long day = 1L; day <= 15L; day++) {
+            state.collectDailyTaxes(day, 10L, 0.0);
+        }
+
+        assertTrue(state.unrest() >= 85);
+        assertTrue(state.legitimacy() <= 25);
+        assertEquals(EmpireState.CivicDisorder.REVOLT, state.civicDisorder());
+        assertTrue(state.factionApproval("commons") < 50);
+        assertTrue(state.lastCivicDisorderChangeDay() >= 1L);
+    }
+
+    @Test
+    void betterCitizenConditionsAndWelfareCanResolveCivilDisorder() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 25), "Capital", 0L);
+        assertTrue(state.setTaxRatePercent(25));
+        for (long day = 1L; day <= 15L; day++) {
+            state.collectDailyTaxes(day, 10L, 0.0);
+        }
+        assertEquals(EmpireState.CivicDisorder.REVOLT, state.civicDisorder());
+
+        assertTrue(state.setTaxRatePercent(5));
+        assertTrue(state.setEconomicPolicy(EconomicPolicy.WELFARE));
+        for (long day = 16L; day <= 180L; day++) {
+            state.collectDailyTaxes(day, 10L, 5.5);
+        }
+
+        assertTrue(state.legitimacy() > 35);
+        assertTrue(state.unrest() <= 40);
+        assertEquals(EmpireState.CivicDisorder.CALM, state.civicDisorder());
+    }
+
+    @Test
+    void politicalStateRestorationClampsApprovalsAndUnrest() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 26), "Capital", 0L);
+
+        state.restorePoliticalSimulation(
+                java.util.Map.of("commons", -20, "merchants", 140, "unknown", 70),
+                150,
+                EmpireState.CivicDisorder.STRIKE,
+                12L);
+
+        assertEquals(0, state.factionApproval("commons"));
+        assertEquals(100, state.factionApproval("merchants"));
+        assertEquals(50, state.factionApproval("scholars"));
+        assertEquals(100, state.unrest());
+        assertEquals(EmpireState.CivicDisorder.STRIKE, state.civicDisorder());
+        assertEquals(12L, state.lastCivicDisorderChangeDay());
+    }
+
 }
