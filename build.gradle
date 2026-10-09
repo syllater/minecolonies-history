@@ -17,6 +17,24 @@ java {
     }
 }
 
+// NeoForge's ModDevGradle configures project-level repositories for the
+// development runtime, so add external mod repositories here (not only in
+// settings.gradle's dependencyResolutionManagement block).
+repositories {
+    maven {
+        name = 'NeoForge'
+        url = uri('https://maven.neoforged.net/releases')
+    }
+    maven {
+        name = 'LDTTeam'
+        url = uri('https://ldtteam.jfrog.io/ldtteam/modding/')
+        content {
+            includeGroup 'com.ldtteam'
+        }
+    }
+    mavenCentral()
+}
+
 neoForge {
     version = neo_version
 
