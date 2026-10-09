@@ -43,17 +43,6 @@ neoForge {
     }
 }
 
-repositories {
-    maven {
-        name = 'LDTTeam - Mods Maven'
-        url = uri('https://ldtteam.jfrog.io/ldtteam/mods-maven/')
-    }
-    maven {
-        name = "Jared's Maven"
-        url = uri('https://maven.blamejared.com/')
-    }
-}
-
 dependencies {
     // MineColonies public APIs are used by the colony integration adapter.
     implementation "com.ldtteam:minecolonies:${minecolonies_version}"
