@@ -48,6 +48,10 @@ repositories {
         name = 'LDTTeam - Mods Maven'
         url = uri('https://ldtteam.jfrog.io/ldtteam/mods-maven/')
     }
+    maven {
+        name = "Jared's Maven"
+        url = uri('https://maven.blamejared.com/')
+    }
 }
 
 dependencies {
@@ -59,7 +63,7 @@ dependencies {
     runtimeOnly "com.ldtteam:structurize:${structurize_version}"
     runtimeOnly "com.ldtteam:blockui:${blockui_version}"
     runtimeOnly "com.ldtteam:domum-ornamentum:${domum_ornamentum_version}"
-    runtimeOnly "com.ldtteam:multi-piston:${multipiston_version}"
+    runtimeOnly "com.ldtteam:multipiston:${multipiston_version}"
 
     testImplementation platform("org.junit:junit-bom:${junit_version}")
     testImplementation 'org.junit.jupiter:junit-jupiter'
