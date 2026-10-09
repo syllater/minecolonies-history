@@ -1,3 +1,21 @@
 {
-  "modmenu.descriptionTranslation.imperium_realms": "European empire simulation expansion for MineColonies."
+  "modmenu.descriptionTranslation.imperium_realms": "European empire simulation expansion for MineColonies.",
+  "block.imperium_realms.imperial_chancery": "Imperial Chancery",
+  "item.imperium_realms.imperial_chancery": "Imperial Chancery",
+  "itemGroup.imperium_realms.imperium": "Imperium: European Realms",
+  "com.imperium_realms.building.imperial_chancery": "Imperial Chancery",
+  "com.imperium_realms.job.diplomat": "Diplomat",
+  "com.imperium_realms.job.diplomat.desc": "A civic specialist who builds diplomatic influence for the empire.",
+  "imperium.policy.low_tax": "Low Taxes",
+  "imperium.policy.balanced": "Balanced Taxation",
+  "imperium.policy.emergency_levy": "Emergency Levy",
+  "imperium.command.no_colony": "You must be inside a MineColonies colony to manage its empire.",
+  "imperium.command.no_permission": "You need the MineColonies Manage Huts permission to administer this empire.",
+  "imperium.command.invalid_policy": "Unknown policy. Use low_tax, balanced, or emergency_levy.",
+  "imperium.command.not_enough_emeralds": "You do not have enough emeralds in your inventory.",
+  "imperium.command.treasury_full": "The imperial treasury cannot accept that deposit.",
+  "imperium.command.status": "Empire: {0} | Policy: {1} | Treasury: {2} crowns | Influence: {3} | Residents: {4}",
+  "imperium.command.treasury_status": "Imperial treasury balance: {0} crowns.",
+  "imperium.command.policy_set": "Tax policy set to {0}: {1} crowns per resident per Minecraft day.",
+  "imperium.command.deposit_complete": "Deposited {0} emerald(s) for {1} crowns. New balance: {2} crowns."
 }
