@@ -1,89 +1,46 @@
 # Checkpoints
 
-## 2026-10-09 12:04 Europe/Amsterdam - Milestone 0 Started
+## 2026-10-09 — Milestone 2 Source and Build Setup
 
-### Completed
+### Repository
 
-- Read the project master prompt from the pasted attachment.
-- Confirmed the repository was empty except `work/` and `outputs/`.
-- Confirmed Git remote:
-  - `origin https://github.com/syllater/minecolonies-history.git`
-- Confirmed local branch:
-  - `main`
-- Checked local Java:
-  - Temurin OpenJDK 21.0.11
-- Checked local Gradle:
-  - Gradle 8.14.5
-- Checked NeoForge Maven metadata and selected NeoForge `21.1.256`.
-- Checked ModDevGradle metadata and selected `2.0.148`.
-- Created minimal NeoForge source, metadata, and translation files.
-- Created required project documents.
+- Repository: https://github.com/syllater/minecolonies-history
+- Branch: `milestone-2/colony-integration`
 
-### Changed Files
+### Implemented files
 
-- `.gitignore`
-- `settings.gradle`
-- `build.gradle`
-- `gradle.properties`
-- `src/main/java/com/imperium/realms/ImperiumRealms.java`
-- `src/main/resources/META-INF/neoforge.mods.toml`
-- `src/main/resources/assets/imperium_realms/lang/en_us.json`
-- `src/main/resources/assets/imperium_realms/lang/nl_nl.json`
-- `PROJECT_GOAL.md`
-- `AGENTS.md`
-- `ROADMAP.md`
-- `STATUS.md`
-- `DECISIONS.md`
-- `COMPATIBILITY.md`
-- `CHECKPOINTS.md`
+- `src/main/java/com/imperium/realms/colony/ColonyIdentity.java`
+- `src/main/java/com/imperium/realms/colony/EmpireState.java`
+- `src/main/java/com/imperium/realms/colony/EmpireStateSavedData.java`
+- `src/main/java/com/imperium/realms/colony/MineColoniesIntegration.java`
+- `src/main/java/com/imperium/realms/colony/MineColoniesLifecycleEvents.java`
+- `src/test/java/com/imperium/realms/colony/ColonyIdentityTest.java`
+- `src/test/java/com/imperium/realms/colony/EmpireStateTest.java`
 
-### Commands Run
+### Integration decisions
 
-- `git status --short`
-- `git remote -v`
-- `git branch --show-current`
-- `java -version`
-- `gradle -v`
-- `curl` checks against NeoForge Maven metadata
-- `curl` checks/searches for MineColonies-related dependency data
+- Use the public API from the exact MineColonies tag `v1.21.1-1.1.1403`.
+- Look up colonies on the logical server through `IMinecoloniesAPI.getInstance().getColonyManager()`.
+- Identify records by dimension ID + colony ID, not by the editable name or center position.
+- Store Imperium-owned records in an overworld SavedData registry so all dimensions share a single index.
+- Periodically reconcile loaded colonies; missing records are inserted, existing records are observed but not reset.
+- Avoid private MineColonies NBT mutation and mixins in this milestone.
 
-### Build and Test Results
+### Build setup added
 
-- `gradle wrapper --gradle-version 8.14.5`
-  - Result: success.
-- `./gradlew build`
-  - Result: success.
-  - Duration: 5m 6s.
-  - `compileJava`: success.
-  - `processResources`: success.
-  - `jar`: success.
-  - `test`: `NO-SOURCE`.
-- Generated JAR:
-  - `build/libs/imperium_realms-0.1.0-milestone0.jar`
-- JAR contents verified:
-  - `META-INF/neoforge.mods.toml`
-  - `assets/imperium_realms/lang/en_us.json`
-  - `assets/imperium_realms/lang/nl_nl.json`
-  - `com/imperium/realms/ImperiumRealms.class`
-- Local commit:
-  - `6aa3a24 Initialize NeoForge milestone 0 baseline`
-- Push attempt:
-  - `git push -u origin main`
-  - Result: failed.
-  - Error: `fatal: could not read Username for 'https://github.com': Device not configured`
-- SSH check:
-  - `ssh -T git@github.com`
-  - Result: failed.
-  - Error: `ssh: connect to host github.com port 22: Undefined error: 0`
+- Added LDTTeam Maven repository.
+- Pinned MineColonies and its required runtime dependency baseline.
+- Configured JUnit Jupiter.
+- Added `.github/workflows/gradle.yml` for `./gradlew --no-daemon clean build` and JAR artifact upload.
 
-### Known Issues
+### Verification
 
-- No gameplay implementation exists yet.
-- MineColonies/Structurize/BlockUI API inspection is pending.
-- The build has no test sources yet; `test NO-SOURCE` is not functional coverage.
-- `runClient` has not been executed in Milestone 0 because required runtime mods are declared but not yet wired into the dev run.
-- GitHub push is blocked until this environment has usable GitHub CLI credentials, a credential helper, or an SSH route/key.
+The GitHub file API has confirmed the writes were accepted, but no Gradle command has been executed by this session. Wait for the actual GitHub Actions result before stating the source compiles.
 
-### Next Recommended Action
+### Critical correction
 
-Ask the user to approve Milestone 0 dependency choices and proceed to Milestone 1.
+A prior investigation referenced MineColonies `version/main`, but that branch is the older Minecraft line. It is not used as evidence for the 1.21.1 implementation. The 1.21.1 signatures were reviewed against the official tag `v1.21.1-1.1.1403`.
+
+### Next
+
+Check Actions run status, fix any actual compile/dependency failures, and only then present Milestone 2 for approval.

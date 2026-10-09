@@ -1,0 +1,138 @@
+name: Verify mod
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+      - name: Run unit tests and build mod
+        run: ./gradlew --no-daemon test build
+      - name: Upload mod JAR
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: imperium-realms-${{ github.sha }}
+          path: build/libs/*.jar
+          if-no-files-found: error
+          retention-days: 14
+
+  client-smoke:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Install a virtual display
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dri
+      - name: Launch development client and verify startup
+        shell: bash
+        run: |
+          set +e
+          set -uo pipefail
+          mkdir -p build
+          log="build/runClient-smoke.log"
+
+          # runClient intentionally stays open after startup. Launch it in a
+          # separate process group, watch for the client initialization marker,
+          # then stop the smoke-test process once the title screen is expected.
+          # OpenAL's null backend lets the client initialize in a headless runner
+          # with no physical audio device.
+          export ALSOFT_DRIVERS=null
+          setsid xvfb-run -a ./gradlew --no-daemon runClient --console=plain >"$log" 2>&1 &
+          pid=$!
+          reached=0
+
+          for attempt in $(seq 1 120); do
+            if grep -Eq "ModLoadingCrashException|Mod loading has failed" "$log" 2>/dev/null; then
+              cat "$log"
+              echo "runClient reported a mod-loading failure."
+              exit 1
+            fi
+
+            # In addition to the sound marker, accept a completed vanilla GUI
+            # atlas load: headless sound initialization can be unavailable on
+            # some runners even when Minecraft and all mods have loaded.
+            if grep -Fq "Sound engine started" "$log" 2>/dev/null || \
+               grep -E "Created: .* minecraft:textures/atlas/gui.png-atlas" "$log" >/dev/null 2>&1; then
+              if ! grep -Eq "ModLoadingCrashException|Mod loading has failed" "$log" 2>/dev/null; then
+                reached=1
+                break
+              fi
+            fi
+
+            if ! kill -0 "$pid" 2>/dev/null; then
+              wait "$pid"
+              result=$?
+              cat "$log"
+              if (grep -Fq "Sound engine started" "$log" || \
+                  grep -E "Created: .* minecraft:textures/atlas/gui.png-atlas" "$log" >/dev/null 2>&1) && \
+                 ! grep -Eq "ModLoadingCrashException|Mod loading has failed" "$log"; then
+                reached=1
+                break
+              fi
+              echo "runClient exited before the startup marker (exit code $result)."
+              exit 1
+            fi
+
+            sleep 2
+          done
+
+          cat "$log"
+          if [ "$reached" -eq 1 ]; then
+            echo "PASS: runClient reached the Minecraft client initialization marker."
+            kill -TERM -- "-$pid" 2>/dev/null || true
+            sleep 2
+            wait "$pid" 2>/dev/null || true
+            exit 0
+          fi
+
+          echo "FAIL: runClient did not reach a clean client resource-start marker within 240 seconds."
+          kill -TERM -- "-$pid" 2>/dev/null || true
+          sleep 2
+          wait "$pid" 2>/dev/null || true
+          exit 1
+      - name: Upload client smoke-test log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: runClient-smoke-log-${{ github.sha }}
+          path: build/runClient-smoke.log
+          if-no-files-found: ignore
+          retention-days: 14

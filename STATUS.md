@@ -1,51 +1,63 @@
 # Status
 
-Last updated: 2026-10-09 12:18 Europe/Amsterdam.
+Last updated: 2026-10-09 Europe/Amsterdam.
 
-## Current State
+## Current state
 
-- Git repository initialized on branch `main`.
-- Remote `origin` points to `https://github.com/syllater/minecolonies-history.git`.
-- Repository started empty except `work/` and `outputs/`.
-- Minimal NeoForge source tree has been created.
-- Required project governance documents have been created.
-- Gradle wrapper has been generated.
-- Minimal NeoForge build succeeds.
-- Generated JAR: `build/libs/imperium_realms-0.1.0-milestone0.jar`.
-- Local Git checkpoint commit created: `6aa3a24 Initialize NeoForge milestone 0 baseline`.
+- Repository: https://github.com/syllater/minecolonies-history
+- Working branch: `milestone-2/colony-integration`
+- Changes are committed to that branch using GitHub's repository file APIs.
+- This environment cannot execute a local shell or Gradle tasks, so build success must come from CI or a shell-enabled checkout.
 
-## Current Milestone
+## Current milestone
 
-Milestone 0 - Repository and Compatibility.
+Milestone 2 — MineColonies Integration.
 
-## Completed So Far
+## Implemented in this branch
 
-- Repository inspection confirmed no existing source, Gradle files, assets, tests, or documentation were present.
-- Local Java version checked: Temurin OpenJDK 21.0.11.
-- Local Gradle version checked: Gradle 8.14.5.
-- NeoForge Maven metadata checked for Minecraft 1.21.1-compatible `21.1.x` versions.
-- ModDevGradle Maven metadata checked.
-- Minimal mod entrypoint and metadata added.
-- English and Dutch starter translation files added.
+- `ColonyIdentity`: dimension + MineColonies colony ID as stable key.
+- `EmpireState`: custom state for first seen, last-seen heartbeat and colony name.
+- `EmpireStateSavedData`: Imperium-owned world save storage under the overworld's DataStorage.
+- `MineColoniesIntegration`: read-only public API adapter and idempotent reconciliation of colonies.
+- `MineColoniesLifecycleEvents`: periodic server-side colony scanning.
+- Unit tests for stable identity and core state behaviour.
+- Gradle coordinates for MineColonies and its required dependency baseline.
+- English and Dutch starter language files retained.
+- GitHub Actions workflow: `.github/workflows/gradle.yml`, intended to run `./gradlew --no-daemon clean build` and upload the mod JAR on success.
 
-## Pending Verification
+## Dependency candidates pinned
 
-- User approval for Milestone 0 findings and dependency choices.
+- Minecraft 1.21.1.
+- NeoForge 21.1.256.
+- Java 21.
+- ModDevGradle 2.0.148.
+- MineColonies 1.1.1403-1.21.1.
+- Structurize 1.0.832-1.21.1-snapshot.
+- BlockUI 1.0.199-1.21.1-snapshot.
+- Domum Ornamentum 1.0.223-snapshot.
+- MultiPiston 1.2.51-1.21.1-snapshot.
 
-## Not Started
+The versions align with the dependency baseline declared by the official MineColonies 1.21.1 release metadata. Gradle artifact resolution still needs confirmation from the build.
 
-- MineColonies API inspection.
-- Structurize API inspection.
-- BlockUI API inspection.
-- Registries beyond the minimal mod entrypoint.
-- Gameplay systems.
-- Runtime `runClient` check.
+## Verification status
 
-## Known Risks
+- Public API source reviewed from the pinned MineColonies 1.21.1 release tag.
+- No local `./gradlew build` executed by this session.
+- No local `./gradlew test` executed by this session.
+- No `./gradlew runClient` executed by this session.
+- Remote CI result still needs to be retrieved/verified before Milestone 2 can be marked accepted.
 
-- MineColonies, Structurize, and BlockUI APIs must be inspected against the exact selected artifacts before implementation.
-- CurseForge-hosted artifacts may require dependency retrieval through CurseMaven or another approved mirror during later development.
-- The current minimal build does not yet compile against MineColonies APIs; it declares MineColonies, Structurize, and BlockUI as required runtime mod dependencies in metadata.
-- `./gradlew test` had no test sources in Milestone 0; this is expected for the empty baseline but does not prove gameplay correctness.
-- `./gradlew runClient` was not run in Milestone 0 because required runtime mods are declared but not yet installed into the dev run configuration.
-- Push to GitHub is pending. HTTPS push could not prompt for credentials in this environment, and SSH to `github.com:22` failed.
+## Known limitations
+
+- No new MineColonies building, profession, worker AI, or Structurize schematic has been added yet.
+- Runtime persistence and automatic colony discovery are implemented but not verified in an actual Minecraft world here.
+- The first version scans colonies once per 200 ticks per server level; this is intentionally low-frequency and idempotent.
+- GitHub Actions runner and remote network access are prerequisites for remote build verification.
+
+## Next actions
+
+1. Retrieve the workflow run triggered by the last branch push.
+2. If the build fails, inspect logs and fix the actual root cause.
+3. Repeat the CI build until it passes or a concrete external blocker remains.
+4. Update this file with the actual CI result and artifact details.
+5. Submit Milestone 2 for user review; do not start Milestone 3 without approval.

@@ -15,6 +15,13 @@ dependencyResolutionManagement {
             url = 'https://maven.neoforged.net/releases'
         }
         maven {
+            name = 'LDTTeam'
+            url = 'https://ldtteam.jfrog.io/ldtteam/modding/'
+            content {
+                includeGroup 'com.ldtteam'
+            }
+        }
+        maven {
             name = 'CurseMaven'
             url = 'https://cursemaven.com'
             content {

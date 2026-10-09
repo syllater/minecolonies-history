@@ -17,13 +17,41 @@ java {
     }
 }
 
+// NeoForge's ModDevGradle configures project-level repositories for the
+// development runtime, so add external mod repositories here (not only in
+// settings.gradle's dependencyResolutionManagement block).
+repositories {
+    maven {
+        name = 'NeoForge'
+        url = uri('https://maven.neoforged.net/releases')
+    }
+    maven {
+        name = 'LDTTeam'
+        url = uri('https://ldtteam.jfrog.io/ldtteam/modding/')
+        content {
+            includeGroup 'com.ldtteam'
+        }
+    }
+    maven {
+        name = 'LDTTeam - Mods Maven'
+        url = uri('https://ldtteam.jfrog.io/ldtteam/mods-maven/')
+        content {
+            includeGroup 'com.ldtteam'
+        }
+    }
+    maven {
+        name = "Jared's Maven"
+        url = uri('https://maven.blamejared.com/')
+    }
+    mavenCentral()
+}
+
 neoForge {
     version = neo_version
 
     runs {
         configureEach {
-            systemProperty 'forge.logging.markers', 'REGISTRIES'
-            logLevel = org.slf4j.event.Level.DEBUG
+            logLevel = org.slf4j.event.Level.INFO
         }
 
         client {
@@ -43,8 +71,30 @@ neoForge {
     }
 }
 
+dependencies {
+    // MineColonies is a required integration target. Compile-only dependencies
+    // provide API types; runtimeOnly makes the actual mods available to runClient.
+    compileOnly "com.ldtteam:minecolonies:${minecolonies_version}"
+    compileOnly "com.ldtteam:structurize:${structurize_version}"
+    compileOnly "com.ldtteam:blockui:${blockui_version}"
+    compileOnly "com.ldtteam:domum-ornamentum:${domum_ornamentum_version}"
+    compileOnly "com.ldtteam:multipiston:${multipiston_version}"
+
+    runtimeOnly "com.ldtteam:minecolonies:${minecolonies_version}"
+    runtimeOnly "com.ldtteam:structurize:${structurize_version}"
+    runtimeOnly "com.ldtteam:blockui:${blockui_version}"
+    runtimeOnly "com.ldtteam:domum-ornamentum:${domum_ornamentum_version}"
+    runtimeOnly "com.ldtteam:multipiston:${multipiston_version}"
+
+    testImplementation "org.junit.jupiter:junit-jupiter:${junit_version}"
+}
+
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
 }
 
 processResources {
