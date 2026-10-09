@@ -44,7 +44,7 @@ public final class ImperiumCommands {
                         .then(Commands.argument("policy", StringArgumentType.word())
                                 .suggests((context, builder) -> SharedSuggestionProvider.suggest(
                                         new String[]{"balanced", "mercantile", "welfare", "austerity"}, builder))
-                                .executes(context -> setPolicy(
+                                 .executes(context -> proposePolicy(
                                         context.getSource(),
                                         StringArgumentType.getString(context, "policy")))))
                 .then(Commands.literal("invest")
@@ -60,6 +60,13 @@ public final class ImperiumCommands {
                                         .executes(context -> proposeTaxRate(
                                                 context.getSource(),
                                                 IntegerArgumentType.getInteger(context, "percent")))))
+                        .then(Commands.literal("propose-policy")
+                                .then(Commands.argument("policy", StringArgumentType.word())
+                                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(
+                                                new String[]{"balanced", "mercantile", "welfare", "austerity"}, builder))
+                                        .executes(context -> proposePolicy(
+                                                context.getSource(),
+                                                StringArgumentType.getString(context, "policy")))))
                         .then(Commands.literal("assent")
                                 .then(Commands.argument("id", LongArgumentType.longArg(1L))
                                         .executes(context -> resolveProposal(
@@ -151,15 +158,20 @@ public final class ImperiumCommands {
         }
 
         for (final ParliamentProposal proposal : proposals) {
+            final Component proposalType = Component.translatable(
+                    "imperium_realms.parliament.type." + proposal.typeId());
             source.sendSuccess(() -> Component.translatable(
                     "imperium_realms.message.parliament_proposal",
                     proposal.id(),
-                    proposal.proposedTaxRate(),
+                    proposalType,
+                    proposal.valueId(),
                     proposal.proposer(),
                     proposal.councilYesVotes(),
                     proposal.councilNoVotes(),
                     proposal.statusId(),
-                    proposal.expiresDay()), false);
+                    proposal.expiresDay(),
+                    proposal.resolvedBy().isBlank() ? "-" : proposal.resolvedBy(),
+                    proposal.resolvedDay()), false);
         }
         source.sendSuccess(() -> Component.translatable(
                 "imperium_realms.message.parliament_instructions"), false);
@@ -178,14 +190,15 @@ public final class ImperiumCommands {
             return denyPermission(source);
         }
 
-        final EmpireState.TaxProposalResolution result =
-                context.state().resolveTaxProposal(proposalId, emperorAssents, currentDay(source));
-        if (result == EmpireState.TaxProposalResolution.NOT_FOUND) {
+        final ParliamentProposal proposal = context.state().findProposal(proposalId).orElse(null);
+        final EmpireState.ProposalResolution result = context.state().resolveProposal(
+                proposalId, emperorAssents, currentDay(source), context.player().getGameProfile().getName());
+        if (result == EmpireState.ProposalResolution.NOT_FOUND) {
             source.sendFailure(Component.translatable(
                     "imperium_realms.message.parliament_proposal_not_found", proposalId));
             return 0;
         }
-        if (result == EmpireState.TaxProposalResolution.ALREADY_RESOLVED) {
+        if (result == EmpireState.ProposalResolution.ALREADY_RESOLVED) {
             source.sendFailure(Component.translatable(
                     "imperium_realms.message.parliament_proposal_closed", proposalId));
             return 0;
@@ -193,10 +206,19 @@ public final class ImperiumCommands {
 
         context.data().markChanged();
         switch (result) {
-            case PASSED -> source.sendSuccess(() -> Component.translatable(
-                    "imperium_realms.message.parliament_proposal_passed",
-                    proposalId,
-                    context.state().taxRatePercent()), true);
+            case PASSED -> {
+                if (proposal != null && proposal.type() == ParliamentProposal.Type.ECONOMIC_POLICY) {
+                    source.sendSuccess(() -> Component.translatable(
+                            "imperium_realms.message.parliament_policy_passed",
+                            proposalId,
+                            context.state().economicPolicy().id()), true);
+                } else {
+                    source.sendSuccess(() -> Component.translatable(
+                            "imperium_realms.message.parliament_proposal_passed",
+                            proposalId,
+                            context.state().taxRatePercent()), true);
+                }
+            }
             case EXPIRED -> source.sendFailure(Component.translatable(
                     "imperium_realms.message.parliament_proposal_expired", proposalId));
             case REJECTED -> {
@@ -211,10 +233,10 @@ public final class ImperiumCommands {
             default -> source.sendFailure(Component.translatable(
                     "imperium_realms.message.parliament_proposal_closed", proposalId));
         }
-        return result == EmpireState.TaxProposalResolution.PASSED ? 1 : 0;
+        return result == EmpireState.ProposalResolution.PASSED ? 1 : 0;
     }
 
-    private static int setPolicy(final CommandSourceStack source, final String requestedPolicy) {
+    private static int proposePolicy(final CommandSourceStack source, final String requestedPolicy) {
         final ColonyContext context = resolveColony(source);
         if (context == null) {
             return 0;
@@ -228,13 +250,25 @@ public final class ImperiumCommands {
             source.sendFailure(Component.translatable("imperium_realms.message.policy_unknown"));
             return 0;
         }
-        if (!context.state().setEconomicPolicy(policy)) {
-            source.sendFailure(Component.translatable("imperium_realms.message.policy_same"));
+        final ParliamentProposal proposal = context.state()
+                .createPolicyProposal(context.player().getGameProfile().getName(), policy, currentDay(source))
+                .orElse(null);
+        if (proposal == null) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.policy_proposal_invalid",
+                    policy.id(),
+                    context.state().economicPolicy().id()));
             return 0;
         }
+
         context.data().markChanged();
         source.sendSuccess(() -> Component.translatable(
-                "imperium_realms.message.policy_changed", policy.id()), true);
+                "imperium_realms.message.policy_proposed",
+                proposal.id(),
+                policy.id(),
+                proposal.councilYesVotes(),
+                proposal.councilNoVotes(),
+                proposal.expiresDay()), true);
         return 1;
     }
 
