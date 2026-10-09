@@ -241,4 +241,29 @@ final class EmpireStateTest {
         assertEquals(5, state.taxRatePercent());
     }
 
+    @Test
+    void liveColonyHappinessChangesStabilityAndLegitimacy() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 16), "Capital", 0L);
+
+        state.collectDailyTaxes(1L, 10L, 5.0);
+        assertEquals(53, state.stability());
+        assertEquals(53, state.legitimacy());
+
+        assertTrue(state.setTaxRatePercent(25));
+        state.collectDailyTaxes(2L, 10L, 0.5);
+        assertEquals(50, state.stability());
+        assertEquals(50, state.legitimacy());
+    }
+
+    @Test
+    void emptyColonyDoesNotGainLegitimacyFromAnEmptyCitizensHappinessFallback() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 17), "Abandoned", 0L);
+
+        state.collectDailyTaxes(1L, 0L, 5.5);
+        assertEquals(48, state.stability());
+        assertEquals(48, state.legitimacy());
+    }
+
 }
