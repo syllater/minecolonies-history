@@ -62,7 +62,7 @@ final class EmpireStateTest {
         assertEquals(10L, state.collectDailyTaxes(1L, 10L));
         assertEquals(10L, state.treasuryCrowns());
         assertEquals(0L, state.collectDailyTaxes(1L, 10L));
-        assertEquals(10L, state.collectDailyTaxes(2L, 10L)); // the method returns this turn's deposit
+        assertEquals(10L, state.collectDailyTaxes(2L, 10L));
         assertEquals(20L, state.treasuryCrowns());
     }
 
@@ -124,5 +124,61 @@ final class EmpireStateTest {
         assertTrue(state.creditTreasury(EmpireState.MAX_TREASURY));
         assertFalse(state.creditTreasury(1L));
         assertEquals(EmpireState.MAX_TREASURY, state.treasuryCrowns());
+    }
+
+    @Test
+    void taxChangesNeedAnEmperorDecisionAndCouncilMajority() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 7), "Capital", 0L);
+        final ParliamentProposal proposal = state.createTaxProposal("Emperor", 10, 0L).orElseThrow();
+
+        assertEquals(0, proposal.councilYesVotes());
+        assertEquals(EmpireState.TaxProposalResolution.REJECTED,
+                state.resolveTaxProposal(proposal.id(), true, 0L));
+        assertEquals(5, state.taxRatePercent());
+        assertEquals(ParliamentProposal.Status.REJECTED, proposal.status());
+    }
+
+    @Test
+    void welfareCanBuildCoalitionForAModestTaxIncrease() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 8), "Capital", 0L);
+        state.setEconomicPolicy(EconomicPolicy.WELFARE);
+        for (long day = 1L; day <= 5L; day++) {
+            state.collectDailyTaxes(day, 0L);
+        }
+        assertEquals(60, state.stability());
+
+        final ParliamentProposal proposal = state.createTaxProposal("Emperor", 6, 5L).orElseThrow();
+        assertEquals(3, proposal.councilYesVotes());
+        assertEquals(EmpireState.TaxProposalResolution.PASSED,
+                state.resolveTaxProposal(proposal.id(), true, 5L));
+        assertEquals(6, state.taxRatePercent());
+    }
+
+    @Test
+    void emperorCanVetoAndProposalsExpire() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 9), "Capital", 0L);
+        final ParliamentProposal vetoed = state.createTaxProposal("Emperor", 4, 0L).orElseThrow();
+        assertEquals(EmpireState.TaxProposalResolution.REJECTED,
+                state.resolveTaxProposal(vetoed.id(), false, 0L));
+        assertEquals(5, state.taxRatePercent());
+
+        final ParliamentProposal expired = state.createTaxProposal("Emperor", 10, 0L).orElseThrow();
+        assertTrue(state.expireParliamentProposals(4L));
+        assertEquals(ParliamentProposal.Status.EXPIRED, expired.status());
+        assertEquals(EmpireState.TaxProposalResolution.ALREADY_RESOLVED,
+                state.resolveTaxProposal(expired.id(), true, 4L));
+    }
+
+    @Test
+    void taxProposalsCannotDuplicateActiveBillsOrChangeTaxImmediately() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 10), "Capital", 0L);
+        assertTrue(state.createTaxProposal("Emperor", 4, 0L).isPresent());
+        assertFalse(state.createTaxProposal("Emperor", 4, 0L).isPresent());
+        assertFalse(state.createTaxProposal("Emperor", 5, 0L).isPresent());
+        assertEquals(5, state.taxRatePercent());
     }
 }

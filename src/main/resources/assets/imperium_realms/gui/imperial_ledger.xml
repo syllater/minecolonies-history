@@ -5,7 +5,7 @@
           label="$(imperium_realms.gui.help)"/>
 
     <button id="status" pos="24 58" size="170 20" label="$(imperium_realms.gui.status)"/>
-    <button id="close" pos="226 58" size="170 20" label="$(imperium_realms.gui.close)"/>
+    <button id="parliament" pos="226 58" size="170 20" label="$(imperium_realms.gui.parliament)"/>
 
     <text id="taxLabel" pos="22 89" size="376 12" color="white"
           label="$(imperium_realms.gui.tax_heading)"/>
@@ -25,7 +25,8 @@
 
     <text id="investLabel" pos="22 185" size="376 12" color="white"
           label="$(imperium_realms.gui.invest_heading)"/>
-    <button id="invest10" pos="22 201" size="88 20" label="$(imperium_realms.gui.invest10)"/>
-    <button id="invest50" pos="114 201" size="88 20" label="$(imperium_realms.gui.invest50)"/>
-    <button id="invest100" pos="206 201" size="88 20" label="$(imperium_realms.gui.invest100)"/>
+    <button id="invest10" pos="22 201" size="80 20" label="$(imperium_realms.gui.invest10)"/>
+    <button id="invest50" pos="106 201" size="80 20" label="$(imperium_realms.gui.invest50)"/>
+    <button id="invest100" pos="190 201" size="80 20" label="$(imperium_realms.gui.invest100)"/>
+    <button id="close" pos="298 201" size="88 20" label="$(imperium_realms.gui.close)"/>
 </window>

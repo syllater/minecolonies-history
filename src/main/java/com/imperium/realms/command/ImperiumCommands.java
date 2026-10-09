@@ -6,9 +6,11 @@ import com.imperium.realms.colony.EconomicPolicy;
 import com.imperium.realms.colony.EmpireState;
 import com.imperium.realms.colony.EmpireStateSavedData;
 import com.imperium.realms.colony.MineColoniesIntegration;
+import com.imperium.realms.colony.ParliamentProposal;
 import com.minecolonies.api.colony.IColony;
 import com.minecolonies.api.colony.permissions.Action;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -20,7 +22,9 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-/** Server-authoritative command interface for the imperial ledger. */
+import java.util.List;
+
+/** Server-authoritative commands for the ledger and first parliament. */
 @EventBusSubscriber(modid = ImperiumRealms.MOD_ID)
 public final class ImperiumCommands {
     private ImperiumCommands() {
@@ -33,7 +37,7 @@ public final class ImperiumCommands {
                         .executes(context -> showStatus(context.getSource())))
                 .then(Commands.literal("tax")
                         .then(Commands.argument("percent", IntegerArgumentType.integer(0, 25))
-                                .executes(context -> setTaxRate(
+                                .executes(context -> proposeTaxRate(
                                         context.getSource(),
                                         IntegerArgumentType.getInteger(context, "percent")))))
                 .then(Commands.literal("policy")
@@ -47,7 +51,27 @@ public final class ImperiumCommands {
                         .then(Commands.argument("crowns", IntegerArgumentType.integer(10, 100_000))
                                 .executes(context -> invest(
                                         context.getSource(),
-                                        IntegerArgumentType.getInteger(context, "crowns"))))));
+                                        IntegerArgumentType.getInteger(context, "crowns")))))
+                .then(Commands.literal("parliament")
+                        .then(Commands.literal("status")
+                                .executes(context -> showParliament(context.getSource())))
+                        .then(Commands.literal("propose-tax")
+                                .then(Commands.argument("percent", IntegerArgumentType.integer(0, 25))
+                                        .executes(context -> proposeTaxRate(
+                                                context.getSource(),
+                                                IntegerArgumentType.getInteger(context, "percent")))))
+                        .then(Commands.literal("assent")
+                                .then(Commands.argument("id", LongArgumentType.longArg(1L))
+                                        .executes(context -> resolveProposal(
+                                                context.getSource(),
+                                                LongArgumentType.getLong(context, "id"),
+                                                true))))
+                        .then(Commands.literal("veto")
+                                .then(Commands.argument("id", LongArgumentType.longArg(1L))
+                                        .executes(context -> resolveProposal(
+                                                context.getSource(),
+                                                LongArgumentType.getLong(context, "id"),
+                                                false))))));
     }
 
     private static int showStatus(final CommandSourceStack source) {
@@ -70,7 +94,11 @@ public final class ImperiumCommands {
         return 1;
     }
 
-    private static int setTaxRate(final CommandSourceStack source, final int rate) {
+    /**
+     * Historical alias retained for the GUI: a tax button now proposes a bill
+     * rather than bypassing the parliamentary process.
+     */
+    private static int proposeTaxRate(final CommandSourceStack source, final int rate) {
         final ColonyContext context = resolveColony(source);
         if (context == null) {
             return 0;
@@ -78,14 +106,112 @@ public final class ImperiumCommands {
         if (!mayManageEconomy(context)) {
             return denyPermission(source);
         }
-        if (!context.state().setTaxRatePercent(rate)) {
-            source.sendFailure(Component.translatable("imperium_realms.message.tax_unchanged"));
+
+        final long day = currentDay(source);
+        final ParliamentProposal proposal = context.state()
+                .createTaxProposal(context.player().getGameProfile().getName(), rate, day)
+                .orElse(null);
+        if (proposal == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.tax_proposal_invalid",
+                    rate, context.state().taxRatePercent()));
             return 0;
         }
+
         context.data().markChanged();
         source.sendSuccess(() -> Component.translatable(
-                "imperium_realms.message.tax_rate", rate, context.state().colonyName()), true);
+                "imperium_realms.message.tax_proposed",
+                proposal.id(),
+                proposal.proposedTaxRate(),
+                proposal.councilYesVotes(),
+                proposal.councilNoVotes(),
+                proposal.expiresDay()), true);
         return 1;
+    }
+
+    private static int showParliament(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) {
+            return 0;
+        }
+
+        final long day = currentDay(source);
+        if (context.state().expireParliamentProposals(day)) {
+            context.data().markChanged();
+        }
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.parliament_header",
+                context.state().colonyName(),
+                context.state().taxRatePercent()), false);
+
+        final List<ParliamentProposal> proposals = context.state().recentParliamentProposals();
+        if (proposals.isEmpty()) {
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.parliament_empty"), false);
+            return 1;
+        }
+
+        for (final ParliamentProposal proposal : proposals) {
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.parliament_proposal",
+                    proposal.id(),
+                    proposal.proposedTaxRate(),
+                    proposal.proposer(),
+                    proposal.councilYesVotes(),
+                    proposal.councilNoVotes(),
+                    proposal.statusId(),
+                    proposal.expiresDay()), false);
+        }
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.parliament_instructions"), false);
+        return 1;
+    }
+
+    private static int resolveProposal(
+            final CommandSourceStack source,
+            final long proposalId,
+            final boolean emperorAssents) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) {
+            return 0;
+        }
+        if (!mayManageEconomy(context)) {
+            return denyPermission(source);
+        }
+
+        final EmpireState.TaxProposalResolution result =
+                context.state().resolveTaxProposal(proposalId, emperorAssents, currentDay(source));
+        if (result == EmpireState.TaxProposalResolution.NOT_FOUND) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.parliament_proposal_not_found", proposalId));
+            return 0;
+        }
+        if (result == EmpireState.TaxProposalResolution.ALREADY_RESOLVED) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.parliament_proposal_closed", proposalId));
+            return 0;
+        }
+
+        context.data().markChanged();
+        switch (result) {
+            case PASSED -> source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.parliament_proposal_passed",
+                    proposalId,
+                    context.state().taxRatePercent()), true);
+            case EXPIRED -> source.sendFailure(Component.translatable(
+                    "imperium_realms.message.parliament_proposal_expired", proposalId));
+            case REJECTED -> {
+                if (emperorAssents) {
+                    source.sendFailure(Component.translatable(
+                            "imperium_realms.message.parliament_no_majority", proposalId));
+                } else {
+                    source.sendSuccess(() -> Component.translatable(
+                            "imperium_realms.message.parliament_vetoed", proposalId), true);
+                }
+            }
+            default -> source.sendFailure(Component.translatable(
+                    "imperium_realms.message.parliament_proposal_closed", proposalId));
+        }
+        return result == EmpireState.TaxProposalResolution.PASSED ? 1 : 0;
     }
 
     private static int setPolicy(final CommandSourceStack source, final String requestedPolicy) {
@@ -136,6 +262,10 @@ public final class ImperiumCommands {
                 points,
                 context.state().treasuryCrowns()), true);
         return 1;
+    }
+
+    private static long currentDay(final CommandSourceStack source) {
+        return Math.max(0L, Math.floorDiv(source.getServer().overworld().getGameTime(), 24_000L));
     }
 
     private static boolean mayManageEconomy(final ColonyContext context) {

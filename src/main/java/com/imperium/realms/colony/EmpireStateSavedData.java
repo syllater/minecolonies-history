@@ -11,17 +11,14 @@ import net.minecraft.world.level.saveddata.SavedData;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * Global Imperium registry stored in the server overworld. Records use
- * dimension + MineColonies colony ID, so same-number colonies in different
- * dimensions never collide.
- */
+/** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 2;
+    private static final int SCHEMA_VERSION = 3;
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -47,7 +44,7 @@ public final class EmpireStateSavedData extends SavedData {
                 ? root.getInt(TAG_SCHEMA_VERSION)
                 : 0;
 
-        if (savedSchema < SCHEMA_VERSION || savedSchema > SCHEMA_VERSION) {
+        if (savedSchema != SCHEMA_VERSION) {
             data.setDirty();
         }
 
@@ -66,6 +63,19 @@ public final class EmpireStateSavedData extends SavedData {
                 final long lastSeen = Math.max(firstSeen, entry.getLong("last_seen"));
                 final EconomicPolicy policy = EconomicPolicy.fromId(entry.getString("economic_policy"))
                         .orElse(EconomicPolicy.BALANCED);
+
+                final List<ParliamentProposal> proposals = new ArrayList<>();
+                if (entry.contains("parliament_proposals", Tag.TAG_LIST)) {
+                    final ListTag savedProposals = entry.getList("parliament_proposals", Tag.TAG_COMPOUND);
+                    for (int proposalIndex = 0; proposalIndex < savedProposals.size(); proposalIndex++) {
+                        try {
+                            proposals.add(ParliamentProposal.fromNbt(savedProposals.getCompound(proposalIndex)));
+                        } catch (IllegalArgumentException ignored) {
+                            // Ignore one malformed bill without losing the colony's economy.
+                        }
+                    }
+                }
+
                 final EmpireState state = new EmpireState(
                         identity,
                         entry.getString("colony_name"),
@@ -77,7 +87,9 @@ public final class EmpireStateSavedData extends SavedData {
                         entry.getLong("knowledge_points"),
                         entry.contains("stability") ? entry.getInt("stability") : 50,
                         entry.contains("last_tax_day") ? entry.getLong("last_tax_day") : -1L,
-                        entry.contains("last_scholar_work_tick") ? entry.getLong("last_scholar_work_tick") : -1L);
+                        entry.contains("last_scholar_work_tick") ? entry.getLong("last_scholar_work_tick") : -1L,
+                        entry.contains("next_proposal_id") ? entry.getLong("next_proposal_id") : 1L,
+                        proposals);
                 data.colonies.put(identity, state);
             } catch (IllegalArgumentException exception) {
                 // Skip malformed records instead of failing the whole world load.
@@ -94,12 +106,7 @@ public final class EmpireStateSavedData extends SavedData {
         return new ArrayList<>(colonies.values());
     }
 
-    /**
-     * Insert defaults for a first observation and refresh only metadata on later
-     * scans. This is safe to run repeatedly for old and new MineColonies saves.
-     *
-     * @return true only when a new record was inserted.
-     */
+    /** Idempotently create a record for a first observation or refresh metadata. */
     public boolean observeColony(
             final ColonyIdentity identity,
             final String colonyName,
@@ -139,6 +146,13 @@ public final class EmpireStateSavedData extends SavedData {
             entry.putInt("stability", state.stability());
             entry.putLong("last_tax_day", state.lastTaxDay());
             entry.putLong("last_scholar_work_tick", state.lastScholarWorkTick());
+            entry.putLong("next_proposal_id", state.nextProposalId());
+
+            final ListTag proposals = new ListTag();
+            for (final ParliamentProposal proposal : state.recentParliamentProposals()) {
+                proposals.add(proposal.save());
+            }
+            entry.put("parliament_proposals", proposals);
             entries.add(entry);
         }
         root.put(TAG_COLONIES, entries);
