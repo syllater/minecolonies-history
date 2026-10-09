@@ -283,11 +283,9 @@ def write_png(path: Path) -> None:
 
 
 def main() -> int:
-    if len(sys.argv) != 3:
-        print("Usage: generate_blueprints.py <output-resource-root> <unused>", file=sys.stderr)
-        # The second argument is intentionally kept for Gradle task compatibility.
-        if len(sys.argv) < 2:
-            return 2
+    if len(sys.argv) != 2:
+        print("Usage: generate_blueprints.py <output-resource-root>", file=sys.stderr)
+        return 2
     output_root = Path(sys.argv[1])
     pack_root = output_root / "blueprints" / MOD_ID / PACK_NAME
     archive_dir = pack_root / "buildings" / "imperial_archive"
