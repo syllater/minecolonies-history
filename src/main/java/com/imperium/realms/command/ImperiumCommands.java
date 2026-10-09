@@ -52,6 +52,14 @@ public final class ImperiumCommands {
                                 .executes(context -> invest(
                                         context.getSource(),
                                         IntegerArgumentType.getInteger(context, "crowns")))))
+                .then(Commands.literal("diplomacy")
+                        .then(Commands.literal("status")
+                                .executes(context -> showDiplomacy(context.getSource())))
+                        .then(Commands.literal("improve")
+                                .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                        .executes(context -> improveDiplomacy(
+                                                context.getSource(),
+                                                IntegerArgumentType.getInteger(context, "colonyId"))))))
                 .then(Commands.literal("parliament")
                         .then(Commands.literal("status")
                                 .executes(context -> showParliament(context.getSource())))
@@ -297,6 +305,91 @@ public final class ImperiumCommands {
                 crowns,
                 points,
                 context.state().treasuryCrowns()), true);
+        return 1;
+    }
+
+    private static int showDiplomacy(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) {
+            return 0;
+        }
+
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.diplomacy_header",
+                context.state().colonyName(),
+                context.state().diplomaticInfluence()), false);
+
+        final var relations = context.state().diplomaticRelations();
+        if (relations.isEmpty()) {
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.diplomacy_empty"), false);
+        } else {
+            relations.forEach((target, score) -> {
+                final Component status = Component.translatable(
+                        "imperium_realms.diplomacy.relation."
+                                + EmpireState.relationStatusId(score));
+                source.sendSuccess(() -> Component.translatable(
+                        "imperium_realms.message.diplomacy_relation",
+                        target.dimensionId(),
+                        target.colonyId(),
+                        score,
+                        status), false);
+            });
+        }
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.diplomacy_instructions"), false);
+        return 1;
+    }
+
+    private static int improveDiplomacy(final CommandSourceStack source, final int targetColonyId) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) {
+            return 0;
+        }
+        if (!mayManageEconomy(context)) {
+            return denyPermission(source);
+        }
+
+        final IColony target = MineColoniesIntegration
+                .colonyById(context.player().serverLevel(), targetColonyId).orElse(null);
+        if (target == null) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.diplomacy_target_missing", targetColonyId));
+            return 0;
+        }
+
+        final ColonyIdentity targetIdentity = ColonyIdentity.from(target);
+        if (context.state().identity().equals(targetIdentity)) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.diplomacy_self_target"));
+            return 0;
+        }
+        if (context.state().diplomaticInfluence() < 10L) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.diplomacy_influence_insufficient"));
+            return 0;
+        }
+        if (context.state().relationScore(targetIdentity) >= 100) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.diplomacy_relation_max", target.getName()));
+            return 0;
+        }
+        if (!context.state().improveDiplomaticRelations(targetIdentity)) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.diplomacy_improve_failed"));
+            return 0;
+        }
+
+        context.data().markChanged();
+        final int score = context.state().relationScore(targetIdentity);
+        final Component status = Component.translatable(
+                "imperium_realms.diplomacy.relation." + EmpireState.relationStatusId(score));
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.diplomacy_improved",
+                target.getName(),
+                status,
+                score,
+                context.state().diplomaticInfluence()), true);
         return 1;
     }
 
