@@ -38,6 +38,14 @@ public final class EmpireState {
         REVOLT
     }
 
+    public enum MilitaryDiscipline {
+        SIEGE_ENGINEERING,
+        FIELD_MEDICINE,
+        CAVALRY_DRILL
+    }
+
+    public static final long MAX_MILITARY_TRAINING_POINTS = 1_000L;
+
     private static final String[] FACTION_IDS = {"merchants", "commons", "nobility", "scholars"};
 
     private final ColonyIdentity identity;
@@ -62,6 +70,9 @@ public final class EmpireState {
     private int unrest;
     private CivicDisorder civicDisorder = CivicDisorder.CALM;
     private long lastCivicDisorderChangeDay = -1L;
+    private long siegeEngineeringPoints;
+    private long fieldMedicinePoints;
+    private long cavalryDrillPoints;
 
     private long nextProposalId = 1L;
     private final List<ParliamentProposal> parliamentProposals = new ArrayList<>();
@@ -331,6 +342,60 @@ public final class EmpireState {
 
     public long lastCivicDisorderChangeDay() {
         return lastCivicDisorderChangeDay;
+    }
+
+    public long siegeEngineeringPoints() {
+        return siegeEngineeringPoints;
+    }
+
+    public long fieldMedicinePoints() {
+        return fieldMedicinePoints;
+    }
+
+    public long cavalryDrillPoints() {
+        return cavalryDrillPoints;
+    }
+
+    /**
+     * Records one guard level-up as specialist military training. Each discipline
+     * has its own persistent cap and is credited only on the logical server.
+     *
+     * @return true if the score changed.
+     */
+    public boolean recordMilitaryTraining(final MilitaryDiscipline discipline) {
+        Objects.requireNonNull(discipline, "discipline");
+        return switch (discipline) {
+            case SIEGE_ENGINEERING -> {
+                if (siegeEngineeringPoints >= MAX_MILITARY_TRAINING_POINTS) {
+                    yield false;
+                }
+                siegeEngineeringPoints++;
+                yield true;
+            }
+            case FIELD_MEDICINE -> {
+                if (fieldMedicinePoints >= MAX_MILITARY_TRAINING_POINTS) {
+                    yield false;
+                }
+                fieldMedicinePoints++;
+                yield true;
+            }
+            case CAVALRY_DRILL -> {
+                if (cavalryDrillPoints >= MAX_MILITARY_TRAINING_POINTS) {
+                    yield false;
+                }
+                cavalryDrillPoints++;
+                yield true;
+            }
+        };
+    }
+
+    void restoreMilitaryTraining(
+            final long siegeEngineering,
+            final long fieldMedicine,
+            final long cavalryDrill) {
+        siegeEngineeringPoints = clamp(siegeEngineering, 0L, MAX_MILITARY_TRAINING_POINTS);
+        fieldMedicinePoints = clamp(fieldMedicine, 0L, MAX_MILITARY_TRAINING_POINTS);
+        cavalryDrillPoints = clamp(cavalryDrill, 0L, MAX_MILITARY_TRAINING_POINTS);
     }
 
     /**
