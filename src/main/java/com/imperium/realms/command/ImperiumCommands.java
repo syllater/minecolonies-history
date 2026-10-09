@@ -20,10 +20,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
-/**
- * First playable command interface for the empire ledger. All financial and
- * policy operations resolve the player's MineColonies colony on the server.
- */
+/** Server-authoritative command interface for the imperial ledger. */
 @EventBusSubscriber(modid = ImperiumRealms.MOD_ID)
 public final class ImperiumCommands {
     private ImperiumCommands() {
@@ -61,15 +58,15 @@ public final class ImperiumCommands {
 
         final EmpireState state = context.state();
         final int population = context.colony().getCitizenManager().getCitizens().size();
-        source.sendSuccess(() -> Component.literal(
-                "§6Imperial Ledger — " + state.colonyName()
-                        + " §7| §eTreasury: §f" + state.treasuryCrowns() + " crowns"
-                        + " §7| §ePopulation: §f" + population
-                        + " §7| §eTax: §f" + state.taxRatePercent() + "%"
-                        + " §7| §ePolicy: §f" + state.economicPolicy().id()
-                        + " §7| §eKnowledge: §f" + state.knowledgePoints()
-                        + " §7| §eStability: §f" + state.stability() + "/100"),
-                false);
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.status",
+                state.colonyName(),
+                state.treasuryCrowns(),
+                population,
+                state.taxRatePercent(),
+                state.economicPolicy().id(),
+                state.knowledgePoints(),
+                state.stability()), false);
         return 1;
     }
 
@@ -82,12 +79,12 @@ public final class ImperiumCommands {
             return denyPermission(source);
         }
         if (!context.state().setTaxRatePercent(rate)) {
-            source.sendFailure(Component.literal("Tax rate unchanged. Choose a rate from 0 to 25 percent."));
+            source.sendFailure(Component.translatable("imperium_realms.message.tax_unchanged"));
             return 0;
         }
         context.data().markChanged();
-        source.sendSuccess(() -> Component.literal("Tax rate set to " + rate + "% for "
-                + context.state().colonyName() + "."), true);
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.tax_rate", rate, context.state().colonyName()), true);
         return 1;
     }
 
@@ -102,17 +99,16 @@ public final class ImperiumCommands {
 
         final EconomicPolicy policy = EconomicPolicy.fromId(requestedPolicy).orElse(null);
         if (policy == null) {
-            source.sendFailure(Component.literal(
-                    "Unknown policy. Choose balanced, mercantile, welfare, or austerity."));
+            source.sendFailure(Component.translatable("imperium_realms.message.policy_unknown"));
             return 0;
         }
         if (!context.state().setEconomicPolicy(policy)) {
-            source.sendFailure(Component.literal("That policy is already active."));
+            source.sendFailure(Component.translatable("imperium_realms.message.policy_same"));
             return 0;
         }
         context.data().markChanged();
-        source.sendSuccess(() -> Component.literal("Economic policy changed to "
-                + policy.id() + ". Its tax and stability effects apply on the next daily turn."), true);
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.policy_changed", policy.id()), true);
         return 1;
     }
 
@@ -125,18 +121,20 @@ public final class ImperiumCommands {
             return denyPermission(source);
         }
         if (crowns % 10 != 0) {
-            source.sendFailure(Component.literal("Investments must be a multiple of 10 crowns."));
+            source.sendFailure(Component.translatable("imperium_realms.message.invest_multiple"));
             return 0;
         }
         if (!context.state().investInKnowledge(crowns)) {
-            source.sendFailure(Component.literal("The treasury does not contain enough crowns."));
+            source.sendFailure(Component.translatable("imperium_realms.message.treasury_insufficient"));
             return 0;
         }
         context.data().markChanged();
         final long points = crowns / 10L;
-        source.sendSuccess(() -> Component.literal("Invested " + crowns + " crowns into "
-                + points + " knowledge point(s). Treasury balance: "
-                + context.state().treasuryCrowns() + " crowns."), true);
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.invest_success",
+                crowns,
+                points,
+                context.state().treasuryCrowns()), true);
         return 1;
     }
 
@@ -147,22 +145,20 @@ public final class ImperiumCommands {
     }
 
     private static int denyPermission(final CommandSourceStack source) {
-        source.sendFailure(Component.literal(
-                "You need colony hut-management permission or operator permission to change the imperial economy."));
+        source.sendFailure(Component.translatable("imperium_realms.message.permission_denied"));
         return 0;
     }
 
     private static ColonyContext resolveColony(final CommandSourceStack source) {
         if (!(source.getEntity() instanceof ServerPlayer player)) {
-            source.sendFailure(Component.literal("This command must be used by a player in a MineColonies colony."));
+            source.sendFailure(Component.translatable("imperium_realms.message.player_required"));
             return null;
         }
 
         final ServerLevel level = player.serverLevel();
         final IColony colony = MineColoniesIntegration.colonyAt(level, player.blockPosition()).orElse(null);
         if (colony == null) {
-            source.sendFailure(Component.literal(
-                    "Stand inside a MineColonies colony to access its imperial ledger."));
+            source.sendFailure(Component.translatable("imperium_realms.message.enter_colony"));
             return null;
         }
 
@@ -171,7 +167,7 @@ public final class ImperiumCommands {
         data.observeColony(identity, colony.getName(), level.getGameTime());
         final EmpireState state = data.get(identity).orElse(null);
         if (state == null) {
-            source.sendFailure(Component.literal("The imperial ledger could not initialize for this colony."));
+            source.sendFailure(Component.translatable("imperium_realms.message.ledger_missing"));
             return null;
         }
         return new ColonyContext(player, colony, data, state);
