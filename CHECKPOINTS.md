@@ -1,50 +1,47 @@
 # Checkpoints
 
-## 2026-10-09 — Milestone 2 API Investigation
+## 2026-10-09 — Milestone 2 implementation checkpoint
 
-### Repository
+### Branch
 
-- Repository: https://github.com/syllater/minecolonies-history
-- Branch created: `milestone-2/colony-integration`
-- The GitHub connection provides GitHub API file operations, not local shell execution.
+`milestone-2/colony-integration`
 
-### Upstream API inspection
+### Implemented files
 
-Inspected public source files:
-- MineColonies `IMinecoloniesAPI.java`:
-  https://github.com/ldtteam/MineColonies/blob/version/main/src/main/java/com/minecolonies/api/IMinecoloniesAPI.java
-- MineColonies `IColonyManager.java`:
-  https://github.com/ldtteam/MineColonies/blob/version/main/src/main/java/com/minecolonies/api/colony/IColonyManager.java
-- MineColonies `IColony.java`:
-  https://github.com/ldtteam/MineColonies/blob/version/main/src/main/java/com/minecolonies/api/colony/IColony.java
-- MineColonies `ICitizenData.java`:
-  https://github.com/ldtteam/MineColonies/blob/version/main/src/main/java/com/minecolonies/api/colony/ICitizenData.java
-- MineColonies `IJob.java`:
-  https://github.com/ldtteam/MineColonies/blob/version/main/src/main/java/com/minecolonies/api/colony/jobs/IJob.java
-- MineColonies `BuildingEntry.java` and `JobEntry.java`:
-  public builder APIs inspected.
+- `src/main/java/com/imperium/realms/colony/ColonyIdentity.java`
+- `src/main/java/com/imperium/realms/colony/EmpireState.java`
+- `src/main/java/com/imperium/realms/colony/EmpireStateSavedData.java`
+- `src/main/java/com/imperium/realms/colony/MineColoniesIntegration.java`
+- `src/main/java/com/imperium/realms/colony/MineColoniesLifecycleEvents.java`
+- `src/test/java/com/imperium/realms/colony/ColonyIdentityTest.java`
+- `src/test/java/com/imperium/realms/colony/EmpireStateTest.java`
 
-### Confirmed API patterns
+### Build configuration
 
-- Use `IMinecoloniesAPI.getInstance().getColonyManager()` for the manager.
-- For server-side world and position lookups, `IColonyManager.getColonyByPosFromWorld(Level, BlockPos)` is available.
-- `IColonyManager.getColonyByWorld(int, Level)` and `getColonies(Level)` are available.
-- `IColony` exposes `getID()`, `getName()`, `getCenter()`, `getWorld()`, `getCitizenManager()` and `markDirty()`.
-- `ICitizenData` exposes job/workbuilding/happiness APIs.
-- Job and building entries use explicit producer/view-producer builders; full MineColonies job/building integrations require complete registration and implementation, not only one entry.
+- Added LDTTeam Maven repository.
+- Pinned candidate MineColonies/Structurize/BlockUI/Domum Ornamentum/MultiPiston dependencies.
+- Added JUnit 5 test dependencies and JUnit Platform configuration.
+- Added `.github/workflows/verify.yml` to build/test on pushes, pull requests and manual workflow dispatch; successful builds upload the mod JAR as an artifact.
 
-### Dependency release evidence
+### API evidence
 
-- MineColonies 1.21.1 release `v1.21.1-1.1.1403` lists Structurize, MultiPiston, BlockUI and Domum Ornamentum as required dependencies.
-- Structurize has a visible 1.21.1 release `v1.21.1-1.0.835-snapshot`.
-- BlockUI has a visible 1.21.1 snapshot `v1.21.1-1.0.212-snapshot`.
+Inspected the API from MineColonies tag `v1.21.1-1.1.1403`, in particular the public `IColonyManager` lookups and `IColony` identity/name/world methods.
 
-### Verification status
+### Test status
 
-- This checkpoint records source inspection only.
-- No compilation/test/run was possible from the GitHub-only tool interface.
-- Do not represent the implementation or this milestone as complete.
+- Unit tests are written but have not been executed from this environment.
+- Gradle dependency resolution has not yet been verified.
+- The mod JAR has not yet been built in this session.
+- `./gradlew runClient` has not yet been executed in this session.
+
+### Architectural notes
+
+- Empire records use dimension ID + colony ID.
+- Persist custom state in Imperium-owned world SavedData.
+- Store records in overworld storage to support cross-dimension identity without record collisions.
+- Periodic discovery is idempotent and does not reset an existing empire record.
+- No MineColonies private NBT modification or mixins have been introduced.
 
 ### Next
 
-Add the narrow colony integration adapter and world-scoped persistence code, then run Gradle in a local or shell-enabled checkout before treating the milestone as complete.
+Inspect the GitHub Actions run for this branch, fix any real failures, then perform a save/reload verification in a local game or suitable test environment. Do not mark Milestone 2 complete without that evidence.
