@@ -35,6 +35,7 @@ public final class EmpireState {
     private EconomicPolicy economicPolicy = EconomicPolicy.BALANCED;
     private long knowledgePoints;
     private int stability = 50;
+    private int legitimacy = 50;
     private long lastTaxDay = -1L;
     private long lastScholarWorkTick = -1L;
 
@@ -81,6 +82,26 @@ public final class EmpireState {
             final long lastScholarWorkTick,
             final long nextProposalId,
             final List<ParliamentProposal> loadedProposals) {
+        this(identity, colonyName, firstSeenGameTime, lastSeenGameTime, treasuryCrowns,
+                taxRatePercent, economicPolicy, knowledgePoints, stability, lastTaxDay,
+                lastScholarWorkTick, nextProposalId, loadedProposals, 50);
+    }
+
+    EmpireState(
+            final ColonyIdentity identity,
+            final String colonyName,
+            final long firstSeenGameTime,
+            final long lastSeenGameTime,
+            final long treasuryCrowns,
+            final int taxRatePercent,
+            final EconomicPolicy economicPolicy,
+            final long knowledgePoints,
+            final int stability,
+            final long lastTaxDay,
+            final long lastScholarWorkTick,
+            final long nextProposalId,
+            final List<ParliamentProposal> loadedProposals,
+            final int legitimacy) {
         this.identity = Objects.requireNonNull(identity, "identity");
         this.colonyName = normalizeName(colonyName);
         this.firstSeenGameTime = Math.max(0L, firstSeenGameTime);
@@ -90,6 +111,7 @@ public final class EmpireState {
         this.economicPolicy = Objects.requireNonNullElse(economicPolicy, EconomicPolicy.BALANCED);
         this.knowledgePoints = Math.max(0L, knowledgePoints);
         this.stability = clamp(stability, 0, 100);
+        this.legitimacy = clamp(legitimacy, 0, 100);
         this.lastTaxDay = lastTaxDay;
         this.lastScholarWorkTick = lastScholarWorkTick;
         this.nextProposalId = Math.max(1L, nextProposalId);
@@ -141,6 +163,11 @@ public final class EmpireState {
 
     public int stability() {
         return stability;
+    }
+
+    /** Public confidence in the government's right to rule, influenced by citizen conditions. */
+    public int legitimacy() {
+        return legitimacy;
     }
 
     public long lastTaxDay() {
@@ -249,16 +276,39 @@ public final class EmpireState {
     }
 
     /**
-     * Processes one day of tax. The return value is the amount collected this turn.
+     * Compatibility overload for simulations/tests without a MineColonies
+     * happiness reading. The live integration uses the three-argument method.
      */
     public long collectDailyTaxes(final long dayIndex, final long population) {
+        return collectDailyTaxes(dayIndex, population, Double.NaN);
+    }
+
+    /**
+     * Processes one day of tax and updates political stability/legitimacy from
+     * MineColonies' overall happiness. MineColonies reports happiness on a
+     * roughly 0–5.5 scale; NaN means no reading is available.
+     *
+     * @return crowns collected this turn.
+     */
+    public long collectDailyTaxes(
+            final long dayIndex,
+            final long population,
+            final double overallHappiness) {
         expireParliamentProposals(dayIndex);
         if (dayIndex <= lastTaxDay) {
             return 0L;
         }
 
         lastTaxDay = dayIndex;
-        stability = clamp(stability + economicPolicy.dailyStabilityChange(), 0, 100);
+        int stabilityChange = economicPolicy.dailyStabilityChange();
+        if (Double.isFinite(overallHappiness)) {
+            final int citizenApprovalChange = citizenApprovalChange(population, overallHappiness);
+            final int taxBurdenChange = population <= 0L ? 0
+                    : taxRatePercent >= 20 ? -1 : taxRatePercent <= 5 ? 1 : 0;
+            stabilityChange += citizenApprovalChange + taxBurdenChange;
+            legitimacy = clamp(legitimacy + citizenApprovalChange + taxBurdenChange, 0, 100);
+        }
+        stability = clamp(stability + stabilityChange, 0, 100);
 
         final long safePopulation = Math.max(0L, Math.min(population, 1_000_000L));
         final long taxableBase = (safePopulation * taxRatePercent) / 5L;
@@ -403,6 +453,26 @@ public final class EmpireState {
             return "Unnamed colony";
         }
         return name.trim();
+    }
+
+    private static int citizenApprovalChange(final long population, final double overallHappiness) {
+        if (population <= 0L) {
+            return -2;
+        }
+        final double happiness = Math.max(0.0, Math.min(5.5, overallHappiness));
+        if (happiness >= 4.5) {
+            return 2;
+        }
+        if (happiness >= 3.5) {
+            return 1;
+        }
+        if (happiness >= 2.5) {
+            return 0;
+        }
+        if (happiness >= 1.5) {
+            return -1;
+        }
+        return -2;
     }
 
     private static int clamp(final int value, final int min, final int max) {
