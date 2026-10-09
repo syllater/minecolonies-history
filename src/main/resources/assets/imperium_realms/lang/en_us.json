@@ -30,7 +30,7 @@
   "imperium_realms.message.player_required": "This command must be used by a player in a MineColonies colony.",
   "imperium_realms.message.enter_colony": "Stand inside a MineColonies colony to access its imperial ledger.",
   "imperium_realms.message.ledger_missing": "The imperial ledger could not initialize for this colony.",
-  "imperium_realms.message.status": "§6Imperial Ledger — %1$s §7| §eTreasury: §f%2$d crowns §7| §ePopulation: §f%3$d §7| §eTax: §f%4$d%% §7| §ePolicy: §f%5$s §7| §eKnowledge: §f%6$d §7| §eStability: §f%7$d/100 §7| §eLegitimacy: §f%8$d/100 §7| §eTax efficiency: §f%9$d%% §7| §eDiplomatic influence: §f%10$d",
+  "imperium_realms.message.status": "§6Imperial Ledger — %1$s §7| §eTreasury: §f%2$d crowns §7| §ePopulation: §f%3$d §7| §eTax: §f%4$d%% §7| §ePolicy: §f%5$s §7| §eKnowledge: §f%6$d §7| §eStability: §f%7$d/100 §7| §eLegitimacy: §f%8$d/100 §7| §eTax efficiency: §f%9$d%% §7| §eDiplomatic influence: §f%10$d §7| §eUnrest: §f%11$d/100 (%12$s)",
   "imperium_realms.message.tax_unchanged": "Tax rate unchanged. Choose a rate from 0 to 25 percent.",
   "imperium_realms.message.tax_rate": "Tax rate set to %1$d%% for %2$s.",
   "imperium_realms.message.tax_proposal_invalid": "Cannot propose %1$d%% tax: the rate is invalid, already active, or an identical open proposal exists. Current rate: %2$d%%.",
@@ -74,5 +74,15 @@
   "imperium_realms.diplomacy.relation.cordial": "Cordial",
   "imperium_realms.diplomacy.relation.neutral": "Neutral",
   "imperium_realms.diplomacy.relation.unfriendly": "Unfriendly",
-  "imperium_realms.diplomacy.relation.hostile": "Hostile"
+  "imperium_realms.diplomacy.relation.hostile": "Hostile",
+  "imperium_realms.message.politics_header": "§6Politics — %1$s §7| Stability: §f%2$d/100 §7| Legitimacy: §f%3$d/100 §7| Unrest: §f%4$d/100 §7| Civic state: §f%5$s",
+  "imperium_realms.message.faction_approval": "§e%1$s approval: §f%2$d/100",
+  "imperium_realms.message.politics_help": "Use /imperium politics to review faction approval. Lower taxes, citizen happiness and Welfare policy can reduce unrest over time. Strikes halve tax income; revolts reduce it to 10%.",
+  "imperium_realms.faction.merchants": "Merchants",
+  "imperium_realms.faction.commons": "Commoners",
+  "imperium_realms.faction.nobility": "Nobility",
+  "imperium_realms.faction.scholars": "Scholars",
+  "imperium_realms.civic_disorder.calm": "Calm",
+  "imperium_realms.civic_disorder.strike": "General strike",
+  "imperium_realms.civic_disorder.revolt": "Revolt"
 }
