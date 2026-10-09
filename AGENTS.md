@@ -3,32 +3,35 @@
 ## Session Start
 
 1. Read `AGENTS.md`, `PROJECT_GOAL.md`, `ROADMAP.md`, `STATUS.md`, `DECISIONS.md`, and `CHECKPOINTS.md`.
-2. Inspect current repository state and branch.
-3. Review the latest checkpoint and verify its claims against current files.
-4. Identify the next uncompleted task in the active milestone.
-5. Make targeted changes without overwriting user work.
-6. Run the smallest relevant check, then wider checks when possible.
-7. Record only actual command/test results.
-8. Update status and checkpoints after each task group.
+2. Inspect the current branch and recent workflow results.
+3. Preserve all existing and concurrent repository changes.
+4. Choose the next incomplete task that advances the playable mod.
+5. Make coherent batches of changes and run relevant checks through CI.
+6. Update status and checkpoints with actual evidence after each task group.
+7. Continue to subsequent milestones without stopping for separate approval after every milestone; the owner has explicitly authorized continuous progression.
 
 ## Development Rules
 
 - Preserve existing user work.
-- Do not use destructive Git commands without explicit approval.
+- Do not use destructive Git operations without explicit approval.
 - Use pinned dependency versions for release builds.
 - Verify APIs against the exact target dependency version.
-- MineColonies is mandatory; never silently replace it with a standalone simulation.
-- Keep gameplay server-authoritative.
-- Keep client-only code out of server paths.
-- Prefer public extension APIs and events over mixins.
-- Do not disable tests or add fake implementations to make a build appear successful.
-- Never claim a build, test or client launch succeeded unless it was actually executed.
-- Request approval after each milestone.
+- MineColonies is mandatory; never replace it with a standalone simulation.
+- Keep gameplay and SavedData writes server-authoritative.
+- Keep client-only code out of dedicated-server paths.
+- Prefer public APIs and events over mixins.
+- Do not disable tests or add fake stubs to make a build appear complete.
+- Never claim a build, test, JAR or client launch succeeded unless actual workflow evidence supports it.
+- Maintain English and Dutch translations for all player-visible strings.
+- Do not require external AI API keys.
+- Add resume-ready checkpoints so the next session can continue without rediscovering context.
 
-## Milestone Gate
+## Active Build Target
 
-Active gate: **Milestone 2 — MineColonies Integration**.
+Minecraft 1.21.1, NeoForge 21.1.x, Java 21, MineColonies required at runtime.
 
-Within this milestone, implement the public colony lookup adapter and Imperium-owned saved state; add verification tests; verify dependency resolution and compile in an environment with shell access. Do not start Milestone 3 until the Milestone 2 acceptance criteria are documented and user approval is obtained.
+## Continuous Development Plan
 
-The GitHub-only tool interface can read and write source files but cannot itself execute a local Gradle shell. Where direct execution is unavailable, use repository CI if configured and otherwise record the verification as pending.
+Continue fixing current CI/runtime issues, then build the next playable slice. Prioritize complete systems and a real MineColonies integration over broad but nonfunctional placeholders. The intended order is economy and politics, complete custom professions/buildings, then military, level-based structures, multiplayer/save-load hardening and release verification.
+
+The GitHub connector can edit files and read CI, but it does not provide a local Gradle shell in this environment. Use CI when available and document any remaining verification gap honestly.

@@ -2,57 +2,82 @@
 
 ## Milestone 0 — Repository and Compatibility
 
-Status: minimal NeoForge baseline exists. Dependency metadata and relevant MineColonies API declarations have been inspected against the exact 1.21.1 release source tag. Dependency resolution/build verification is now delegated to the newly added GitHub Actions build workflow.
+Status: baseline and pinned 1.21.1 dependency source inspection complete. Gradle/CI results are tracked in the active workflow runs.
 
 ## Milestone 1 — Technical Foundation
 
-Status: baseline entrypoint, Gradle metadata, English/Dutch starter language files, CI build workflow and JUnit test infrastructure exist. This remains a minimal foundation; there are no gameplay buildings or professions yet.
+Status: NeoForge entrypoint, Gradle configuration, translations, JUnit infrastructure and CI workflow exist.
 
 ## Milestone 2 — MineColonies Integration
 
-Implemented on branch `milestone-2/colony-integration`:
-- Public API adapter for server-side colony lookup at a world position.
-- Identity model keyed by dimension ID + MineColonies colony ID.
-- Imperium-owned, overworld SavedData for records across all dimensions.
-- Idempotent first-observation of loaded colonies.
-- Periodic server-side discovery of colonies in each ticking server level.
-- Safe observation updates that do not reset first-seen time or overwrite the entire record.
-- Schema-versioned serialized records.
-- Unit tests for identity validation and basic first-seen/observation rules.
-- Required runtime metadata and development dependencies for MineColonies, Structurize, BlockUI, Domum Ornamentum and MultiPiston.
-- GitHub Actions workflow intended to compile, test and upload the JAR.
+Implemented:
+- Public API adapter for server-side colony lookup by world position.
+- Stable identity keyed by dimension ID + MineColonies colony ID.
+- Imperium-owned SavedData in overworld storage for colonies in all dimensions.
+- Idempotent reconciliation for existing and new colonies.
+- Unit tests for identity and core state observation.
+- Required MineColonies dependency family and runtime metadata.
 
-Not claimed complete yet:
-- The branch must pass the remote Gradle build and tests.
-- The code has not been launched in Minecraft in this session.
-- No custom MineColonies worker or hut has been implemented in this milestone.
-- SavedData load/save behaviour still needs runtime or focused integration verification.
+Remaining verification:
+- Client smoke CI must pass; earlier client smoke failure was caused by the absence of an OpenAL device in headless CI, not a MineColonies mod-loading exception.
+- Persistence has not yet been tested against a real player-created world and save/reload.
 
-Acceptance:
-- Dependency resolution succeeds on the actual Gradle build.
-- Code compiles against the pinned 1.21.1 artifacts.
-- Tests pass.
-- Server-side colony lookup and scanning work.
-- Existing records are not reset on repeated scans.
-- Imperium data is saved independently of MineColonies internal NBT.
-- Build creates the mod JAR.
+## Milestone 3 — Initial Economy and Policies
 
-## Milestone 3 — First Playable Vertical Slice
+Implemented on `milestone-3/imperial-economy`:
+- Persistent treasury, tax rate, chosen policy, and last collection day.
+- Daily-unique tax collection with policy upkeep and non-negative treasury.
+- Server-authoritative `/imperium` commands gated by MineColonies Manage Huts permissions.
+- Unit tests for economy state, tax uniqueness, upkeep and tax range.
+- English and Dutch translations.
 
-After Milestone 2 is reviewed and approved:
-- One truly buildable new MineColonies building.
-- One complete registered profession.
-- One working policy.
-- One treasury transaction.
-- One GUI with server-side validation.
-- Save/load for the slice.
+Still required:
+- Confirm the latest CI run after the command tree fix.
+- Test saved-data migration and tax collection in a real colony world.
 
-## Later Milestones
+## Milestone 4 — Parliament and Politics
 
-- Milestone 4: Parliament and politics.
-- Milestone 5: Economy and remaining citizen professions.
-- Milestone 6: Military system.
-- Milestone 7: Buildings and visual progression.
-- Milestone 8: Empire simulation and strategy.
-- Milestone 9: Multiplayer compatibility and hardening.
-- Milestone 10: Release.
+Implemented on `milestone-4/parliament-politics`:
+- Constitutional Empire government display.
+- Persisted proposals and enacted legislation per colony.
+- One vote per MineColonies colony member and proposal.
+- Debate period of one in-game day before resolution.
+- Majority vote determines passage; ties and zero-vote proposals fail.
+- Three initial laws: Public Works Act, Scholarship Charter and Tax Relief Charter.
+- Passing legislation applies an economic effect and records the act.
+- English and Dutch translations and pure Java unit tests.
+
+Next implementation:
+- Persist emperor identity and appointment/abdication rules.
+- Add faction support, approval/happiness modifiers, and peaceful unrest mechanics.
+- Replace command-only administration with a proper in-game UI.
+
+## Milestone 5 — Economy and Citizens
+
+- Add named new jobs through complete MineColonies JobEntry, AI, view and building/module support.
+- Add a tax collector and philosopher after verifying the full 1.21.1 Job/AI extension contract.
+- Link citizen happiness and policy modifiers to MineColonies citizen state without mutating private NBT.
+
+## Milestone 6 — Military
+
+- Add imperial field medic, siege engineer and cavalier only after complete entity/job/AI/guard registration can be verified.
+- Keep strategy state server-authoritative; avoid replacing MineColonies combat and guards with abstract-only counters.
+
+## Milestone 7 — Buildings and Visual Progression
+
+- Design one real buildable imperial building and schematic first.
+- Add level-based visual/function changes in tested stages.
+- Integrate Structurize/BlockUI once the selected APIs are verified.
+
+## Milestone 8 — Empire Simulation and Strategy
+
+- Provincially aggregated economy and domestic development.
+- Internal factions, parliament, diplomacy and strategy warfare systems.
+
+## Milestone 9 — Multiplayer and Hardening
+
+- Validate permissions, server/client boundaries, save/load, upgrades and dedicated-server startup.
+
+## Milestone 10 — Release
+
+- Build distributable JAR, verify client/server launch, document dependency versions, setup, translation coverage and migration behavior.

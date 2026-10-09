@@ -1,46 +1,29 @@
 # Checkpoints
 
-## 2026-10-09 — Milestone 2 Source and Build Setup
+## 2026-10-09 — Parliament and Politics Slice
 
-### Repository
+Branch: `milestone-4/parliament-politics`
 
-- Repository: https://github.com/syllater/minecolonies-history
-- Branch: `milestone-2/colony-integration`
+Added:
+- `GovernmentType`
+- `ImperialLaw`
+- `ParliamentSession`
+- `ParliamentSavedData`
+- `ParliamentSessionTest`
+- English and Dutch parliament/law translations.
+- `/imperium parliament status`
+- `/imperium parliament propose public_works_act|scholarship_charter|tax_relief_charter`
+- `/imperium parliament vote yes|no`
+- `/imperium parliament resolve`
 
-### Implemented files
+Design details:
+- Parliament state uses Imperium-owned overworld SavedData keyed by colony dimension + ID.
+- Only players recognized as members by MineColonies can vote.
+- Proposing and resolving laws requires the MineColonies Manage Huts permission.
+- A proposal cannot be resolved until one full in-game day after it was proposed.
+- A strict majority of yes votes is required; ties and no-vote resolutions fail.
+- Passed acts apply an idempotent initial economic effect and remain in the enacted-law history.
 
-- `src/main/java/com/imperium/realms/colony/ColonyIdentity.java`
-- `src/main/java/com/imperium/realms/colony/EmpireState.java`
-- `src/main/java/com/imperium/realms/colony/EmpireStateSavedData.java`
-- `src/main/java/com/imperium/realms/colony/MineColoniesIntegration.java`
-- `src/main/java/com/imperium/realms/colony/MineColoniesLifecycleEvents.java`
-- `src/test/java/com/imperium/realms/colony/ColonyIdentityTest.java`
-- `src/test/java/com/imperium/realms/colony/EmpireStateTest.java`
-
-### Integration decisions
-
-- Use the public API from the exact MineColonies tag `v1.21.1-1.1.1403`.
-- Look up colonies on the logical server through `IMinecoloniesAPI.getInstance().getColonyManager()`.
-- Identify records by dimension ID + colony ID, not by the editable name or center position.
-- Store Imperium-owned records in an overworld SavedData registry so all dimensions share a single index.
-- Periodically reconcile loaded colonies; missing records are inserted, existing records are observed but not reset.
-- Avoid private MineColonies NBT mutation and mixins in this milestone.
-
-### Build setup added
-
-- Added LDTTeam Maven repository.
-- Pinned MineColonies and its required runtime dependency baseline.
-- Configured JUnit Jupiter.
-- Added `.github/workflows/gradle.yml` for `./gradlew --no-daemon clean build` and JAR artifact upload.
-
-### Verification
-
-The GitHub file API has confirmed the writes were accepted, but no Gradle command has been executed by this session. Wait for the actual GitHub Actions result before stating the source compiles.
-
-### Critical correction
-
-A prior investigation referenced MineColonies `version/main`, but that branch is the older Minecraft line. It is not used as evidence for the 1.21.1 implementation. The 1.21.1 signatures were reviewed against the official tag `v1.21.1-1.1.1403`.
-
-### Next
-
-Check Actions run status, fix any actual compile/dependency failures, and only then present Milestone 2 for approval.
+Known follow-up:
+- The next slice should persist an emperor/office-holder and add political-faction support before complex unrest.
+- Build and client startup must be checked in CI, then test save/reload in a real world before release claims.

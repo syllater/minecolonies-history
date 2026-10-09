@@ -6,6 +6,10 @@ import com.imperium.realms.colony.EmpireState;
 import com.imperium.realms.colony.EmpireStateSavedData;
 import com.imperium.realms.colony.MineColoniesIntegration;
 import com.imperium.realms.economy.EmpirePolicy;
+import com.imperium.realms.politics.GovernmentType;
+import com.imperium.realms.politics.ImperialLaw;
+import com.imperium.realms.politics.ParliamentSavedData;
+import com.imperium.realms.politics.ParliamentSession;
 import com.minecolonies.api.colony.IColony;
 import com.minecolonies.api.colony.permissions.Action;
 import com.mojang.brigadier.Command;
@@ -25,8 +29,7 @@ import static com.mojang.brigadier.arguments.IntegerArgumentType.getInteger;
 import static com.mojang.brigadier.arguments.IntegerArgumentType.integer;
 
 /**
- * Initial playable economy interface. All writes go through server-side
- * MineColonies checks and Imperium's SavedData.
+ * Server-authoritative command interface for the initial economic and parliament systems.
  */
 @EventBusSubscriber(modid = ImperiumRealms.MOD_ID)
 public final class ImperiumCommands {
@@ -35,25 +38,44 @@ public final class ImperiumCommands {
 
     @SubscribeEvent
     public static void onRegisterCommands(final RegisterCommandsEvent event) {
-        event.getDispatcher().register(
-                Commands.literal("imperium")
-                        .then(Commands.literal("status")
-                                .executes(context -> showStatus(context.getSource())))
-                        .then(Commands.literal("taxes")
-                                .then(Commands.literal("rate")
-                                        .then(Commands.argument("percent", integer(0, 50))
-                                                .executes(context -> setTaxRate(
-                                                        context.getSource(),
-                                                        getInteger(context, "percent")))))
-                                .then(Commands.literal("collect")
-                                        .executes(context -> collectTaxes(context.getSource()))))
-                        .then(Commands.literal("policy")
-                                .then(Commands.literal("balanced")
-                                        .executes(context -> setPolicy(context.getSource(), EmpirePolicy.BALANCED)))
-                                .then(Commands.literal("public_works")
-                                        .executes(context -> setPolicy(context.getSource(), EmpirePolicy.PUBLIC_WORKS)))
-                                .then(Commands.literal("scholarship")
-                                        .executes(context -> setPolicy(context.getSource(), EmpirePolicy.SCHOLARSHIP)))));
+        final var root = Commands.literal("imperium")
+                .then(Commands.literal("status")
+                        .executes(context -> showStatus(context.getSource())))
+                .then(Commands.literal("taxes")
+                        .then(Commands.literal("rate")
+                                .then(Commands.argument("percent", integer(0, 50))
+                                        .executes(context -> setTaxRate(
+                                                context.getSource(),
+                                                getInteger(context, "percent")))))
+                        .then(Commands.literal("collect")
+                                .executes(context -> collectTaxes(context.getSource()))))
+                .then(Commands.literal("policy")
+                        .then(Commands.literal("balanced")
+                                .executes(context -> setPolicy(context.getSource(), EmpirePolicy.BALANCED)))
+                        .then(Commands.literal("public_works")
+                                .executes(context -> setPolicy(context.getSource(), EmpirePolicy.PUBLIC_WORKS)))
+                        .then(Commands.literal("scholarship")
+                                .executes(context -> setPolicy(context.getSource(), EmpirePolicy.SCHOLARSHIP))));
+
+        root.then(Commands.literal("parliament")
+                .then(Commands.literal("status")
+                        .executes(context -> showParliamentStatus(context.getSource())))
+                .then(Commands.literal("propose")
+                        .then(Commands.literal("public_works_act")
+                                .executes(context -> proposeLaw(context.getSource(), ImperialLaw.PUBLIC_WORKS_ACT)))
+                        .then(Commands.literal("scholarship_charter")
+                                .executes(context -> proposeLaw(context.getSource(), ImperialLaw.SCHOLARSHIP_CHARTER)))
+                        .then(Commands.literal("tax_relief_charter")
+                                .executes(context -> proposeLaw(context.getSource(), ImperialLaw.TAX_RELIEF_CHARTER))))
+                .then(Commands.literal("vote")
+                        .then(Commands.literal("yes")
+                                .executes(context -> castParliamentVote(context.getSource(), true)))
+                        .then(Commands.literal("no")
+                                .executes(context -> castParliamentVote(context.getSource(), false))))
+                .then(Commands.literal("resolve")
+                        .executes(context -> resolveLaw(context.getSource()))));
+
+        event.getDispatcher().register(root);
     }
 
     private static int showStatus(final CommandSourceStack source) throws CommandSyntaxException {
@@ -147,9 +169,128 @@ public final class ImperiumCommands {
                 taxes.grossRevenue(),
                 taxes.upkeepPaid(),
                 taxes.treasuryBalance()), true);
-
         if (taxes.unpaidUpkeep() > 0) {
             source.sendFailure(Component.translatable("commands.imperium.upkeep_unpaid", taxes.unpaidUpkeep()));
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int showParliamentStatus(final CommandSourceStack source) throws CommandSyntaxException {
+        final ServerPlayer player = source.getPlayerOrException();
+        final Optional<IColony> colony = findColony(source, player);
+        if (colony.isEmpty()) {
+            return 0;
+        }
+
+        final ColonyIdentity identity = ColonyIdentity.from(colony.get());
+        final ParliamentSavedData.ParliamentSnapshot parliament =
+                ParliamentSavedData.get(player.serverLevel()).snapshot(identity);
+        final Component proposal = parliament.hasActiveProposal()
+                ? Component.translatable("law.imperium." + parliament.proposalLawId())
+                : Component.translatable("commands.imperium.parliament_no_active_proposal");
+        source.sendSuccess(() -> Component.translatable(
+                "commands.imperium.parliament_status",
+                Component.translatable(GovernmentType.CONSTITUTIONAL_EMPIRE.translationKey()),
+                proposal,
+                parliament.yesVotes(),
+                parliament.noVotes(),
+                parliament.votesCast()), false);
+        if (!parliament.enactedLawIds().isEmpty()) {
+            source.sendSuccess(() -> Component.translatable(
+                    "commands.imperium.parliament_enacted",
+                    String.join(", ", parliament.enactedLawIds().stream().sorted().toList())), false);
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int proposeLaw(
+            final CommandSourceStack source,
+            final ImperialLaw law) throws CommandSyntaxException {
+        final ServerPlayer player = source.getPlayerOrException();
+        final Optional<IColony> colony = findManageableColony(source, player);
+        if (colony.isEmpty()) {
+            return 0;
+        }
+
+        final ServerLevel level = player.serverLevel();
+        final ColonyIdentity identity = ColonyIdentity.from(colony.get());
+        final long gameDay = currentGameDay(level);
+        final boolean proposed = ParliamentSavedData.get(level).propose(
+                identity, law, player.getUUID(), gameDay);
+        if (!proposed) {
+            source.sendFailure(Component.translatable("commands.imperium.parliament_proposal_rejected"));
+            return 0;
+        }
+
+        source.sendSuccess(() -> Component.translatable(
+                "commands.imperium.parliament_proposal_opened",
+                Component.translatable(law.translationKey())), true);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int castParliamentVote(
+            final CommandSourceStack source,
+            final boolean inFavor) throws CommandSyntaxException {
+        final ServerPlayer player = source.getPlayerOrException();
+        final Optional<IColony> colony = findColony(source, player);
+        if (colony.isEmpty()) {
+            return 0;
+        }
+        if (!colony.get().getPermissions().isColonyMember(player)) {
+            source.sendFailure(Component.translatable("commands.imperium.parliament_not_member"));
+            return 0;
+        }
+
+        final ColonyIdentity identity = ColonyIdentity.from(colony.get());
+        final boolean accepted = ParliamentSavedData.get(player.serverLevel()).castVote(
+                identity, player.getUUID(), inFavor);
+        if (!accepted) {
+            source.sendFailure(Component.translatable("commands.imperium.parliament_vote_rejected"));
+            return 0;
+        }
+
+        source.sendSuccess(() -> Component.translatable(
+                inFavor ? "commands.imperium.parliament_vote_yes" : "commands.imperium.parliament_vote_no"), false);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int resolveLaw(final CommandSourceStack source) throws CommandSyntaxException {
+        final ServerPlayer player = source.getPlayerOrException();
+        final Optional<IColony> colony = findManageableColony(source, player);
+        if (colony.isEmpty()) {
+            return 0;
+        }
+
+        final ServerLevel level = player.serverLevel();
+        final ColonyIdentity identity = ColonyIdentity.from(colony.get());
+        final ParliamentSavedData parliament = ParliamentSavedData.get(level);
+        final ParliamentSavedData.ParliamentSnapshot before = parliament.snapshot(identity);
+        if (!before.hasActiveProposal()) {
+            source.sendFailure(Component.translatable("commands.imperium.parliament_no_active_proposal"));
+            return 0;
+        }
+
+        final Optional<ParliamentSession.Resolution> resolution = parliament.resolve(identity, currentGameDay(level));
+        if (resolution.isEmpty()) {
+            source.sendFailure(Component.translatable("commands.imperium.parliament_too_early"));
+            return 0;
+        }
+
+        final ParliamentSession.Resolution result = resolution.get();
+        if (result.passed()) {
+            final ImperialLaw law = ImperialLaw.fromId(result.lawId()).orElseThrow();
+            law.apply(EmpireStateSavedData.get(level), identity);
+            source.sendSuccess(() -> Component.translatable(
+                    "commands.imperium.parliament_law_passed",
+                    Component.translatable(law.translationKey()),
+                    result.yesVotes(),
+                    result.noVotes()), true);
+        } else {
+            source.sendSuccess(() -> Component.translatable(
+                    "commands.imperium.parliament_law_failed",
+                    Component.translatable("law.imperium." + result.lawId()),
+                    result.yesVotes(),
+                    result.noVotes()), true);
         }
         return Command.SINGLE_SUCCESS;
     }
@@ -181,5 +322,9 @@ public final class ImperiumCommands {
 
     private static EmpireState stateFor(final ServerLevel level, final IColony colony) {
         return MineColoniesIntegration.getOrCreateState(level, colony);
+    }
+
+    private static long currentGameDay(final ServerLevel level) {
+        return Math.floorDiv(level.getServer().overworld().getGameTime(), 24_000L);
     }
 }
