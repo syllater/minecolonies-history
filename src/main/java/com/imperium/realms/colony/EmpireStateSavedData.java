@@ -18,7 +18,7 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 4;
+    private static final int SCHEMA_VERSION = 5;
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -145,7 +145,8 @@ public final class EmpireStateSavedData extends SavedData {
                         entry.contains("last_tax_day") ? entry.getLong("last_tax_day") : -1L,
                         entry.contains("last_scholar_work_tick") ? entry.getLong("last_scholar_work_tick") : -1L,
                         entry.contains("next_proposal_id") ? entry.getLong("next_proposal_id") : 1L,
-                        proposals);
+                        proposals,
+                        entry.contains("legitimacy") ? entry.getInt("legitimacy") : 50);
                 data.colonies.put(identity, state);
             } catch (IllegalArgumentException exception) {
                 // Skip malformed records instead of failing the whole world load.
@@ -200,6 +201,7 @@ public final class EmpireStateSavedData extends SavedData {
             entry.putString("economic_policy", state.economicPolicy().id());
             entry.putLong("knowledge_points", state.knowledgePoints());
             entry.putInt("stability", state.stability());
+            entry.putInt("legitimacy", state.legitimacy());
             entry.putLong("last_tax_day", state.lastTaxDay());
             entry.putLong("last_scholar_work_tick", state.lastScholarWorkTick());
             entry.putLong("next_proposal_id", state.nextProposalId());
