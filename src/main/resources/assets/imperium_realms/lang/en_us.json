@@ -1,3 +1,16 @@
 {
-  "modmenu.descriptionTranslation.imperium_realms": "European empire simulation expansion for MineColonies."
+  "modmenu.descriptionTranslation.imperium_realms": "European empire simulation expansion for MineColonies.",
+  "policy.imperium.balanced": "Balanced administration",
+  "policy.imperium.public_works": "Public works",
+  "policy.imperium.scholarship": "Scholarship and learning",
+  "commands.imperium.no_colony": "You must stand inside a MineColonies colony to use this command.",
+  "commands.imperium.no_permission": "You need the MineColonies Manage Huts permission to change imperial finances or policy.",
+  "commands.imperium.status": "%1$s — Treasury: %2$s crowns; tax rate: %3$s%%; policy: %4$s.",
+  "commands.imperium.tax_rate_set": "Imperial tax rate set to %1$s%%.",
+  "commands.imperium.tax_rate_unchanged": "The imperial tax rate is already %1$s%%.",
+  "commands.imperium.policy_set": "Imperial policy changed to %1$s.",
+  "commands.imperium.policy_unchanged": "The empire already follows %1$s.",
+  "commands.imperium.taxes_already_collected": "Taxes have already been collected for this in-game day.",
+  "commands.imperium.taxes_collected": "Collected %1$s crowns; paid %2$s crowns in policy upkeep. Treasury balance: %3$s crowns.",
+  "commands.imperium.upkeep_unpaid": "Treasury shortage: %1$s crowns of policy upkeep remain unpaid."
 }
