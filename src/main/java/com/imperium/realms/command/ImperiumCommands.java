@@ -52,6 +52,8 @@ public final class ImperiumCommands {
                                 .executes(context -> invest(
                                         context.getSource(),
                                         IntegerArgumentType.getInteger(context, "crowns")))))
+                .then(Commands.literal("politics")
+                        .executes(context -> showPolitics(context.getSource())))
                 .then(Commands.literal("diplomacy")
                         .then(Commands.literal("status")
                                 .executes(context -> showDiplomacy(context.getSource())))
@@ -108,7 +110,9 @@ public final class ImperiumCommands {
                 state.stability(),
                 state.legitimacy(),
                 state.taxCollectionEfficiencyPercent(),
-                state.diplomaticInfluence()), false);
+                state.diplomaticInfluence(),
+                state.unrest(),
+                state.civicDisorder().name().toLowerCase(java.util.Locale.ROOT)), false);
         return 1;
     }
 
@@ -306,6 +310,35 @@ public final class ImperiumCommands {
                 crowns,
                 points,
                 context.state().treasuryCrowns()), true);
+        return 1;
+    }
+
+    private static int showPolitics(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) {
+            return 0;
+        }
+
+        final EmpireState state = context.state();
+        final Component disorder = Component.translatable(
+                "imperium_realms.civic_disorder."
+                        + state.civicDisorder().name().toLowerCase(java.util.Locale.ROOT));
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.politics_header",
+                state.colonyName(),
+                state.stability(),
+                state.legitimacy(),
+                state.unrest(),
+                disorder), false);
+
+        for (final var faction : state.factionApproval().entrySet()) {
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.faction_approval",
+                    Component.translatable("imperium_realms.faction." + faction.getKey()),
+                    faction.getValue()), false);
+        }
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.politics_help"), false);
         return 1;
     }
 
