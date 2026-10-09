@@ -298,9 +298,9 @@ def main() -> int:
         "icon": "icon.png",
         "authors": ["Imperium: European Realms"],
         "desc": "Original medieval European-inspired administrative and military buildings for Imperium.",
-        "mods": ["minecraft", "minecolonies", MOD_ID],
-        "version": 1.0,
-        "pack-format": 1,
+        "mods": ["structurize", "minecolonies", MOD_ID],
+        "version": "1",
+        "pack-format": "1",
     }
     (pack_root / "pack.json").write_text(json.dumps(pack_json, indent=2) + "\n", encoding="utf-8")
     write_png(pack_root / "icon.png")
