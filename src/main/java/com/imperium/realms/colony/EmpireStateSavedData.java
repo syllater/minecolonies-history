@@ -18,7 +18,7 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 3;
+    private static final int SCHEMA_VERSION = 4;
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -83,6 +83,27 @@ public final class EmpireStateSavedData extends SavedData {
                                 }
                             }
 
+                            // Schema versions <= 3 stored only tax bills. Missing type
+                            // therefore migrates safely to TAX_RATE.
+                            ParliamentProposal.Type proposalType = ParliamentProposal.Type.TAX_RATE;
+                            try {
+                                if (proposalTag.contains("proposal_type", Tag.TAG_STRING)) {
+                                    proposalType = ParliamentProposal.Type.valueOf(
+                                            proposalTag.getString("proposal_type"));
+                                }
+                            } catch (IllegalArgumentException ignored) {
+                                // Unknown bill types are treated as the legacy tax-bill shape.
+                            }
+
+                            final EconomicPolicy previousPolicy = EconomicPolicy.fromId(
+                                    proposalTag.getString("previous_policy"))
+                                    .orElse(proposalType == ParliamentProposal.Type.ECONOMIC_POLICY
+                                            ? EconomicPolicy.BALANCED : null);
+                            final EconomicPolicy proposedPolicy = EconomicPolicy.fromId(
+                                    proposalTag.getString("proposed_policy"))
+                                    .orElse(proposalType == ParliamentProposal.Type.ECONOMIC_POLICY
+                                            ? EconomicPolicy.BALANCED : null);
+
                             ParliamentProposal.Status proposalStatus = ParliamentProposal.Status.OPEN;
                             try {
                                 proposalStatus = ParliamentProposal.Status.valueOf(proposalTag.getString("status"));
@@ -92,13 +113,19 @@ public final class EmpireStateSavedData extends SavedData {
 
                             proposals.add(ParliamentProposal.restore(
                                     proposalTag.getLong("id"),
+                                    proposalType,
                                     proposalTag.getString("proposer"),
                                     proposalTag.getInt("previous_tax"),
                                     proposalTag.getInt("proposed_tax"),
+                                    previousPolicy,
+                                    proposedPolicy,
                                     proposalTag.getLong("created_day"),
                                     proposalTag.getLong("expires_day"),
                                     votes,
-                                    proposalStatus));
+                                    proposalStatus,
+                                    proposalTag.getString("resolved_by"),
+                                    proposalTag.contains("resolved_day")
+                                            ? proposalTag.getLong("resolved_day") : -1L));
                         } catch (IllegalArgumentException ignored) {
                             // Ignore one malformed bill without losing the colony's economy.
                         }
@@ -181,12 +208,21 @@ public final class EmpireStateSavedData extends SavedData {
             for (final ParliamentProposal proposal : state.storedParliamentProposals()) {
                 final CompoundTag proposalTag = new CompoundTag();
                 proposalTag.putLong("id", proposal.id());
+                proposalTag.putString("proposal_type", proposal.type().name());
                 proposalTag.putString("proposer", proposal.proposer());
                 proposalTag.putInt("previous_tax", proposal.previousTaxRate());
                 proposalTag.putInt("proposed_tax", proposal.proposedTaxRate());
+                if (proposal.previousPolicy() != null) {
+                    proposalTag.putString("previous_policy", proposal.previousPolicy().id());
+                }
+                if (proposal.proposedPolicy() != null) {
+                    proposalTag.putString("proposed_policy", proposal.proposedPolicy().id());
+                }
                 proposalTag.putLong("created_day", proposal.createdDay());
                 proposalTag.putLong("expires_day", proposal.expiresDay());
                 proposalTag.putString("status", proposal.status().name());
+                proposalTag.putString("resolved_by", proposal.resolvedBy());
+                proposalTag.putLong("resolved_day", proposal.resolvedDay());
 
                 final ListTag votes = new ListTag();
                 proposal.councilVotes().forEach((seat, yes) -> {
