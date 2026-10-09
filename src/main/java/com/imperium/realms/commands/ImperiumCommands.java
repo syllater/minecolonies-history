@@ -7,11 +7,16 @@ import com.imperium.realms.colony.EmpireStateSavedData;
 import com.imperium.realms.colony.MineColoniesIntegration;
 import com.imperium.realms.economy.EmpirePolicy;
 import com.imperium.realms.politics.ImperialOfficeSavedData;
+import com.imperium.realms.politics.DiplomaticRelation;
+import com.imperium.realms.politics.DiplomacyOffer;
+import com.imperium.realms.politics.DiplomacySavedData;
+import com.imperium.realms.politics.TreatyType;
 import com.imperium.realms.politics.FactionType;
 import com.imperium.realms.politics.GovernmentType;
 import com.imperium.realms.politics.ImperialLaw;
 import com.imperium.realms.politics.ParliamentSavedData;
 import com.imperium.realms.politics.ParliamentSession;
+import com.minecolonies.api.IMinecoloniesAPI;
 import com.minecolonies.api.colony.IColony;
 import com.minecolonies.api.colony.permissions.Action;
 import com.mojang.brigadier.Command;
@@ -93,6 +98,28 @@ public final class ImperiumCommands {
                                         context.getSource(), EntityArgument.getPlayer(context, "successor")))))
                 .then(Commands.literal("abdicate")
                         .executes(context -> abdicateEmperor(context.getSource()))));
+
+        root.then(Commands.literal("diplomacy")
+                .then(Commands.literal("status")
+                        .executes(context -> showDiplomacyStatus(context.getSource())))
+                .then(Commands.literal("offer")
+                        .then(Commands.argument("colonyId", integer(0))
+                                .then(Commands.literal("friendship")
+                                        .executes(context -> offerTreaty(context.getSource(),
+                                                getInteger(context, "colonyId"), TreatyType.FRIENDSHIP)))
+                                .then(Commands.literal("trade_pact")
+                                        .executes(context -> offerTreaty(context.getSource(),
+                                                getInteger(context, "colonyId"), TreatyType.TRADE_PACT)))
+                                .then(Commands.literal("non_aggression")
+                                        .executes(context -> offerTreaty(context.getSource(),
+                                                getInteger(context, "colonyId"), TreatyType.NON_AGGRESSION)))
+                                .then(Commands.literal("alliance")
+                                        .executes(context -> offerTreaty(context.getSource(),
+                                                getInteger(context, "colonyId"), TreatyType.ALLIANCE)))))
+                .then(Commands.literal("accept")
+                        .executes(context -> acceptTreaty(context.getSource())))
+                .then(Commands.literal("decline")
+                        .executes(context -> declineTreaty(context.getSource()))));
 
         event.getDispatcher().register(root);
     }
@@ -195,6 +222,146 @@ public final class ImperiumCommands {
     }
 
 
+
+
+    private static int showDiplomacyStatus(final CommandSourceStack source) throws CommandSyntaxException {
+        final ServerPlayer player = source.getPlayerOrException();
+        final Optional<IColony> colony = findColony(source, player);
+        if (colony.isEmpty()) {
+            return 0;
+        }
+
+        final ServerLevel level = player.serverLevel();
+        final ColonyIdentity identity = ColonyIdentity.from(colony.get());
+        final DiplomacySavedData data = DiplomacySavedData.get(level);
+        final Optional<DiplomacyOffer> pending = data.pendingOfferFor(identity);
+        if (pending.isPresent()) {
+            final DiplomacyOffer offer = pending.get();
+            source.sendSuccess(() -> Component.translatable(
+                    "commands.imperium.diplomacy_pending_offer",
+                    colonyNameFor(offer.source(), level),
+                    Component.translatable(offer.treaty().translationKey()),
+                    offer.proposerName()), false);
+        } else {
+            source.sendSuccess(() -> Component.translatable(
+                    "commands.imperium.diplomacy_no_pending_offer"), false);
+        }
+
+        final var relations = data.relationsFor(identity);
+        if (relations.isEmpty()) {
+            source.sendSuccess(() -> Component.translatable(
+                    "commands.imperium.diplomacy_no_relations"), false);
+        } else {
+            for (final DiplomaticRelation.Snapshot relation : relations) {
+                final String name = colonyNameFor(relation.otherColony(), level);
+                final Component treaty = Component.translatable(relation.treaty().translationKey());
+                final Component stance = Component.translatable("diplomacy.imperium.stance." + relation.stanceId());
+                source.sendSuccess(() -> Component.translatable(
+                        "commands.imperium.diplomacy_relation",
+                        name, treaty, relation.standing(), stance), false);
+            }
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int offerTreaty(
+            final CommandSourceStack source,
+            final int targetColonyId,
+            final TreatyType treaty) throws CommandSyntaxException {
+        final ServerPlayer player = source.getPlayerOrException();
+        final Optional<IColony> origin = findManageableColony(source, player);
+        if (origin.isEmpty()) {
+            return 0;
+        }
+
+        final ServerLevel level = player.serverLevel();
+        final IColony target = IMinecoloniesAPI.getInstance().getColonyManager()
+                .getColonyByWorld(targetColonyId, level);
+        if (target == null) {
+            source.sendFailure(Component.translatable("commands.imperium.diplomacy_target_missing", targetColonyId));
+            return 0;
+        }
+
+        final ColonyIdentity fromIdentity = ColonyIdentity.from(origin.get());
+        final ColonyIdentity toIdentity = ColonyIdentity.from(target);
+        if (fromIdentity.equals(toIdentity)) {
+            source.sendFailure(Component.translatable("commands.imperium.diplomacy_self_offer"));
+            return 0;
+        }
+
+        final boolean offered = DiplomacySavedData.get(level).offer(
+                fromIdentity,
+                toIdentity,
+                treaty,
+                player.getUUID(),
+                player.getGameProfile().getName(),
+                currentGameDay(level));
+        if (!offered) {
+            source.sendFailure(Component.translatable("commands.imperium.diplomacy_offer_rejected"));
+            return 0;
+        }
+
+        source.sendSuccess(() -> Component.translatable(
+                "commands.imperium.diplomacy_offer_sent",
+                target.getName(),
+                Component.translatable(treaty.translationKey())), true);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int acceptTreaty(final CommandSourceStack source) throws CommandSyntaxException {
+        final ServerPlayer player = source.getPlayerOrException();
+        final Optional<IColony> colony = findManageableColony(source, player);
+        if (colony.isEmpty()) {
+            return 0;
+        }
+
+        final ServerLevel level = player.serverLevel();
+        final ColonyIdentity identity = ColonyIdentity.from(colony.get());
+        final Optional<DiplomaticRelation.Snapshot> accepted = DiplomacySavedData.get(level).accept(
+                identity,
+                player.getUUID(),
+                player.getGameProfile().getName(),
+                currentGameDay(level));
+        if (accepted.isEmpty()) {
+            source.sendFailure(Component.translatable("commands.imperium.diplomacy_accept_rejected"));
+            return 0;
+        }
+
+        final DiplomaticRelation.Snapshot relation = accepted.get();
+        source.sendSuccess(() -> Component.translatable(
+                "commands.imperium.diplomacy_offer_accepted",
+                colonyNameFor(relation.otherColony(), level),
+                Component.translatable(relation.treaty().translationKey())), true);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int declineTreaty(final CommandSourceStack source) throws CommandSyntaxException {
+        final ServerPlayer player = source.getPlayerOrException();
+        final Optional<IColony> colony = findManageableColony(source, player);
+        if (colony.isEmpty()) {
+            return 0;
+        }
+
+        final boolean declined = DiplomacySavedData.get(player.serverLevel())
+                .decline(ColonyIdentity.from(colony.get()));
+        if (!declined) {
+            source.sendFailure(Component.translatable("commands.imperium.diplomacy_decline_rejected"));
+            return 0;
+        }
+
+        source.sendSuccess(() -> Component.translatable(
+                "commands.imperium.diplomacy_offer_declined"), true);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static String colonyNameFor(final ColonyIdentity identity, final ServerLevel level) {
+        if (!identity.dimensionId().equals(level.dimension().location().toString())) {
+            return identity.storageKey();
+        }
+        final IColony colony = IMinecoloniesAPI.getInstance().getColonyManager()
+                .getColonyByWorld(identity.colonyId(), level);
+        return colony == null ? identity.storageKey() : colony.getName();
+    }
 
     private static int showEmperorStatus(final CommandSourceStack source) throws CommandSyntaxException {
         final ServerPlayer player = source.getPlayerOrException();
