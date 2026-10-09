@@ -63,7 +63,7 @@ public final class MineColoniesLifecycleEvents {
 
                 final EmpireState state = MineColoniesIntegration.getOrCreateState(overworld, colony);
                 final long population = colony.getCitizenManager().getCitizens().size();
-                totalRevenue += state.collectDailyTaxes(dayIndex, population);
+                totalRevenue += state.collectDailyTaxes(dayIndex, population, colony.getOverallHappiness());
                 coloniesAssessed++;
             }
         }
