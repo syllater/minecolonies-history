@@ -1,3 +1,16 @@
 {
-  "modmenu.descriptionTranslation.imperium_realms": "Europese rijkssimulatie-uitbreiding voor MineColonies."
+  "modmenu.descriptionTranslation.imperium_realms": "Europese rijkssimulatie-uitbreiding voor MineColonies.",
+  "policy.imperium.balanced": "Evenwichtig bestuur",
+  "policy.imperium.public_works": "Openbare werken",
+  "policy.imperium.scholarship": "Wetenschap en onderwijs",
+  "commands.imperium.no_colony": "Je moet binnen een MineColonies-kolonie staan om dit commando te gebruiken.",
+  "commands.imperium.no_permission": "Je hebt de MineColonies-rechten 'Hutten beheren' nodig om de keizerlijke financiën of het beleid te wijzigen.",
+  "commands.imperium.status": "%1$s — Schatkist: %2$s kronen; belastingtarief: %3$s%%; beleid: %4$s.",
+  "commands.imperium.tax_rate_set": "Keizerlijk belastingtarief ingesteld op %1$s%%.",
+  "commands.imperium.tax_rate_unchanged": "Het keizerlijke belastingtarief is al %1$s%%.",
+  "commands.imperium.policy_set": "Keizerlijk beleid gewijzigd naar %1$s.",
+  "commands.imperium.policy_unchanged": "Het rijk volgt al het beleid %1$s.",
+  "commands.imperium.taxes_already_collected": "De belastingen zijn voor deze in-game dag al geïnd.",
+  "commands.imperium.taxes_collected": "%1$s kronen geïnd; %2$s kronen betaald aan beleidskosten. Saldo van de schatkist: %3$s kronen.",
+  "commands.imperium.upkeep_unpaid": "Tekort in de schatkist: %1$s kronen aan beleidskosten zijn nog niet betaald."
 }
