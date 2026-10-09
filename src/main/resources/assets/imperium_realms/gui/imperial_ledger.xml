@@ -1,4 +1,4 @@
-<window size="420 264" lightbox="true" type="FULLSCREEN_VANILLA"
+<window size="420 340" lightbox="true" type="FULLSCREEN_VANILLA"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/ldtteam/BlockUI/version/main/src/main/resources/assets/blockui/gui/block_ui.xsd">
     <text id="title" size="390 18" pos="15 7" color="black" textalign="MIDDLE" label="$(gui.imperium.ledger.title)"/>
@@ -28,5 +28,15 @@
     <button id="vote_no" size="190 20" pos="15 208" label="$(gui.imperium.ledger.vote_no)"/>
     <button id="resolve" size="190 20" pos="215 208" label="$(gui.imperium.ledger.resolve)"/>
 
-    <button id="close" size="190 20" pos="115 236" label="$(gui.imperium.ledger.close)"/>
+    <button id="emperor_status" size="190 20" pos="15 231" label="$(gui.imperium.ledger.emperor_status)"/>
+    <button id="diplomacy_status" size="190 20" pos="215 231" label="$(gui.imperium.ledger.diplomacy_status)"/>
+
+    <button id="emperor_claim" size="190 20" pos="15 254" label="$(gui.imperium.ledger.emperor_claim)"/>
+    <button id="emperor_abdicate" size="190 20" pos="215 254" label="$(gui.imperium.ledger.emperor_abdicate)"/>
+
+    <button id="diplomacy_accept" size="190 20" pos="15 277" label="$(gui.imperium.ledger.diplomacy_accept)"/>
+    <button id="diplomacy_decline" size="190 20" pos="215 277" label="$(gui.imperium.ledger.diplomacy_decline)"/>
+
+    <text id="diplomacy_help" size="390 12" pos="15 299" color="black" textalign="MIDDLE" label="$(gui.imperium.ledger.diplomacy_help)"/>
+    <button id="close" size="190 20" pos="115 314" label="$(gui.imperium.ledger.close)"/>
 </window>

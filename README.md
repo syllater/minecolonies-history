@@ -36,6 +36,10 @@ Examples:
 - `/imperium parliament propose public_works_act`
 - `/imperium parliament vote yes`
 - `/imperium parliament resolve`
+- `/imperium emperor status|claim|appoint <player>|abdicate`
+- `/imperium diplomacy status`
+- `/imperium diplomacy offer <colonyId> alliance`
+- `/imperium diplomacy accept|decline`
 
 ## Current implemented systems
 
@@ -44,6 +48,9 @@ Examples:
 - Parliament proposals, votes, majority outcomes and three initial acts.
 - Daily citizen-approval/unrest simulation and four domestic faction support shares.
 - English and Dutch player-facing strings.
+- Emperor office and succession history.
+- Bilateral diplomatic treaties (friendship, trade, non-aggression, alliance) requiring acceptance by the target colony.
+- BlockUI ledger controls for emperor office and pending treaty offers.
 
 ## Project documents
 

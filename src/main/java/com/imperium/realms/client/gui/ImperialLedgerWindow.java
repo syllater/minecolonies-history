@@ -37,7 +37,13 @@ public final class ImperialLedgerWindow extends BOWindow implements ButtonHandle
             Map.entry("propose_tax_relief", "imperium parliament propose tax_relief_charter"),
             Map.entry("vote_yes", "imperium parliament vote yes"),
             Map.entry("vote_no", "imperium parliament vote no"),
-            Map.entry("resolve", "imperium parliament resolve")
+            Map.entry("resolve", "imperium parliament resolve"),
+            Map.entry("emperor_status", "imperium emperor status"),
+            Map.entry("emperor_claim", "imperium emperor claim"),
+            Map.entry("emperor_abdicate", "imperium emperor abdicate"),
+            Map.entry("diplomacy_status", "imperium diplomacy status"),
+            Map.entry("diplomacy_accept", "imperium diplomacy accept"),
+            Map.entry("diplomacy_decline", "imperium diplomacy decline")
     );
 
     public ImperialLedgerWindow() {

@@ -8,6 +8,8 @@ Last updated: 2026-10-09 Europe/Amsterdam.
 - `milestone-3/imperial-economy`
 - `milestone-4/parliament-politics`
 - `milestone-5/factions-approval`
+- `milestone-6/imperial-ledger-gui`
+- `milestone-7/emperor-diplomacy`
 
 The user authorized continuous development without pausing for milestone approval. Continue progressing through the backlog, but only report actual CI/runtime results.
 
@@ -39,6 +41,12 @@ The user authorized continuous development without pausing for milestone approva
 - Faction shares normalize to 100 and are saved with a data schema version.
 - Added `/imperium politics` and English/Dutch faction strings.
 - The newest branch has not yet completed CI.
+
+### Emperor and diplomacy source implementation
+- `/imperium emperor status|claim|appoint|abdicate` with persistent office and succession rules.
+- `/imperium diplomacy status|offer|accept|decline` with saved bilateral treaty offers and relations.
+- The BlockUI ledger has corresponding controls.
+- Latest branch CI needs to verify these current files.
 
 ## Current verification requirements
 

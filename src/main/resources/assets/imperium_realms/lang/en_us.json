@@ -86,5 +86,12 @@
   "commands.imperium.diplomacy_accept_rejected": "There is no treaty offer to accept.",
   "commands.imperium.diplomacy_offer_accepted": "Accepted the %2$s treaty with %1$s.",
   "commands.imperium.diplomacy_decline_rejected": "There is no treaty offer to decline.",
-  "commands.imperium.diplomacy_offer_declined": "The treaty offer was declined."
+  "commands.imperium.diplomacy_offer_declined": "The treaty offer was declined.",
+  "gui.imperium.ledger.emperor_status": "View Emperor",
+  "gui.imperium.ledger.diplomacy_status": "View Diplomatic Relations",
+  "gui.imperium.ledger.emperor_claim": "Claim Imperial Office",
+  "gui.imperium.ledger.emperor_abdicate": "Abdicate",
+  "gui.imperium.ledger.diplomacy_accept": "Accept Treaty Offer",
+  "gui.imperium.ledger.diplomacy_decline": "Decline Treaty Offer",
+  "gui.imperium.ledger.diplomacy_help": "Offer treaties with /imperium diplomacy offer <colonyId> friendship|trade_pact|non_aggression|alliance."
 }

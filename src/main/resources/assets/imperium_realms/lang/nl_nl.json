@@ -16,7 +16,7 @@
   "diplomacy.imperium.treaty.non_aggression": "Niet-aanvalsverdrag",
   "diplomacy.imperium.treaty.alliance": "Bondgenootschap",
   "diplomacy.imperium.stance.hostile": "Vijandig",
-  "diplomacy.imperium.stance.strained": "Ges pannen",
+  "diplomacy.imperium.stance.strained": "Gespannen",
   "diplomacy.imperium.stance.neutral": "Neutraal",
   "diplomacy.imperium.stance.friendly": "Vriendschappelijk",
   "diplomacy.imperium.stance.allied": "Geallieerd",
@@ -86,5 +86,12 @@
   "commands.imperium.diplomacy_accept_rejected": "Er is geen verdrag om te accepteren.",
   "commands.imperium.diplomacy_offer_accepted": "Het verdrag %2$s met %1$s is geaccepteerd.",
   "commands.imperium.diplomacy_decline_rejected": "Er is geen verdragsvoorstel om af te wijzen.",
-  "commands.imperium.diplomacy_offer_declined": "Het verdragsvoorstel is afgewezen."
+  "commands.imperium.diplomacy_offer_declined": "Het verdragsvoorstel is afgewezen.",
+  "gui.imperium.ledger.emperor_status": "Bekijk de keizer",
+  "gui.imperium.ledger.diplomacy_status": "Bekijk diplomatieke relaties",
+  "gui.imperium.ledger.emperor_claim": "Eis het keizerlijke ambt op",
+  "gui.imperium.ledger.emperor_abdicate": "Doe afstand van de troon",
+  "gui.imperium.ledger.diplomacy_accept": "Accepteer verdrag",
+  "gui.imperium.ledger.diplomacy_decline": "Wijs verdrag af",
+  "gui.imperium.ledger.diplomacy_help": "Bied verdragen aan met /imperium diplomacy offer <colonyId> friendship|trade_pact|non_aggression|alliance."
 }
