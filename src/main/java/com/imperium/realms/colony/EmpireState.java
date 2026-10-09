@@ -193,7 +193,9 @@ public final class EmpireState {
                     || safeTime - lastScholarWorkTick < SCHOLAR_WORK_INTERVAL_TICKS)) {
             return false;
         }
-        knowledgePoints = Math.min(Long.MAX_VALUE, knowledgePoints + 1L);
+        if (knowledgePoints < Long.MAX_VALUE) {
+            knowledgePoints++;
+        }
         lastScholarWorkTick = safeTime;
         return true;
     }
