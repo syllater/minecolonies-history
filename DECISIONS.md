@@ -1,37 +1,39 @@
 # Decisions
 
-## 2026-10-09 - Project Baseline
+## 2026-10-09 — Project Baseline
 
 Decision: Start from a minimal NeoForge 1.21.1 Java project because the repository was empty.
 
-Rationale: The Milestone 0 requirement is to inspect the repo, create the necessary project files, verify compatibility, and produce a minimal NeoForge build before gameplay implementation.
+## 2026-10-09 — Java Version
 
-## 2026-10-09 - Java Version
+Decision: Use Java 21 based on the previous local environment verification recorded in `CHECKPOINTS.md`.
 
-Decision: Use Java 21.
+## 2026-10-09 — NeoForge and ModDevGradle
 
-Evidence: The local environment has Temurin OpenJDK 21.0.11. Minecraft 1.21.1/NeoForge development targets Java 21-era tooling.
+Decision: Pin NeoForge `21.1.256` and ModDevGradle `2.0.148` for the initial project baseline.
 
-## 2026-10-09 - NeoForge Version
+## 2026-10-09 — Required runtime dependencies
 
-Decision: Pin NeoForge to `21.1.256` for the initial 1.21.1 project baseline.
+Decision: MineColonies, Structurize, and BlockUI remain required at runtime. Direct compile-time use is allowed only after exact artifacts and API signatures are validated.
 
-Evidence: NeoForge Maven metadata lists `21.1.256` as the latest observed `21.1.x` version during Milestone 0 verification.
+## 2026-10-09 — Mixins
 
-## 2026-10-09 - ModDevGradle Version
+Decision: No mixins unless a required feature cannot be supported with a public API or event and the target method is verified against the pinned artifact.
 
-Decision: Pin `net.neoforged.moddev` to `2.0.148`.
+## 2026-10-09 — Milestone 2 colony data ownership
 
-Evidence: NeoForge Maven metadata for the Gradle plugin lists `2.0.148` as the latest release observed during Milestone 0 verification.
+Decision: Keep Imperium's empire state in Imperium-owned world SavedData, keyed by MineColonies identity (dimension + colony ID), rather than changing MineColonies internals or writing directly into colony-private NBT.
 
-## 2026-10-09 - MineColonies Dependency Treatment
+Rationale:
+- `IColonyManager` offers server-side colony lookup by world/position and colony ID.
+- `IColony` exposes stable public read methods including ID, name, center, world, citizen manager and dirty marking.
+- No supported public extension slot for custom empire state was verified in the inspected interface excerpts.
+- A separate saved-data layer reduces the risk of damaging existing colony saves and permits lazy/idempotent initialization.
 
-Decision: Declare MineColonies, Structurize, and BlockUI as required runtime dependencies in `neoforge.mods.toml`, but defer compile-time API usage until exact artifacts and APIs are inspected.
+## 2026-10-09 — Milestone 2 integration boundary
 
-Rationale: The project must not pretend MineColonies integration is implemented before the real API has been verified. Milestone 0 establishes the mandatory dependency line; Milestones 1 and 2 will inspect and compile against the actual APIs.
+Decision: Prefer public MineColonies API types under `com.minecolonies.api`; do not import implementation types under `com.minecolonies.core` from Imperium gameplay code unless a documented limitation makes it unavoidable.
 
-## 2026-10-09 - Mixins
+## 2026-10-09 — Exact artifacts
 
-Decision: No mixins in Milestone 0.
-
-Rationale: Mixins require exact target-method verification and are only allowed if public APIs/events cannot support an essential feature.
+Decision: Update the candidate MineColonies/Structurize/BlockUI version notes using upstream 1.21.1 release metadata. Compilation against the actual artifacts remains unverified because this session has no local shell/build execution capability.
