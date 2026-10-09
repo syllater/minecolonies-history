@@ -28,6 +28,18 @@ public final class MineColoniesIntegration {
                         .getColonyByPosFromWorld(level, position));
     }
 
+    /** Resolve a real MineColonies colony in the specified dimension by its ID. */
+    public static Optional<IColony> colonyById(final ServerLevel level, final int colonyId) {
+        Objects.requireNonNull(level, "level");
+        if (colonyId < 0) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(
+                IMinecoloniesAPI.getInstance()
+                        .getColonyManager()
+                        .getColonyByWorld(colonyId, level));
+    }
+
     /**
      * Reconcile colonies already known to MineColonies with Imperium's own
      * persistence. Safe to call repeatedly; existing records are not reset.
