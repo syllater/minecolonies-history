@@ -19,12 +19,9 @@ public final class BuildingImperialArchive extends AbstractBuilding {
         return SCHEMATIC_NAME;
     }
 
-    /**
-     * The initial slice supports one schematic tier. This remains deliberately
-     * limited until the level 1 Structurize blueprint is included and tested.
-     */
+    /** The generated Structurize pack provides all five upgrade tiers. */
     @Override
     public int getMaxBuildingLevel() {
-        return 1;
+        return 5;
     }
 }
