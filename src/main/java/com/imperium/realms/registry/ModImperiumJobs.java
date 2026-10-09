@@ -4,6 +4,9 @@ import com.imperium.realms.ImperiumRealms;
 import com.imperium.realms.colony.JobPhilosopher;
 import com.imperium.realms.colony.JobDiplomat;
 import com.imperium.realms.colony.JobTaxCollector;
+import com.imperium.realms.colony.JobImperialSiegeEngineer;
+import com.imperium.realms.colony.JobImperialFieldMedic;
+import com.imperium.realms.colony.JobImperialCavalier;
 import com.minecolonies.api.colony.jobs.registry.JobEntry;
 import com.minecolonies.apiimp.CommonMinecoloniesAPIImpl;
 import com.minecolonies.core.colony.jobs.views.DefaultJobView;
@@ -38,6 +41,30 @@ public final class ModImperiumJobs {
                     .setRegistryName(ResourceLocation.fromNamespaceAndPath(
                             ImperiumRealms.MOD_ID, "diplomat"))
                     .setJobProducer(JobDiplomat::new)
+                    .setJobViewProducer(() -> DefaultJobView::new)
+                    .createJobEntry());
+
+    public static final DeferredHolder<JobEntry, JobEntry> IMPERIAL_SIEGE_ENGINEER =
+            JOBS.register("imperial_siege_engineer", () -> new JobEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(
+                            ImperiumRealms.MOD_ID, "imperial_siege_engineer"))
+                    .setJobProducer(JobImperialSiegeEngineer::new)
+                    .setJobViewProducer(() -> DefaultJobView::new)
+                    .createJobEntry());
+
+    public static final DeferredHolder<JobEntry, JobEntry> IMPERIAL_FIELD_MEDIC =
+            JOBS.register("imperial_field_medic", () -> new JobEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(
+                            ImperiumRealms.MOD_ID, "imperial_field_medic"))
+                    .setJobProducer(JobImperialFieldMedic::new)
+                    .setJobViewProducer(() -> DefaultJobView::new)
+                    .createJobEntry());
+
+    public static final DeferredHolder<JobEntry, JobEntry> IMPERIAL_CAVALIER =
+            JOBS.register("imperial_cavalier", () -> new JobEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(
+                            ImperiumRealms.MOD_ID, "imperial_cavalier"))
+                    .setJobProducer(JobImperialCavalier::new)
                     .setJobViewProducer(() -> DefaultJobView::new)
                     .createJobEntry());
 
