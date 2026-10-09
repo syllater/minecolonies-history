@@ -1,46 +1,32 @@
 # Checkpoints
 
-## 2026-10-09 — Milestone 2 Source and Build Setup
+## 2026-10-09 — Milestone 3 first vertical slice (in progress)
 
-### Repository
+### Branch and baseline
 
 - Repository: https://github.com/syllater/minecolonies-history
-- Branch: `milestone-2/colony-integration`
+- Branch: milestone-2/colony-integration
+- Last fully verified baseline before Milestone 3 source additions: CI run 37925143022; build/tests and client startup smoke passed on that earlier revision.
+- Current milestone-3 source revision is awaiting a new CI verdict.
 
-### Implemented files
+### Added in this slice
 
-- `src/main/java/com/imperium/realms/colony/ColonyIdentity.java`
-- `src/main/java/com/imperium/realms/colony/EmpireState.java`
-- `src/main/java/com/imperium/realms/colony/EmpireStateSavedData.java`
-- `src/main/java/com/imperium/realms/colony/MineColoniesIntegration.java`
-- `src/main/java/com/imperium/realms/colony/MineColoniesLifecycleEvents.java`
-- `src/test/java/com/imperium/realms/colony/ColonyIdentityTest.java`
-- `src/test/java/com/imperium/realms/colony/EmpireStateTest.java`
+- Treasury and knowledge points persisted in EmpireState.
+- Economic policy enum: balanced, mercantile, welfare, austerity.
+- Daily tax processing with one turn per overworld day, population-based income, and stability trade-offs.
+- Server-authoritative /imperium commands and permission checks.
+- English/Dutch command and building translations.
+- MineColonies registry entries for Philosopher and Imperial Archive, plus an AI work loop.
+- Crafting recipe and placeholder model assets.
+- Expanded unit tests for tax turns, policy multipliers, treasury safety, investment conversion and scholarship interval.
 
-### Integration decisions
+### Build feedback and correction
 
-- Use the public API from the exact MineColonies tag `v1.21.1-1.1.1403`.
-- Look up colonies on the logical server through `IMinecoloniesAPI.getInstance().getColonyManager()`.
-- Identify records by dimension ID + colony ID, not by the editable name or center position.
-- Store Imperium-owned records in an overworld SavedData registry so all dimensions share a single index.
-- Periodically reconcile loaded colonies; missing records are inserted, existing records are observed but not reset.
-- Avoid private MineColonies NBT mutation and mixins in this milestone.
+The first new compile attempt failed in EntityAIWorkPhilosopher because idleState(), markIdle() and markWorking() were mistakenly assumed to exist in the parent class, and decide() was incorrectly marked @Override. The latest implementation now defines those helpers locally and removes the invalid override; verify that fix using the next Actions run.
 
-### Build setup added
+### Current limitations
 
-- Added LDTTeam Maven repository.
-- Pinned MineColonies and its required runtime dependency baseline.
-- Configured JUnit Jupiter.
-- Added `.github/workflows/gradle.yml` for `./gradlew --no-daemon clean build` and JAR artifact upload.
-
-### Verification
-
-The GitHub file API has confirmed the writes were accepted, but no Gradle command has been executed by this session. Wait for the actual GitHub Actions result before stating the source compiles.
-
-### Critical correction
-
-A prior investigation referenced MineColonies `version/main`, but that branch is the older Minecraft line. It is not used as evidence for the 1.21.1 implementation. The 1.21.1 signatures were reviewed against the official tag `v1.21.1-1.1.1403`.
-
-### Next
-
-Check Actions run status, fix any actual compile/dependency failures, and only then present Milestone 2 for approval.
+- No verified Structurize blueprint pack yet.
+- No full player-facing BlockUI GUI yet.
+- No real-world save/reload or worker-assignment test yet.
+- Do not mark Milestone 3 complete before the latest CI and actual schematic/runtime criteria pass.
