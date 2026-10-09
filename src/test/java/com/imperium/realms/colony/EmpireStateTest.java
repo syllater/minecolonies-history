@@ -266,4 +266,30 @@ final class EmpireStateTest {
         assertEquals(48, state.legitimacy());
     }
 
+    @Test
+    void taxCollectorTrainingImprovesRevenueAndIsCapped() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 18), "Capital", 0L);
+
+        assertEquals(0, state.taxCollectionEfficiencyPercent());
+        assertTrue(state.recordTaxCollectorWork(0L));
+        assertFalse(state.recordTaxCollectorWork(1_199L));
+        assertTrue(state.recordTaxCollectorWork(1_200L));
+        assertEquals(2, state.taxCollectionEfficiencyPercent());
+
+        // A 100-citizen colony at 5% tax has a base yield of 100 crowns.
+        assertEquals(102L, state.collectDailyTaxes(1L, 100L));
+        assertEquals(102L, state.treasuryCrowns());
+
+        long tick = 2_400L;
+        while (state.taxCollectionEfficiencyPercent() < 25) {
+            assertTrue(state.recordTaxCollectorWork(tick));
+            tick += 1_200L;
+        }
+        assertEquals(25, state.taxCollectionEfficiencyPercent());
+        assertFalse(state.recordTaxCollectorWork(tick));
+        assertEquals(125L, state.collectDailyTaxes(2L, 100L));
+        assertEquals(227L, state.treasuryCrowns());
+    }
+
 }
