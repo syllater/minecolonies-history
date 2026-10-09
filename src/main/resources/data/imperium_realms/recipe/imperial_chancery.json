@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": ["SSS", "SBS", "SSS"],
+  "key": {
+    "S": { "item": "minecraft:spruce_planks" },
+    "B": { "item": "minecraft:book" }
+  },
+  "result": { "id": "imperium_realms:imperial_chancery", "count": 1 }
+}
