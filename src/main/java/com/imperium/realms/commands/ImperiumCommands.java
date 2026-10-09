@@ -13,6 +13,7 @@ import com.imperium.realms.politics.ParliamentSession;
 import com.minecolonies.api.colony.IColony;
 import com.minecolonies.api.colony.permissions.Action;
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -38,7 +39,7 @@ public final class ImperiumCommands {
 
     @SubscribeEvent
     public static void onRegisterCommands(final RegisterCommandsEvent event) {
-        final var root = Commands.literal("imperium")
+        final LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("imperium")
                 .then(Commands.literal("status")
                         .executes(context -> showStatus(context.getSource())))
                 .then(Commands.literal("taxes")
