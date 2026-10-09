@@ -9,6 +9,7 @@ import com.imperium.realms.economy.EmpirePolicy;
 import com.minecolonies.api.colony.IColony;
 import com.minecolonies.api.colony.permissions.Action;
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -55,7 +56,7 @@ public final class ImperiumCommands {
                                         .executes(context -> setPolicy(context.getSource(), EmpirePolicy.SCHOLARSHIP))));
     }
 
-    private static int showStatus(final CommandSourceStack source) throws Exception {
+    private static int showStatus(final CommandSourceStack source) throws CommandSyntaxException {
         final ServerPlayer player = source.getPlayerOrException();
         final Optional<IColony> colony = findColony(source, player);
         if (colony.isEmpty()) {
