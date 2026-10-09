@@ -1,5 +1,8 @@
 package com.imperium.realms;
 
+import com.imperium.realms.registry.ModBlocks;
+import com.imperium.realms.registry.ModImperiumBuildings;
+import com.imperium.realms.registry.ModImperiumJobs;
 import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -13,6 +16,10 @@ public final class ImperiumRealms {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public ImperiumRealms(final IEventBus modEventBus) {
+        ModBlocks.register(modEventBus);
+        // Register the job entry before the building entry that refers to it.
+        ModImperiumJobs.register(modEventBus);
+        ModImperiumBuildings.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
     }
 
