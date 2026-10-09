@@ -2,6 +2,7 @@ package com.imperium.realms.registry;
 
 import com.imperium.realms.ImperiumRealms;
 import com.imperium.realms.colony.JobPhilosopher;
+import com.imperium.realms.colony.JobTaxCollector;
 import com.minecolonies.api.colony.jobs.registry.JobEntry;
 import com.minecolonies.apiimp.CommonMinecoloniesAPIImpl;
 import com.minecolonies.core.colony.jobs.views.DefaultJobView;
@@ -20,6 +21,14 @@ public final class ModImperiumJobs {
                     .setRegistryName(ResourceLocation.fromNamespaceAndPath(
                             ImperiumRealms.MOD_ID, "philosopher"))
                     .setJobProducer(JobPhilosopher::new)
+                    .setJobViewProducer(() -> DefaultJobView::new)
+                    .createJobEntry());
+
+    public static final DeferredHolder<JobEntry, JobEntry> TAX_COLLECTOR =
+            JOBS.register("tax_collector", () -> new JobEntry.Builder()
+                    .setRegistryName(ResourceLocation.fromNamespaceAndPath(
+                            ImperiumRealms.MOD_ID, "tax_collector"))
+                    .setJobProducer(JobTaxCollector::new)
                     .setJobViewProducer(() -> DefaultJobView::new)
                     .createJobEntry());
 
