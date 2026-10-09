@@ -151,7 +151,7 @@ final class EmpireStateTest {
 
         final ParliamentProposal proposal = state.createTaxProposal("Emperor", 6, 5L).orElseThrow();
         assertEquals(3, proposal.councilYesVotes());
-        assertEquals(EmpireState.TaxProposalResolution.PASSED,
+        assertEquals(EmpireState.ProposalResolution.PASSED,
                 state.resolveProposal(proposal.id(), true, 5L, "Emperor"));
         assertEquals(6, state.taxRatePercent());
     }
@@ -161,14 +161,14 @@ final class EmpireStateTest {
         final EmpireState state = EmpireState.create(
                 new ColonyIdentity("minecraft:overworld", 9), "Capital", 0L);
         final ParliamentProposal vetoed = state.createTaxProposal("Emperor", 4, 0L).orElseThrow();
-        assertEquals(EmpireState.TaxProposalResolution.REJECTED,
+        assertEquals(EmpireState.ProposalResolution.REJECTED,
                 state.resolveProposal(vetoed.id(), false, 0L, "Emperor"));
         assertEquals(5, state.taxRatePercent());
 
         final ParliamentProposal expired = state.createTaxProposal("Emperor", 10, 0L).orElseThrow();
         assertTrue(state.expireParliamentProposals(4L));
         assertEquals(ParliamentProposal.Status.EXPIRED, expired.status());
-        assertEquals(EmpireState.TaxProposalResolution.ALREADY_RESOLVED,
+        assertEquals(EmpireState.ProposalResolution.ALREADY_RESOLVED,
                 state.resolveProposal(expired.id(), true, 4L, "Emperor"));
     }
 
