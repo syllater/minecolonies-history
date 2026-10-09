@@ -1,21 +1,25 @@
 package com.imperium.realms.colony;
 
 import com.imperium.realms.ImperiumRealms;
+import com.minecolonies.api.IMinecoloniesAPI;
+import com.minecolonies.api.colony.IColony;
 import com.mojang.logging.LogUtils;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import org.slf4j.Logger;
 
 /**
- * Periodically discovers existing/new colonies through MineColonies' public API.
- * The idempotent persistence service prevents repeated scans from resetting data.
+ * Periodically discovers colonies, and processes the economic turn once per
+ * overworld day. Every mutation happens on the logical server.
  */
 @EventBusSubscriber(modid = ImperiumRealms.MOD_ID)
 public final class MineColoniesLifecycleEvents {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final long SCAN_INTERVAL_TICKS = 200L;
+    private static final long TAX_TURN_INTERVAL_TICKS = 24_000L;
 
     private MineColoniesLifecycleEvents() {
     }
@@ -25,14 +29,52 @@ public final class MineColoniesLifecycleEvents {
         if (!(event.getLevel() instanceof ServerLevel level)) {
             return;
         }
-        if (Math.floorMod(level.getGameTime(), SCAN_INTERVAL_TICKS) != 0L) {
-            return;
+
+        if (Math.floorMod(level.getGameTime(), SCAN_INTERVAL_TICKS) == 0L) {
+            final int created = MineColoniesIntegration.synchronizeLoadedColonies(level);
+            if (created > 0) {
+                LOGGER.info("Initialized {} Imperium empire record(s) in dimension {}",
+                        created, level.dimension().location());
+            }
         }
 
-        final int created = MineColoniesIntegration.synchronizeLoadedColonies(level);
-        if (created > 0) {
-            LOGGER.info("Initialized {} Imperium empire record(s) in dimension {}",
-                    created, level.dimension().location());
+        // Use one stable clock for every dimension to prevent a multi-world
+        // server from charging the same colony more than once per day.
+        final long gameTime = level.getGameTime();
+        if (level.dimension().equals(Level.OVERWORLD)
+                && gameTime > 0L
+                && Math.floorMod(gameTime, TAX_TURN_INTERVAL_TICKS) == 0L) {
+            collectDailyTaxes(level, Math.floorDiv(gameTime, TAX_TURN_INTERVAL_TICKS));
+        }
+    }
+
+    private static void collectDailyTaxes(final ServerLevel overworld, final long dayIndex) {
+        final var data = EmpireStateSavedData.get(overworld);
+        long totalRevenue = 0L;
+        int coloniesAssessed = 0;
+
+        for (final ServerLevel colonyLevel : overworld.getServer().getAllLevels()) {
+            for (final IColony colony : IMinecoloniesAPI.getInstance()
+                    .getColonyManager()
+                    .getColonies(colonyLevel)) {
+                if (colony == null) {
+                    continue;
+                }
+
+                final EmpireState state = MineColoniesIntegration.getOrCreateState(overworld, colony);
+                final long population = colony.getCitizenManager().getCitizens().size();
+                totalRevenue += state.collectDailyTaxes(dayIndex, population);
+                coloniesAssessed++;
+            }
+        }
+
+        // The turn index, stability changes and zero-income turns are persisted too.
+        if (coloniesAssessed > 0) {
+            data.markChanged();
+        }
+        if (totalRevenue > 0L) {
+            LOGGER.info("Imperium collected {} crown(s) across {} loaded colony record(s) for day {}",
+                    totalRevenue, coloniesAssessed, dayIndex);
         }
     }
 }
