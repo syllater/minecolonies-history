@@ -19,6 +19,10 @@ dependencyResolutionManagement {
             url = 'https://ldtteam.jfrog.io/ldtteam/mods-maven/'
         }
         maven {
+            name = "Jared's Maven"
+            url = 'https://maven.blamejared.com/'
+        }
+        maven {
             name = 'CurseMaven'
             url = 'https://cursemaven.com'
             content {
