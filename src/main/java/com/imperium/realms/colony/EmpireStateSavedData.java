@@ -18,7 +18,7 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 6;
+    private static final int SCHEMA_VERSION = 7;
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -132,6 +132,24 @@ public final class EmpireStateSavedData extends SavedData {
                     }
                 }
 
+                final Map<ColonyIdentity, Integer> diplomaticRelations = new LinkedHashMap<>();
+                if (entry.contains("diplomatic_relations", Tag.TAG_LIST)) {
+                    final ListTag savedRelations = entry.getList("diplomatic_relations", Tag.TAG_COMPOUND);
+                    for (int relationIndex = 0; relationIndex < savedRelations.size(); relationIndex++) {
+                        final CompoundTag relation = savedRelations.getCompound(relationIndex);
+                        try {
+                            final ColonyIdentity target = new ColonyIdentity(
+                                    relation.getString("dimension"),
+                                    relation.getInt("colony_id"));
+                            if (!identity.equals(target)) {
+                                diplomaticRelations.put(target, relation.getInt("score"));
+                            }
+                        } catch (IllegalArgumentException ignored) {
+                            // Skip a malformed diplomatic record without losing the colony's treasury.
+                        }
+                    }
+                }
+
                 final EmpireState state = new EmpireState(
                         identity,
                         entry.getString("colony_name"),
@@ -150,7 +168,12 @@ public final class EmpireStateSavedData extends SavedData {
                         entry.contains("tax_collection_efficiency")
                                 ? entry.getInt("tax_collection_efficiency") : 0,
                         entry.contains("last_tax_collector_work_tick")
-                                ? entry.getLong("last_tax_collector_work_tick") : -1L);
+                                ? entry.getLong("last_tax_collector_work_tick") : -1L,
+                        entry.contains("diplomatic_influence")
+                                ? entry.getLong("diplomatic_influence") : 0L,
+                        entry.contains("last_diplomat_work_tick")
+                                ? entry.getLong("last_diplomat_work_tick") : -1L,
+                        diplomaticRelations);
                 data.colonies.put(identity, state);
             } catch (IllegalArgumentException exception) {
                 // Skip malformed records instead of failing the whole world load.
@@ -208,7 +231,19 @@ public final class EmpireStateSavedData extends SavedData {
             entry.putInt("legitimacy", state.legitimacy());
             entry.putInt("tax_collection_efficiency", state.taxCollectionEfficiencyPercent());
             entry.putLong("last_tax_collector_work_tick", state.lastTaxCollectorWorkTick());
+            entry.putLong("diplomatic_influence", state.diplomaticInfluence());
+            entry.putLong("last_diplomat_work_tick", state.lastDiplomatWorkTick());
             entry.putLong("last_tax_day", state.lastTaxDay());
+
+            final ListTag diplomaticRelations = new ListTag();
+            state.diplomaticRelations().forEach((target, score) -> {
+                final CompoundTag relation = new CompoundTag();
+                relation.putString("dimension", target.dimensionId());
+                relation.putInt("colony_id", target.colonyId());
+                relation.putInt("score", score);
+                diplomaticRelations.add(relation);
+            });
+            entry.put("diplomatic_relations", diplomaticRelations);
             entry.putLong("last_scholar_work_tick", state.lastScholarWorkTick());
             entry.putLong("next_proposal_id", state.nextProposalId());
 
