@@ -18,7 +18,7 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 7;
+    private static final int SCHEMA_VERSION = 8;
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -174,6 +174,34 @@ public final class EmpireStateSavedData extends SavedData {
                         entry.contains("last_diplomat_work_tick")
                                 ? entry.getLong("last_diplomat_work_tick") : -1L,
                         diplomaticRelations);
+
+                final Map<String, Integer> factionApproval = new LinkedHashMap<>();
+                if (entry.contains("faction_approval", Tag.TAG_LIST)) {
+                    final ListTag savedFactionApproval = entry.getList("faction_approval", Tag.TAG_COMPOUND);
+                    for (int factionIndex = 0; factionIndex < savedFactionApproval.size(); factionIndex++) {
+                        final CompoundTag faction = savedFactionApproval.getCompound(factionIndex);
+                        final String factionId = faction.getString("id");
+                        if (factionId.equals("merchants") || factionId.equals("commons")
+                                || factionId.equals("nobility") || factionId.equals("scholars")) {
+                            factionApproval.put(factionId, faction.getInt("approval"));
+                        }
+                    }
+                }
+
+                EmpireState.CivicDisorder civicDisorder = EmpireState.CivicDisorder.CALM;
+                try {
+                    if (entry.contains("civic_disorder", Tag.TAG_STRING)) {
+                        civicDisorder = EmpireState.CivicDisorder.valueOf(entry.getString("civic_disorder"));
+                    }
+                } catch (IllegalArgumentException ignored) {
+                    // Treat an unknown future status as calm rather than locking a world in a crisis.
+                }
+                state.restorePoliticalSimulation(
+                        factionApproval,
+                        entry.contains("unrest") ? entry.getInt("unrest") : 0,
+                        civicDisorder,
+                        entry.contains("last_civic_disorder_change_day")
+                                ? entry.getLong("last_civic_disorder_change_day") : -1L);
                 data.colonies.put(identity, state);
             } catch (IllegalArgumentException exception) {
                 // Skip malformed records instead of failing the whole world load.
@@ -233,7 +261,19 @@ public final class EmpireStateSavedData extends SavedData {
             entry.putLong("last_tax_collector_work_tick", state.lastTaxCollectorWorkTick());
             entry.putLong("diplomatic_influence", state.diplomaticInfluence());
             entry.putLong("last_diplomat_work_tick", state.lastDiplomatWorkTick());
+            entry.putInt("unrest", state.unrest());
+            entry.putString("civic_disorder", state.civicDisorder().name());
+            entry.putLong("last_civic_disorder_change_day", state.lastCivicDisorderChangeDay());
             entry.putLong("last_tax_day", state.lastTaxDay());
+
+            final ListTag factionApproval = new ListTag();
+            state.factionApproval().forEach((factionId, approval) -> {
+                final CompoundTag faction = new CompoundTag();
+                faction.putString("id", factionId);
+                faction.putInt("approval", approval);
+                factionApproval.add(faction);
+            });
+            entry.put("faction_approval", factionApproval);
 
             final ListTag diplomaticRelations = new ListTag();
             state.diplomaticRelations().forEach((target, score) -> {
