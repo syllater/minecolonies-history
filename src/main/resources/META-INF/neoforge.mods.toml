@@ -26,7 +26,7 @@ side = "BOTH"
 [[dependencies.${mod_id}]]
 modId = "minecolonies"
 type = "required"
-versionRange = "[1.1.1403,)"
+versionRange = "[1.1.1319,)"
 ordering = "AFTER"
 side = "BOTH"
 
@@ -48,5 +48,12 @@ side = "BOTH"
 modId = "domum_ornamentum"
 type = "required"
 versionRange = "[1.0.223,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "multipiston"
+type = "required"
+versionRange = "[1.2.51,)"
 ordering = "AFTER"
 side = "BOTH"
