@@ -43,8 +43,37 @@ neoForge {
     }
 }
 
+repositories {
+    maven {
+        name = 'LDTTeam - Mods Maven'
+        url = uri('https://ldtteam.jfrog.io/ldtteam/mods-maven/')
+    }
+}
+
+dependencies {
+    // MineColonies public APIs are used by the colony integration adapter.
+    implementation "com.ldtteam:minecolonies:${minecolonies_version}"
+
+    // Make MineColonies' required companions available to the development client.
+    // These are not shaded into the Imperium JAR.
+    runtimeOnly "com.ldtteam:structurize:${structurize_version}"
+    runtimeOnly "com.ldtteam:blockui:${blockui_version}"
+    runtimeOnly "com.ldtteam:domum-ornamentum:${domum_ornamentum_version}"
+    runtimeOnly "com.ldtteam:multi-piston:${multipiston_version}"
+
+    testImplementation platform("org.junit:junit-bom:${junit_version}")
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+    }
 }
 
 processResources {
