@@ -6,6 +6,7 @@ import com.imperium.realms.colony.EmpireState;
 import com.imperium.realms.colony.EmpireStateSavedData;
 import com.imperium.realms.colony.MineColoniesIntegration;
 import com.imperium.realms.economy.EmpirePolicy;
+import com.imperium.realms.politics.ImperialOfficeSavedData;
 import com.imperium.realms.politics.FactionType;
 import com.imperium.realms.politics.GovernmentType;
 import com.imperium.realms.politics.ImperialLaw;
@@ -18,6 +19,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -79,6 +81,18 @@ public final class ImperiumCommands {
                                 .executes(context -> castParliamentVote(context.getSource(), false))))
                 .then(Commands.literal("resolve")
                         .executes(context -> resolveLaw(context.getSource()))));
+
+        root.then(Commands.literal("emperor")
+                .then(Commands.literal("status")
+                        .executes(context -> showEmperorStatus(context.getSource())))
+                .then(Commands.literal("claim")
+                        .executes(context -> claimEmperor(context.getSource())))
+                .then(Commands.literal("appoint")
+                        .then(Commands.argument("successor", EntityArgument.player())
+                                .executes(context -> appointEmperor(
+                                        context.getSource(), EntityArgument.getPlayer(context, "successor")))))
+                .then(Commands.literal("abdicate")
+                        .executes(context -> abdicateEmperor(context.getSource()))));
 
         event.getDispatcher().register(root);
     }
@@ -180,6 +194,101 @@ public final class ImperiumCommands {
         return Command.SINGLE_SUCCESS;
     }
 
+
+
+    private static int showEmperorStatus(final CommandSourceStack source) throws CommandSyntaxException {
+        final ServerPlayer player = source.getPlayerOrException();
+        final Optional<IColony> colony = findColony(source, player);
+        if (colony.isEmpty()) {
+            return 0;
+        }
+
+        final var office = ImperialOfficeSavedData.get(player.serverLevel())
+                .office(ColonyIdentity.from(colony.get()));
+        final Component emperor = office.emperorName()
+                .<Component>map(Component::literal)
+                .orElseGet(() -> Component.translatable("commands.imperium.emperor_vacant"));
+        source.sendSuccess(() -> Component.translatable(
+                "commands.imperium.emperor_status",
+                colony.get().getName(),
+                emperor,
+                office.reignCount(),
+                office.abdications()), false);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int claimEmperor(final CommandSourceStack source) throws CommandSyntaxException {
+        final ServerPlayer player = source.getPlayerOrException();
+        final Optional<IColony> colony = findManageableColony(source, player);
+        if (colony.isEmpty()) {
+            return 0;
+        }
+
+        final ColonyIdentity identity = ColonyIdentity.from(colony.get());
+        final boolean claimed = ImperialOfficeSavedData.get(player.serverLevel()).claim(
+                identity, player.getUUID(), player.getGameProfile().getName(), currentGameDay(player.serverLevel()));
+        if (!claimed) {
+            source.sendFailure(Component.translatable("commands.imperium.emperor_claim_rejected"));
+            return 0;
+        }
+
+        source.sendSuccess(() -> Component.translatable(
+                "commands.imperium.emperor_claimed", player.getGameProfile().getName()), true);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int appointEmperor(
+            final CommandSourceStack source,
+            final ServerPlayer successor) throws CommandSyntaxException {
+        final ServerPlayer player = source.getPlayerOrException();
+        final Optional<IColony> colony = findColony(source, player);
+        if (colony.isEmpty()) {
+            return 0;
+        }
+        if (!colony.get().getPermissions().isColonyMember(player)) {
+            source.sendFailure(Component.translatable("commands.imperium.parliament_not_member"));
+            return 0;
+        }
+        if (!colony.get().getPermissions().isColonyMember(successor)) {
+            source.sendFailure(Component.translatable("commands.imperium.emperor_successor_not_member"));
+            return 0;
+        }
+
+        final boolean appointed = ImperialOfficeSavedData.get(player.serverLevel()).appoint(
+                ColonyIdentity.from(colony.get()),
+                player.getUUID(),
+                successor.getUUID(),
+                successor.getGameProfile().getName(),
+                currentGameDay(player.serverLevel()));
+        if (!appointed) {
+            source.sendFailure(Component.translatable("commands.imperium.emperor_appoint_rejected"));
+            return 0;
+        }
+
+        source.sendSuccess(() -> Component.translatable(
+                "commands.imperium.emperor_appointed",
+                successor.getGameProfile().getName()), true);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int abdicateEmperor(final CommandSourceStack source) throws CommandSyntaxException {
+        final ServerPlayer player = source.getPlayerOrException();
+        final Optional<IColony> colony = findColony(source, player);
+        if (colony.isEmpty()) {
+            return 0;
+        }
+
+        final boolean abdicated = ImperialOfficeSavedData.get(player.serverLevel()).abdicate(
+                ColonyIdentity.from(colony.get()), player.getUUID());
+        if (!abdicated) {
+            source.sendFailure(Component.translatable("commands.imperium.emperor_abdicate_rejected"));
+            return 0;
+        }
+
+        source.sendSuccess(() -> Component.translatable(
+                "commands.imperium.emperor_abdicated", player.getGameProfile().getName()), true);
+        return Command.SINGLE_SUCCESS;
+    }
 
     private static int showPoliticsStatus(final CommandSourceStack source) throws CommandSyntaxException {
         final ServerPlayer player = source.getPlayerOrException();

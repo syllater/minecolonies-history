@@ -56,5 +56,14 @@
   "commands.imperium.parliament_law_passed": "%1$s passed with %2$s votes in favor and %3$s against. Its effect has been applied.",
   "commands.imperium.parliament_law_failed": "%1$s failed with %2$s votes in favor and %3$s against.",
   "commands.imperium.politics_status": "%1$s — Approval: %2$s%%; unrest: %3$s%%.",
-  "commands.imperium.faction_support": "%1$s support: %2$s%%."
+  "commands.imperium.faction_support": "%1$s support: %2$s%%.",
+  "commands.imperium.emperor_vacant": "Vacant",
+  "commands.imperium.emperor_status": "%1$s — Emperor: %2$s; total reigns: %3$s; abdications: %4$s.",
+  "commands.imperium.emperor_claim_rejected": "The imperial office is already occupied.",
+  "commands.imperium.emperor_claimed": "%1$s has claimed the imperial office.",
+  "commands.imperium.emperor_successor_not_member": "The proposed successor must be a member of this MineColonies colony.",
+  "commands.imperium.emperor_appoint_rejected": "Only the current emperor may appoint a different successor.",
+  "commands.imperium.emperor_appointed": "%1$s has been appointed emperor.",
+  "commands.imperium.emperor_abdicate_rejected": "Only the current emperor can abdicate.",
+  "commands.imperium.emperor_abdicated": "%1$s has abdicated. The imperial office is now vacant."
 }

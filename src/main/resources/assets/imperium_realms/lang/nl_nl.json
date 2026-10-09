@@ -56,5 +56,14 @@
   "commands.imperium.parliament_law_passed": "%1$s is aangenomen met %2$s stemmen voor en %3$s tegen. Het effect is toegepast.",
   "commands.imperium.parliament_law_failed": "%1$s is verworpen met %2$s stemmen voor en %3$s tegen.",
   "commands.imperium.politics_status": "%1$s — Goedkeuring: %2$s%%; onrust: %3$s%%.",
-  "commands.imperium.faction_support": "Steun voor %1$s: %2$s%%."
+  "commands.imperium.faction_support": "Steun voor %1$s: %2$s%%.",
+  "commands.imperium.emperor_vacant": "Vacant",
+  "commands.imperium.emperor_status": "%1$s — Keizer: %2$s; totaal aantal regeringsperiodes: %3$s; abdicaties: %4$s.",
+  "commands.imperium.emperor_claim_rejected": "Het keizerlijke ambt is al bezet.",
+  "commands.imperium.emperor_claimed": "%1$s heeft het keizerlijke ambt opgeëist.",
+  "commands.imperium.emperor_successor_not_member": "De opvolger moet lid zijn van deze MineColonies-kolonie.",
+  "commands.imperium.emperor_appoint_rejected": "Alleen de huidige keizer kan een andere opvolger benoemen.",
+  "commands.imperium.emperor_appointed": "%1$s is tot keizer benoemd.",
+  "commands.imperium.emperor_abdicate_rejected": "Alleen de huidige keizer kan afstand doen van de troon.",
+  "commands.imperium.emperor_abdicated": "%1$s heeft afstand gedaan van de troon. Het keizerlijke ambt is vacant."
 }
