@@ -2,82 +2,58 @@
 
 ## Milestone 0 — Repository and Compatibility
 
-Status: baseline and pinned 1.21.1 dependency source inspection complete. Gradle/CI results are tracked in the active workflow runs.
+Status: baseline and pinned 1.21.1 dependency source inspection complete. Gradle and client-smoke outcomes are recorded from GitHub Actions.
 
 ## Milestone 1 — Technical Foundation
 
-Status: NeoForge entrypoint, Gradle configuration, translations, JUnit infrastructure and CI workflow exist.
+Status: NeoForge entrypoint, Gradle config, English/Dutch translations, JUnit infrastructure and CI verification workflow.
 
 ## Milestone 2 — MineColonies Integration
 
-Implemented:
-- Public API adapter for server-side colony lookup by world position.
-- Stable identity keyed by dimension ID + MineColonies colony ID.
-- Imperium-owned SavedData in overworld storage for colonies in all dimensions.
-- Idempotent reconciliation for existing and new colonies.
-- Unit tests for identity and core state observation.
-- Required MineColonies dependency family and runtime metadata.
-
-Remaining verification:
-- Client smoke CI must pass; earlier client smoke failure was caused by the absence of an OpenAL device in headless CI, not a MineColonies mod-loading exception.
-- Persistence has not yet been tested against a real player-created world and save/reload.
+Implemented: public server-side colony lookup, dimension+colony identity, Imperium-owned overworld SavedData, idempotent discovery and tests.
+Verification: the integration branch has passed the Gradle build/test and headless client smoke workflow. Manual save/reload with a player-created colony is still needed for full runtime confidence.
 
 ## Milestone 3 — Initial Economy and Policies
 
-Implemented on `milestone-3/imperial-economy`:
-- Persistent treasury, tax rate, chosen policy, and last collection day.
-- Daily-unique tax collection with policy upkeep and non-negative treasury.
-- Server-authoritative `/imperium` commands gated by MineColonies Manage Huts permissions.
-- Unit tests for economy state, tax uniqueness, upkeep and tax range.
-- English and Dutch translations.
-
-Still required:
-- Confirm the latest CI run after the command tree fix.
-- Test saved-data migration and tax collection in a real colony world.
+Implemented: persistent treasury/tax rate/policy; daily-unique tax math with policy upkeep; server-authoritative commands gated by MineColonies Manage Huts; English/Dutch strings and unit tests.
+Verification: CI passed the build/test and client smoke workflow for the corrected economy revision.
 
 ## Milestone 4 — Parliament and Politics
 
-Implemented on `milestone-4/parliament-politics`:
-- Constitutional Empire government display.
-- Persisted proposals and enacted legislation per colony.
-- One vote per MineColonies colony member and proposal.
-- Debate period of one in-game day before resolution.
-- Majority vote determines passage; ties and zero-vote proposals fail.
-- Three initial laws: Public Works Act, Scholarship Charter and Tax Relief Charter.
-- Passing legislation applies an economic effect and records the act.
-- English and Dutch translations and pure Java unit tests.
+Implemented on `milestone-4/parliament-politics`: constitutional empire label; persisted proposals and votes; one vote per colony member; one full in-game day debate; majority decisions; three laws with economic effects; translations and unit tests.
+Pending: verify the newest branch build/test and client smoke workflow.
 
-Next implementation:
-- Persist emperor identity and appointment/abdication rules.
-- Add faction support, approval/happiness modifiers, and peaceful unrest mechanics.
-- Replace command-only administration with a proper in-game UI.
+## Milestone 5 — Factions, Citizen Approval and Unrest
 
-## Milestone 5 — Economy and Citizens
+Implemented on `milestone-5/factions-approval`:
+- Persisted approval, unrest and four faction support shares per colony.
+- Daily political simulation uses MineColonies colony-wide happiness (public API, 0–10 scale) and responds to taxes/policies.
+- Shares are bounded and normalized to total 100.
+- Daily treasury and politics are advanced by the existing colony discovery pass after day zero.
+- Added `/imperium politics` status view and unit tests.
 
-- Add named new jobs through complete MineColonies JobEntry, AI, view and building/module support.
-- Add a tax collector and philosopher after verifying the full 1.21.1 Job/AI extension contract.
-- Link citizen happiness and policy modifiers to MineColonies citizen state without mutating private NBT.
+Next:
+- Expose a proper player-facing management GUI, while keeping commands as admin/debug access.
+- Add emperor office-holder rules and improve faction-specific behavior.
+- Add a truly registered custom MineColonies worker/hut with a tested 1.21.1 AI/view/block/registry/schematic implementation.
+- Continue military units, buildings, multiplayer save/load and release hardening.
 
-## Milestone 6 — Military
+## Milestone 6 — Citizens and Economy
 
-- Add imperial field medic, siege engineer and cavalier only after complete entity/job/AI/guard registration can be verified.
-- Keep strategy state server-authoritative; avoid replacing MineColonies combat and guards with abstract-only counters.
+Add complete custom MineColonies job integrations including job AI, view, building/module support and registration for Tax Collector, Philosopher and Diplomat. Do not claim a role exists until actual MineColonies can assign/work it.
 
-## Milestone 7 — Buildings and Visual Progression
+## Milestone 7 — Military
 
-- Design one real buildable imperial building and schematic first.
-- Add level-based visual/function changes in tested stages.
-- Integrate Structurize/BlockUI once the selected APIs are verified.
+Implement real registered units/jobs for Imperial Field Medic, Siege Engineer and Imperial Cavalier, including server authoritative combat/AI and guard compatibility.
 
-## Milestone 8 — Empire Simulation and Strategy
+## Milestone 8 — Buildings and Visual Progression
 
-- Provincially aggregated economy and domestic development.
-- Internal factions, parliament, diplomacy and strategy warfare systems.
+Add a genuine schematic-backed imperial building, then level-based visual and functional progression from L1 through L5 using Structurize and appropriate BlockUI interfaces.
 
-## Milestone 9 — Multiplayer and Hardening
+## Milestone 9 — Empire Simulation
 
-- Validate permissions, server/client boundaries, save/load, upgrades and dedicated-server startup.
+Domestic factions, approval/unrest events, provinces, diplomacy and grand strategy wars.
 
-## Milestone 10 — Release
+## Milestone 10 — Multiplayer and Release
 
-- Build distributable JAR, verify client/server launch, document dependency versions, setup, translation coverage and migration behavior.
+Dedicated server, migration/save/reload, network validation, translations, reproducible JAR and documented tested dependency versions.

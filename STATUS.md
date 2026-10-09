@@ -4,40 +4,53 @@ Last updated: 2026-10-09 Europe/Amsterdam.
 
 ## Active branches
 
-- MineColonies integration: `milestone-2/colony-integration`
-- Economy/policies: `milestone-3/imperial-economy`
-- Parliament/politics: `milestone-4/parliament-politics`
+- `milestone-2/colony-integration`
+- `milestone-3/imperial-economy`
+- `milestone-4/parliament-politics`
+- `milestone-5/factions-approval`
 
-The user authorized continued development across milestones without a separate approval pause after every milestone. Keep working through the backlog, while recording actual CI outcomes and avoiding claims that are not verified.
+The user authorized continuous development without pausing for milestone approval. Continue progressing through the backlog, but only report actual CI/runtime results.
 
-## Implemented so far
+## Implemented systems
 
 ### MineColonies integration
-- Public API adapter for server-side colony lookup.
-- Stable identity based on dimension + colony ID.
-- Imperium-owned SavedData for colony-linked records.
-- Periodic idempotent discovery of existing/new colonies.
+- Public server API lookup for colonies.
+- Stable identity by dimension + colony ID.
+- Imperium-owned persistent state, independent of MineColonies private NBT.
+- Idempotent colony discovery.
+- CI has passed build/test and client smoke on the corrected integration revision.
 
-### Economy and policies
-- Persisted treasury, tax rate, policy and tax collection day.
-- Daily-unique tax calculation with policy upkeep.
-- Server-side commands gated by MineColonies Manage Huts permission.
-- English/Dutch commands and policy labels.
-- Unit tests for economy calculation and safe ranges.
+### Economy
+- Persistent treasury, tax rate and policy.
+- Daily unique tax calculation, including upkeep.
+- Commands gated by MineColonies Manage Huts permissions.
+- CI has passed build/test and client smoke on the corrected economy revision.
 
 ### Parliament
-- Persisted proposal/voting sessions per colony.
-- Constitutional Empire government label.
-- One vote per colony member per proposal.
-- At least one full in-game day before resolution.
-- Majority rules; tied or empty vote fails.
-- Three laws with economic effects and an enacted-law record.
-- English/Dutch translations and unit tests.
+- Persistent proposals/voting per colony.
+- One vote per member per proposal.
+- One full in-game day debate; majority determines passage.
+- Three initial acts with economic effects.
+- Latest parliament branch CI still needs final verification.
 
-## Verification
+### Factions and unrest
+- Persisted citizen approval, unrest and four faction support shares.
+- Daily simulation uses MineColonies public colony happiness, taxes and policy.
+- Faction shares normalize to 100 and are saved with a data schema version.
+- Added `/imperium politics` and English/Dutch faction strings.
+- The newest branch has not yet completed CI.
 
-- Prior CI runs have passed `test build` for the integration-only code.
-- CI identified and helped fix a command-tree syntax error during the parliament slice.
-- Headless client smoke-test runs are being corrected: the previous failure had OpenAL no-device messages and the script waited for an audio marker, even though MineColonies/BlockUI texture atlases were loaded. The updated script uses the OpenAL null backend and checks for mod-load failure and GUI atlas readiness.
-- The latest CI run for the corrected parliament branch still needs to finish before claiming this branch builds.
-- No manual in-world save/reload test has been performed in this session.
+## Current verification requirements
+
+- Check CI for the current parliament and factions branches.
+- Fix all compile/test/runtime errors.
+- Confirm runClient reaches clean resource start without a mod-loading failure.
+- A real world save/reload test is still not performed; document this as a limitation until done.
+- Do not claim release completion until there is a final distributable JAR and CI has passed the final commit.
+
+## Known remaining work
+
+- Proper in-game BlockUI management GUI.
+- Complete emperor office-holder model and faction-specific gameplay.
+- Genuine MineColonies professions/building with AI, view, hut block/module/registry and Structurize schematic.
+- Military units, L1–L5 building progression, diplomacy and multiplayer validation.

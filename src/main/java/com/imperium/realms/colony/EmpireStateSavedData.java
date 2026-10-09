@@ -1,6 +1,7 @@
 package com.imperium.realms.colony;
 
 import com.imperium.realms.economy.EmpirePolicy;
+import com.imperium.realms.politics.FactionType;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -11,6 +12,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -23,7 +25,7 @@ import java.util.Optional;
  */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 2;
+    private static final int SCHEMA_VERSION = 3;
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -49,8 +51,7 @@ public final class EmpireStateSavedData extends SavedData {
                 ? root.getInt(TAG_SCHEMA_VERSION)
                 : 0;
 
-        // Previous schema versions did not have economy fields. The constructor
-        // supplies their migration defaults: 0 crowns, 10% tax, balanced policy.
+        // Older records did not have political state; defaults below migrate them.
         if (savedSchema > SCHEMA_VERSION) {
             data.setDirty();
         }
@@ -77,8 +78,22 @@ public final class EmpireStateSavedData extends SavedData {
                         .orElse(EmpirePolicy.BALANCED);
                 final long lastTaxDay = entry.contains("last_tax_day", Tag.TAG_LONG)
                         ? entry.getLong("last_tax_day") : -1L;
+
+                final EnumMap<FactionType, Integer> support = new EnumMap<>(FactionType.class);
+                for (final FactionType faction : FactionType.values()) {
+                    support.put(faction, entry.contains(faction.savedDataKey(), Tag.TAG_INT)
+                            ? entry.getInt(faction.savedDataKey()) : 25);
+                }
+                final int approval = entry.contains("citizen_approval", Tag.TAG_INT)
+                        ? entry.getInt("citizen_approval") : 50;
+                final int unrest = entry.contains("unrest", Tag.TAG_INT)
+                        ? entry.getInt("unrest") : 0;
+                final long lastPoliticsDay = entry.contains("last_politics_day", Tag.TAG_LONG)
+                        ? entry.getLong("last_politics_day") : 0L;
+
                 data.colonies.put(identity, new EmpireState(
-                        identity, name, firstSeen, lastSeen, treasury, taxRate, policy, lastTaxDay));
+                        identity, name, firstSeen, lastSeen, treasury, taxRate, policy, lastTaxDay,
+                        approval, unrest, lastPoliticsDay, support));
             } catch (IllegalArgumentException exception) {
                 // Skip malformed records rather than aborting the entire world load.
             }
@@ -154,6 +169,19 @@ public final class EmpireStateSavedData extends SavedData {
         return result;
     }
 
+    public Optional<EmpireState.PoliticalReport> processPoliticalDay(
+            final ColonyIdentity identity,
+            final double overallHappiness,
+            final long gameDay) {
+        final EmpireState state = colonies.get(identity);
+        if (state == null) {
+            return Optional.empty();
+        }
+        final Optional<EmpireState.PoliticalReport> report = state.processPoliticsDay(overallHappiness, gameDay);
+        report.ifPresent(ignored -> setDirty());
+        return report;
+    }
+
     @Override
     public CompoundTag save(final CompoundTag root, final HolderLookup.Provider registries) {
         root.putInt(TAG_SCHEMA_VERSION, SCHEMA_VERSION);
@@ -169,6 +197,12 @@ public final class EmpireStateSavedData extends SavedData {
             entry.putInt("tax_rate", state.taxRatePercent());
             entry.putString("policy", state.policy().id());
             entry.putLong("last_tax_day", state.lastTaxCollectionDay());
+            entry.putInt("citizen_approval", state.citizenApproval());
+            entry.putInt("unrest", state.unrest());
+            entry.putLong("last_politics_day", state.lastPoliticsDay());
+            for (final FactionType faction : FactionType.values()) {
+                entry.putInt(faction.savedDataKey(), state.factionSupport(faction));
+            }
             entries.add(entry);
         }
         root.put(TAG_COLONIES, entries);

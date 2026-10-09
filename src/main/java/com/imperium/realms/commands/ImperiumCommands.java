@@ -6,6 +6,7 @@ import com.imperium.realms.colony.EmpireState;
 import com.imperium.realms.colony.EmpireStateSavedData;
 import com.imperium.realms.colony.MineColoniesIntegration;
 import com.imperium.realms.economy.EmpirePolicy;
+import com.imperium.realms.politics.FactionType;
 import com.imperium.realms.politics.GovernmentType;
 import com.imperium.realms.politics.ImperialLaw;
 import com.imperium.realms.politics.ParliamentSavedData;
@@ -57,6 +58,9 @@ public final class ImperiumCommands {
                                 .executes(context -> setPolicy(context.getSource(), EmpirePolicy.PUBLIC_WORKS)))
                         .then(Commands.literal("scholarship")
                                 .executes(context -> setPolicy(context.getSource(), EmpirePolicy.SCHOLARSHIP))));
+
+        root.then(Commands.literal("politics")
+                .executes(context -> showPoliticsStatus(context.getSource())));
 
         root.then(Commands.literal("parliament")
                 .then(Commands.literal("status")
@@ -172,6 +176,30 @@ public final class ImperiumCommands {
                 taxes.treasuryBalance()), true);
         if (taxes.unpaidUpkeep() > 0) {
             source.sendFailure(Component.translatable("commands.imperium.upkeep_unpaid", taxes.unpaidUpkeep()));
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+
+    private static int showPoliticsStatus(final CommandSourceStack source) throws CommandSyntaxException {
+        final ServerPlayer player = source.getPlayerOrException();
+        final Optional<IColony> colony = findColony(source, player);
+        if (colony.isEmpty()) {
+            return 0;
+        }
+
+        final EmpireState state = stateFor(player.serverLevel(), colony.get());
+        source.sendSuccess(() -> Component.translatable(
+                "commands.imperium.politics_status",
+                state.colonyName(),
+                state.citizenApproval(),
+                state.unrest()), false);
+        for (final FactionType faction : FactionType.values()) {
+            final int support = state.factionSupport(faction);
+            source.sendSuccess(() -> Component.translatable(
+                    "commands.imperium.faction_support",
+                    Component.translatable(faction.translationKey()),
+                    support), false);
         }
         return Command.SINGLE_SUCCESS;
     }

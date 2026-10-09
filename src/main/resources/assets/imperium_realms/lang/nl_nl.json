@@ -7,6 +7,10 @@
   "law.imperium.public_works_act": "Wet op de Openbare Werken",
   "law.imperium.scholarship_charter": "Onderwijshandvest",
   "law.imperium.tax_relief_charter": "Handvest voor Belastingverlichting",
+  "faction.imperium.crown_loyalists": "Kroongetrouwen",
+  "faction.imperium.merchants_guild": "Koopliedengilde",
+  "faction.imperium.commoners_assembly": "Volksvergadering",
+  "faction.imperium.scholars_circle": "Geleerdenkring",
   "commands.imperium.no_colony": "Je moet binnen een MineColonies-kolonie staan om dit commando te gebruiken.",
   "commands.imperium.no_permission": "Je hebt de MineColonies-rechten 'Hutten beheren' nodig om de keizerlijke financiën of wetgeving te wijzigen.",
   "commands.imperium.status": "%1$s — Schatkist: %2$s kronen; belastingtarief: %3$s%%; beleid: %4$s.",
@@ -28,5 +32,7 @@
   "commands.imperium.parliament_vote_no": "Je stem tegen is geregistreerd.",
   "commands.imperium.parliament_too_early": "Een voorstel kan pas worden afgehandeld nadat één volledige in-game dag voor debat is verstreken.",
   "commands.imperium.parliament_law_passed": "%1$s is aangenomen met %2$s stemmen voor en %3$s tegen. Het effect is toegepast.",
-  "commands.imperium.parliament_law_failed": "%1$s is verworpen met %2$s stemmen voor en %3$s tegen."
+  "commands.imperium.parliament_law_failed": "%1$s is verworpen met %2$s stemmen voor en %3$s tegen.",
+  "commands.imperium.politics_status": "%1$s — Goedkeuring: %2$s%%; onrust: %3$s%%.",
+  "commands.imperium.faction_support": "Steun voor %1$s: %2$s%%."
 }

@@ -1,29 +1,25 @@
 # Checkpoints
 
-## 2026-10-09 — Parliament and Politics Slice
+## 2026-10-09 — Factions, Approval and Unrest
 
-Branch: `milestone-4/parliament-politics`
+Branch: `milestone-5/factions-approval`
 
 Added:
-- `GovernmentType`
-- `ImperialLaw`
-- `ParliamentSession`
-- `ParliamentSavedData`
-- `ParliamentSessionTest`
-- English and Dutch parliament/law translations.
-- `/imperium parliament status`
-- `/imperium parliament propose public_works_act|scholarship_charter|tax_relief_charter`
-- `/imperium parliament vote yes|no`
-- `/imperium parliament resolve`
+- `FactionType`: Crown Loyalists, Merchants' Guild, Commoners' Assembly and Scholars' Circle.
+- Persistent `citizenApproval` (0–100), `unrest` (0–100), `lastPoliticsDay` and faction support percentages.
+- SavedData schema bumped to 3; previous records receive defaults and old treasury/policy fields are retained.
+- Daily politics update driven by MineColonies' public `IColony.getOverallHappiness()` API. The upstream implementation averages citizen happiness and returns 5.5 for an empty colony; the score uses a 0–10 scale.
+- Daily tax/politics advancement after in-game day zero, using overworld game time to prevent cross-dimension duplicate updates.
+- `/imperium politics` displays approval, unrest and faction support.
+- Unit tests for day gating, happiness response, policy influence and faction normalization.
+- English and Dutch translations.
 
-Design details:
-- Parliament state uses Imperium-owned overworld SavedData keyed by colony dimension + ID.
-- Only players recognized as members by MineColonies can vote.
-- Proposing and resolving laws requires the MineColonies Manage Huts permission.
-- A proposal cannot be resolved until one full in-game day after it was proposed.
-- A strict majority of yes votes is required; ties and no-vote resolutions fail.
-- Passed acts apply an idempotent initial economic effect and remain in the enacted-law history.
+### Design notes
 
-Known follow-up:
-- The next slice should persist an emperor/office-holder and add political-faction support before complex unrest.
-- Build and client startup must be checked in CI, then test save/reload in a real world before release claims.
+- Faction shares sum to 100. Policy/tax/happiness shifts transfer support between factions rather than increasing the total.
+- Approval and unrest are bounded between 0 and 100.
+- Each daily update executes once per colony/game day even though multiple dimensions can trigger discovery scans.
+
+### Next
+
+Check the newest CI build/test and client smoke. Continue into GUI and complete MineColonies professions/buildings after the politics branch compiles and launches.
