@@ -68,8 +68,37 @@ public final class EmpireStateSavedData extends SavedData {
                 if (entry.contains("parliament_proposals", Tag.TAG_LIST)) {
                     final ListTag savedProposals = entry.getList("parliament_proposals", Tag.TAG_COMPOUND);
                     for (int proposalIndex = 0; proposalIndex < savedProposals.size(); proposalIndex++) {
+                        final CompoundTag proposalTag = savedProposals.getCompound(proposalIndex);
                         try {
-                            proposals.add(ParliamentProposal.fromNbt(savedProposals.getCompound(proposalIndex)));
+                            final Map<String, Boolean> votes = new LinkedHashMap<>();
+                            if (proposalTag.contains("council_votes", Tag.TAG_LIST)) {
+                                final ListTag savedVotes = proposalTag.getList("council_votes", Tag.TAG_COMPOUND);
+                                for (int voteIndex = 0; voteIndex < savedVotes.size(); voteIndex++) {
+                                    final CompoundTag vote = savedVotes.getCompound(voteIndex);
+                                    final String seat = vote.getString("seat");
+                                    if (seat.equals("merchants") || seat.equals("commons")
+                                            || seat.equals("nobility") || seat.equals("scholars")) {
+                                        votes.put(seat, vote.getBoolean("yes"));
+                                    }
+                                }
+                            }
+
+                            ParliamentProposal.Status proposalStatus = ParliamentProposal.Status.OPEN;
+                            try {
+                                proposalStatus = ParliamentProposal.Status.valueOf(proposalTag.getString("status"));
+                            } catch (IllegalArgumentException ignored) {
+                                // An unknown future status is treated as open and will expire normally.
+                            }
+
+                            proposals.add(ParliamentProposal.restore(
+                                    proposalTag.getLong("id"),
+                                    proposalTag.getString("proposer"),
+                                    proposalTag.getInt("previous_tax"),
+                                    proposalTag.getInt("proposed_tax"),
+                                    proposalTag.getLong("created_day"),
+                                    proposalTag.getLong("expires_day"),
+                                    votes,
+                                    proposalStatus));
                         } catch (IllegalArgumentException ignored) {
                             // Ignore one malformed bill without losing the colony's economy.
                         }
@@ -149,8 +178,25 @@ public final class EmpireStateSavedData extends SavedData {
             entry.putLong("next_proposal_id", state.nextProposalId());
 
             final ListTag proposals = new ListTag();
-            for (final ParliamentProposal proposal : state.recentParliamentProposals()) {
-                proposals.add(proposal.save());
+            for (final ParliamentProposal proposal : state.storedParliamentProposals()) {
+                final CompoundTag proposalTag = new CompoundTag();
+                proposalTag.putLong("id", proposal.id());
+                proposalTag.putString("proposer", proposal.proposer());
+                proposalTag.putInt("previous_tax", proposal.previousTaxRate());
+                proposalTag.putInt("proposed_tax", proposal.proposedTaxRate());
+                proposalTag.putLong("created_day", proposal.createdDay());
+                proposalTag.putLong("expires_day", proposal.expiresDay());
+                proposalTag.putString("status", proposal.status().name());
+
+                final ListTag votes = new ListTag();
+                proposal.councilVotes().forEach((seat, yes) -> {
+                    final CompoundTag vote = new CompoundTag();
+                    vote.putString("seat", seat);
+                    vote.putBoolean("yes", yes);
+                    votes.add(vote);
+                });
+                proposalTag.put("council_votes", votes);
+                proposals.add(proposalTag);
             }
             entry.put("parliament_proposals", proposals);
             entries.add(entry);

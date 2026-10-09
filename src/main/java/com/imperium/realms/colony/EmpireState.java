@@ -315,6 +315,11 @@ public final class EmpireState {
         return Collections.unmodifiableList(recent);
     }
 
+    /** Proposals in insertion order, used by the persistence layer. */
+    List<ParliamentProposal> storedParliamentProposals() {
+        return Collections.unmodifiableList(new ArrayList<>(parliamentProposals));
+    }
+
     public boolean expireParliamentProposals(final long currentDay) {
         boolean changed = false;
         for (final ParliamentProposal proposal : parliamentProposals) {

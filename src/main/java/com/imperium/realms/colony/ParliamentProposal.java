@@ -1,8 +1,5 @@
 package com.imperium.realms.colony;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -15,8 +12,8 @@ import java.util.Objects;
  * or later policy change cannot silently rewrite a pending bill's votes.
  */
 public final class ParliamentProposal {
-    private static final int COUNCIL_MAJORITY = 2;
     private static final int TOTAL_SEATS = 5;
+    private static final int REQUIRED_MAJORITY = TOTAL_SEATS / 2 + 1;
     private static final String TAG_VOTES = "council_votes";
 
     public enum Status {
@@ -72,6 +69,19 @@ public final class ParliamentProposal {
         this.status = Objects.requireNonNullElse(status, Status.OPEN);
     }
 
+    static ParliamentProposal restore(
+            final long id,
+            final String proposer,
+            final int previousTaxRate,
+            final int proposedTaxRate,
+            final long createdDay,
+            final long expiresDay,
+            final Map<String, Boolean> councilVotes,
+            final Status status) {
+        return new ParliamentProposal(id, proposer, previousTaxRate, proposedTaxRate,
+                createdDay, expiresDay, councilVotes, status);
+    }
+
     static ParliamentProposal createTaxProposal(
             final long id,
             final String proposer,
@@ -101,60 +111,6 @@ public final class ParliamentProposal {
 
         return new ParliamentProposal(
                 id, proposer, currentTaxRate, proposedTaxRate, safeDay, expiry, votes, Status.OPEN);
-    }
-
-    static ParliamentProposal fromNbt(final CompoundTag tag) {
-        final Map<String, Boolean> votes = new LinkedHashMap<>();
-        if (tag.contains(TAG_VOTES, Tag.TAG_LIST)) {
-            final ListTag voteList = tag.getList(TAG_VOTES, Tag.TAG_COMPOUND);
-            for (int index = 0; index < voteList.size(); index++) {
-                final CompoundTag vote = voteList.getCompound(index);
-                final String seat = vote.getString("seat");
-                if (seat.equals("merchants") || seat.equals("commons")
-                        || seat.equals("nobility") || seat.equals("scholars")) {
-                    votes.put(seat, vote.getBoolean("yes"));
-                }
-            }
-        }
-
-        Status loadedStatus = Status.OPEN;
-        try {
-            loadedStatus = Status.valueOf(tag.getString("status"));
-        } catch (IllegalArgumentException ignored) {
-            // Unknown status from a newer save is downgraded to an open proposal;
-            // it still needs the Emperor's decision and is subject to expiry.
-        }
-
-        return new ParliamentProposal(
-                tag.getLong("id"),
-                tag.getString("proposer"),
-                tag.getInt("previous_tax"),
-                tag.getInt("proposed_tax"),
-                tag.getLong("created_day"),
-                tag.getLong("expires_day"),
-                votes,
-                loadedStatus);
-    }
-
-    CompoundTag save() {
-        final CompoundTag tag = new CompoundTag();
-        tag.putLong("id", id);
-        tag.putString("proposer", proposer);
-        tag.putInt("previous_tax", previousTaxRate);
-        tag.putInt("proposed_tax", proposedTaxRate);
-        tag.putLong("created_day", createdDay);
-        tag.putLong("expires_day", expiresDay);
-        tag.putString("status", status.name());
-
-        final ListTag votes = new ListTag();
-        councilVotes.forEach((seat, yes) -> {
-            final CompoundTag vote = new CompoundTag();
-            vote.putString("seat", seat);
-            vote.putBoolean("yes", yes);
-            votes.add(vote);
-        });
-        tag.put(TAG_VOTES, votes);
-        return tag;
     }
 
     public long id() {
@@ -197,6 +153,10 @@ public final class ParliamentProposal {
         return councilVotes.size() - councilYesVotes();
     }
 
+    public Map<String, Boolean> councilVotes() {
+        return java.util.Collections.unmodifiableMap(new LinkedHashMap<>(councilVotes));
+    }
+
     /**
      * Applies a recorded Emperor assent or veto. Passing requires a majority
      * of the four council seats plus the Emperor's affirmative vote (3 of 5).
@@ -211,7 +171,7 @@ public final class ParliamentProposal {
         }
         if (!emperorAssents
                 || proposedTaxRate == currentTaxRate
-                || councilYesVotes() + 1 < COUNCIL_MAJORITY + 1
+                || councilYesVotes() + 1 < REQUIRED_MAJORITY
                 || councilVotes.size() < TOTAL_SEATS - 1) {
             status = Status.REJECTED;
             return status;
