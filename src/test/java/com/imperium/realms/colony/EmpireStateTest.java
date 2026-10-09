@@ -413,4 +413,38 @@ final class EmpireStateTest {
         assertEquals(12L, state.lastCivicDisorderChangeDay());
     }
 
+    @Test
+    void militaryLevelUpsAdvanceSeparateSpecialistTrainingTracks() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 31), "Capital", 0L);
+
+        assertTrue(state.recordMilitaryTraining(EmpireState.MilitaryDiscipline.SIEGE_ENGINEERING));
+        assertTrue(state.recordMilitaryTraining(EmpireState.MilitaryDiscipline.FIELD_MEDICINE));
+        assertTrue(state.recordMilitaryTraining(EmpireState.MilitaryDiscipline.CAVALRY_DRILL));
+        assertEquals(1L, state.siegeEngineeringPoints());
+        assertEquals(1L, state.fieldMedicinePoints());
+        assertEquals(1L, state.cavalryDrillPoints());
+    }
+
+    @Test
+    void militaryTrainingScoresAreCappedAndRestorable() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 32), "Capital", 0L);
+
+        for (int index = 0; index < 1_100; index++) {
+            state.recordMilitaryTraining(EmpireState.MilitaryDiscipline.SIEGE_ENGINEERING);
+            state.recordMilitaryTraining(EmpireState.MilitaryDiscipline.FIELD_MEDICINE);
+            state.recordMilitaryTraining(EmpireState.MilitaryDiscipline.CAVALRY_DRILL);
+        }
+        assertEquals(EmpireState.MAX_MILITARY_TRAINING_POINTS, state.siegeEngineeringPoints());
+        assertEquals(EmpireState.MAX_MILITARY_TRAINING_POINTS, state.fieldMedicinePoints());
+        assertEquals(EmpireState.MAX_MILITARY_TRAINING_POINTS, state.cavalryDrillPoints());
+        assertFalse(state.recordMilitaryTraining(EmpireState.MilitaryDiscipline.CAVALRY_DRILL));
+
+        state.restoreMilitaryTraining(-2L, 1050L, 17L);
+        assertEquals(0L, state.siegeEngineeringPoints());
+        assertEquals(EmpireState.MAX_MILITARY_TRAINING_POINTS, state.fieldMedicinePoints());
+        assertEquals(17L, state.cavalryDrillPoints());
+    }
+
 }
