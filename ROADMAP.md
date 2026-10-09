@@ -18,16 +18,20 @@ Implementation present:
 - Idempotent initialization for new and already-existing colonies.
 - Name refresh that does not reset first-seen time.
 - Focused unit tests for identity/state logic.
-- CI workflow for `test` and `build`.
+- CI workflow for `test` and `build`, with a JAR artifact.
+- Headless client startup smoke-test job that looks for the client initialization marker.
 
 Still required before acceptance:
 - Successful resolution of the pinned Maven dependencies.
 - Successful compilation against the exact MineColonies 1.21.1 release artifact.
 - Successful execution of unit tests.
-- Review the CI result and correct any failures.
+- Confirm the latest build/test run is green after repository configuration was restored.
+- Confirm the client smoke job reached its startup marker.
+- Review CI results and correct any failures.
 - Runtime validation in a loaded MineColonies world, including save/reload.
 - Explicit check of existing-colony and new-colony discovery.
 - Document whether the actual build and client launch succeeded.
+- Verify save/reload behavior with a real MineColonies colony; the headless main-menu smoke test does not cover it.
 
 ## Milestone 3 — First Playable Vertical Slice
 

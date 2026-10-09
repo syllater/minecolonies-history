@@ -12,7 +12,7 @@ import org.slf4j.Logger;
  * Periodically discovers existing/new colonies through MineColonies' public API.
  * The idempotent persistence service prevents repeated scans from resetting data.
  */
-@EventBusSubscriber(modid = ImperiumRealms.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
+@EventBusSubscriber(modid = ImperiumRealms.MOD_ID)
 public final class MineColoniesLifecycleEvents {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final long SCAN_INTERVAL_TICKS = 200L;

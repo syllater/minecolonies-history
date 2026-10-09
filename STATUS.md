@@ -7,7 +7,8 @@ Last updated: 2026-10-09 Europe/Amsterdam.
 - Repository: https://github.com/syllater/minecolonies-history
 - Working branch: `milestone-2/colony-integration`
 - A GitHub Actions build/test workflow is configured at `.github/workflows/verify.yml`.
-- First CI compile succeeded for `compileJava`, `processResources`, `jar` and `compileTestJava`; test execution then failed during runtime dependency resolution. The identified causes are being corrected: MultiPiston uses artifact ID `multipiston`, and the project needs Jared's Maven repository for JEI artifacts.
+- A CI run on commit `46e2fe20c8a2eb5a87602d4856f514a66e6b0081` completed `./gradlew --no-daemon test build` successfully and uploaded a mod JAR artifact. The artifact was 10,615 bytes. This green run included the corrected `multipiston` artifact ID and Jared's Maven repository.
+- A subsequent repository-centralization attempt failed because ModDevGradle project repositories overrode the settings repositories. Project-level repositories were restored; the latest repository configuration is being reverified by CI.
 - The connected tool environment can read/write GitHub repository content but cannot directly invoke a local shell.
 
 ## Current Milestone
@@ -23,31 +24,28 @@ Milestone 2 — MineColonies Integration.
 - `MineColoniesLifecycleEvents`: periodic server-level scan for existing/new colonies.
 - Unit tests for identity uniqueness/validation and state observation semantics.
 - Pinned candidate 1.21.1 dependencies and the LDTTeam Maven repository.
-- GitHub Actions workflow to run `./gradlew --no-daemon test build` and upload the resulting mod JAR as an artifact.
+- GitHub Actions workflow to run `./gradlew --no-daemon test build`, upload the mod JAR, and run a headless client-startup smoke test that checks for the `Sound engine started` marker.
 
 ## API investigation
 
 Public APIs were inspected from the exact MineColonies source tag `v1.21.1-1.1.1403`, including `IMinecoloniesAPI`, `IColonyManager` and `IColony`. This is source inspection only; compile compatibility remains to be established by CI.
 
-## Not yet verified
+## Not yet verified on the latest commit
 
-- Maven artifact resolution for all pinned coordinates.
-- Java compilation against the exact dependencies.
-- JUnit execution.
-- Generated mod JAR contents.
-- Actual game runtime behavior.
-- `./gradlew runClient`.
+- Dependency resolution after restoring project-level repositories.
+- The latest commit's unit test/build run.
+- The new headless `runClient` smoke test.
+- Actual save/reload behavior in a real MineColonies world.
 - Dedicated-server startup with MineColonies and all required companions.
 
 ## Current blocker
 
-The GitHub-connected environment cannot run local Gradle commands. CI has demonstrated source compilation succeeds so far, but test/build is not green until dependency resolution is corrected. The branch's GitHub Actions workflow should provide a real build/test result once GitHub executes it. If CI fails, fix the concrete failure and rerun CI before considering the milestone ready.
+The GitHub-connected environment cannot invoke a local shell. A prior CI revision did pass tests and build, but the latest repository configuration still needs its own green result. The workflow now also attempts a bounded headless client startup. A client startup marker is not a substitute for validating save/reload with an actual MineColonies colony.
 
 ## Next actions
 
-1. Check GitHub Actions for the latest branch run.
-2. Fix any dependency, compile, test or resource errors.
-3. Verify persistence and first-seen initialization in a real server/world test.
-4. Confirm the build JAR is produced.
-5. Run `./gradlew runClient` locally or through a suitable runner and inspect logs.
-6. Request user approval before Milestone 3.
+1. Confirm the latest `build-and-test` CI job succeeds.
+2. Confirm the headless client smoke job reaches its startup marker.
+3. Fix any dependency, compile, test or runtime errors found.
+4. Verify persistence and first-seen initialization in a real MineColonies world, including save/reload.
+5. Request user approval before Milestone 3.
