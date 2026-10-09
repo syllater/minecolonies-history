@@ -1,58 +1,85 @@
 # Roadmap
 
-## Milestone 0 — Repository and Compatibility
+## Milestone 0 — Repository and compatibility
 
-Status: minimal NeoForge baseline exists. Dependency metadata and relevant MineColonies API declarations have been inspected against the exact 1.21.1 release source tag. Dependency resolution/build verification is now delegated to the newly added GitHub Actions build workflow.
+Status: baseline and dependency metadata exist. The pinned MineColonies 1.21.1 source tag was inspected for the API used by the integration. Artifact resolution was verified by a CI build on an earlier milestone-2 baseline.
 
-## Milestone 1 — Technical Foundation
+## Milestone 1 — Technical foundation
 
-Status: baseline entrypoint, Gradle metadata, English/Dutch starter language files, CI build workflow and JUnit test infrastructure exist. This remains a minimal foundation; there are no gameplay buildings or professions yet.
+Status: Java/NeoForge project, Gradle wrapper, dependency configuration, English/Dutch localization, JUnit and a CI build/client-smoke workflow exist. Baseline test evidence: GitHub Actions run 37925143022 passed the build/test job and headless runClient smoke test before the current Milestone 3 source additions.
 
-## Milestone 2 — MineColonies Integration
+## Milestone 2 — MineColonies integration
 
-Implemented on branch `milestone-2/colony-integration`:
-- Public API adapter for server-side colony lookup at a world position.
-- Identity model keyed by dimension ID + MineColonies colony ID.
-- Imperium-owned, overworld SavedData for records across all dimensions.
-- Idempotent first-observation of loaded colonies.
-- Periodic server-side discovery of colonies in each ticking server level.
-- Safe observation updates that do not reset first-seen time or overwrite the entire record.
-- Schema-versioned serialized records.
-- Unit tests for identity validation and basic first-seen/observation rules.
-- Required runtime metadata and development dependencies for MineColonies, Structurize, BlockUI, Domum Ornamentum and MultiPiston.
-- GitHub Actions workflow intended to compile, test and upload the JAR.
+Implemented:
+- Server-side public MineColonies API lookup by world position.
+- Colony identity keyed by dimension ID plus MineColonies colony ID.
+- Imperium-owned overworld SavedData, separate from MineColonies private NBT.
+- Idempotent discovery/initialization for existing and new colonies.
+- Versioned persistence schema, with older records loading safe defaults.
+- Tests for stable identity and safe first-observation behaviour.
 
-Not claimed complete yet:
-- The branch must pass the remote Gradle build and tests.
-- The code has not been launched in Minecraft in this session.
-- No custom MineColonies worker or hut has been implemented in this milestone.
-- SavedData load/save behaviour still needs runtime or focused integration verification.
+The integration baseline has built previously; all changes must keep passing CI as the source evolves.
+
+## Milestone 3 — First playable vertical slice
+
+Source work underway on milestone-2/colony-integration:
+- Treasury, tax rate (0–25%), economic policies, stability, knowledge points and idempotent daily tax turns.
+- Server-authoritative /imperium commands for status, taxation, policy changes and investments.
+- Permission check for economy-changing commands.
+- English and Dutch translation keys.
+- MineColonies registration for a new Philosopher job, worker AI and Imperial Archive hut/building entry.
+- Crafting recipe, blockstate and placeholder block/item model.
+- Unit tests for treasury, policy, tax turns, scholarship interval and bounds.
+
+Not yet accepted:
+- The new AI failed an early compile because assumed helper methods were missing; a fix now implements those methods locally. The resulting latest commit still needs a fresh CI verdict.
+- Structurize level-1 schematic assets for a fully buildable Imperial Archive have not been authored or verified.
+- A real save/reload test and in-world worker assignment test remain outstanding.
+- A dedicated graphical GUI has not yet been added; this first command interface is the initial management path.
 
 Acceptance:
-- Dependency resolution succeeds on the actual Gradle build.
-- Code compiles against the pinned 1.21.1 artifacts.
-- Tests pass.
-- Server-side colony lookup and scanning work.
-- Existing records are not reset on repeated scans.
-- Imperium data is saved independently of MineColonies internal NBT.
-- Build creates the mod JAR.
+- Latest test/build and headless runClient jobs pass.
+- New job/building registries load without breaking MineColonies.
+- Daily taxation is charged at most once per day per colony, and state survives save/reload.
+- /imperium command effects are server-side and permission-checked.
+- The Philosopher produces knowledge only at the intended interval.
+- An Imperial Archive schematic can be built and upgraded in a real MineColonies world.
 
-## Milestone 3 — First Playable Vertical Slice
+## Milestone 4 — Parliament and politics
 
-After Milestone 2 is reviewed and approved:
-- One truly buildable new MineColonies building.
-- One complete registered profession.
-- One working policy.
-- One treasury transaction.
-- One GUI with server-side validation.
-- Save/load for the slice.
+- Government model with Emperor and parliament.
+- Council seats, proposal/voting rules and policy-change audit history.
+- Stability effects and legitimacy from citizen conditions.
 
-## Later Milestones
+## Milestone 5 — Economy and professions
 
-- Milestone 4: Parliament and politics.
-- Milestone 5: Economy and remaining citizen professions.
-- Milestone 6: Military system.
-- Milestone 7: Buildings and visual progression.
-- Milestone 8: Empire simulation and strategy.
-- Milestone 9: Multiplayer compatibility and hardening.
-- Milestone 10: Release.
+- Expand treasury, production and maintenance flows.
+- Add Diplomat and Tax Collector as full MineColonies professions.
+- Translate all gameplay surfaces into English and Dutch.
+
+## Milestone 6 — Military system
+
+- Siege Engineer, Imperial Field Medic and Imperial Cavalier.
+- Server-authoritative formation/morale/supply logic.
+- Grand-strategy combat with opt-in/clear player control.
+
+## Milestone 7 — Buildings and visual progression
+
+- Structurize schematics with levels 1–5.
+- Hybrid visual/function upgrades and upgrade-compatible save migration.
+- BlockUI management views where supported by the selected API.
+
+## Milestone 8 — Empire simulation and diplomacy
+
+- Abstract provinces, provincial needs, faction happiness, strikes/revolts and diplomacy.
+- Simulation cadence with configurable performance budgets.
+
+## Milestone 9 — Multiplayer hardening
+
+- Server/client authority review, persistence migrations and dedicated-server smoke test.
+- Compatibility matrix and actual-world save/reload test.
+
+## Milestone 10 — Release
+
+- Versioned mod JAR, release notes, verified dependencies, translations, known limitations and install instructions.
+- Final ./gradlew build and ./gradlew runClient evidence.
