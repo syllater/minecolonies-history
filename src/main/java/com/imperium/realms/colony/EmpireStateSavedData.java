@@ -15,14 +15,13 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Global Imperium storage stored on the server overworld.
- *
- * <p>Records include the dimension in their identity, so colonies in separate
- * dimensions cannot collide even though this SavedData instance is global.</p>
+ * Global Imperium registry stored in the server overworld. Records use
+ * dimension + MineColonies colony ID, so same-number colonies in different
+ * dimensions never collide.
  */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 1;
+    private static final int SCHEMA_VERSION = 2;
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -48,10 +47,7 @@ public final class EmpireStateSavedData extends SavedData {
                 ? root.getInt(TAG_SCHEMA_VERSION)
                 : 0;
 
-        // Version 0 means a save written before schema versioning; it had no
-        // records in this format. Unknown newer versions are read best-effort,
-        // because the field names are independently checked below.
-        if (savedSchema > SCHEMA_VERSION) {
+        if (savedSchema < SCHEMA_VERSION || savedSchema > SCHEMA_VERSION) {
             data.setDirty();
         }
 
@@ -68,10 +64,23 @@ public final class EmpireStateSavedData extends SavedData {
                         entry.getInt("colony_id"));
                 final long firstSeen = Math.max(0L, entry.getLong("first_seen"));
                 final long lastSeen = Math.max(firstSeen, entry.getLong("last_seen"));
-                final String name = entry.getString("colony_name");
-                data.colonies.put(identity, new EmpireState(identity, name, firstSeen, lastSeen));
+                final EconomicPolicy policy = EconomicPolicy.fromId(entry.getString("economic_policy"))
+                        .orElse(EconomicPolicy.BALANCED);
+                final EmpireState state = new EmpireState(
+                        identity,
+                        entry.getString("colony_name"),
+                        firstSeen,
+                        lastSeen,
+                        entry.getLong("treasury_crowns"),
+                        entry.contains("tax_rate") ? entry.getInt("tax_rate") : 5,
+                        policy,
+                        entry.getLong("knowledge_points"),
+                        entry.contains("stability") ? entry.getInt("stability") : 50,
+                        entry.contains("last_tax_day") ? entry.getLong("last_tax_day") : -1L,
+                        entry.contains("last_scholar_work_tick") ? entry.getLong("last_scholar_work_tick") : -1L);
+                data.colonies.put(identity, state);
             } catch (IllegalArgumentException exception) {
-                // Skip malformed records rather than aborting the entire world load.
+                // Skip malformed records instead of failing the whole world load.
             }
         }
         return data;
@@ -86,8 +95,8 @@ public final class EmpireStateSavedData extends SavedData {
     }
 
     /**
-     * Insert default state on first observation, and refresh mutable colony
-     * metadata on later scans without resetting the record.
+     * Insert defaults for a first observation and refresh only metadata on later
+     * scans. This is safe to run repeatedly for old and new MineColonies saves.
      *
      * @return true only when a new record was inserted.
      */
@@ -108,6 +117,10 @@ public final class EmpireStateSavedData extends SavedData {
         return false;
     }
 
+    public void markChanged() {
+        setDirty();
+    }
+
     @Override
     public CompoundTag save(final CompoundTag root, final HolderLookup.Provider registries) {
         root.putInt(TAG_SCHEMA_VERSION, SCHEMA_VERSION);
@@ -119,6 +132,13 @@ public final class EmpireStateSavedData extends SavedData {
             entry.putString("colony_name", state.colonyName());
             entry.putLong("first_seen", state.firstSeenGameTime());
             entry.putLong("last_seen", state.lastSeenGameTime());
+            entry.putLong("treasury_crowns", state.treasuryCrowns());
+            entry.putInt("tax_rate", state.taxRatePercent());
+            entry.putString("economic_policy", state.economicPolicy().id());
+            entry.putLong("knowledge_points", state.knowledgePoints());
+            entry.putInt("stability", state.stability());
+            entry.putLong("last_tax_day", state.lastTaxDay());
+            entry.putLong("last_scholar_work_tick", state.lastScholarWorkTick());
             entries.add(entry);
         }
         root.put(TAG_COLONIES, entries);
