@@ -15,6 +15,8 @@ public final class EmpireState {
     private static final int MIN_TAX_RATE = 0;
     private static final int MAX_TAX_RATE = 25;
     private static final long SCHOLAR_WORK_INTERVAL_TICKS = 1_200L;
+    private static final long TAX_COLLECTOR_WORK_INTERVAL_TICKS = 1_200L;
+    private static final int MAX_TAX_COLLECTION_EFFICIENCY_PERCENT = 25;
     private static final int MAX_STORED_PROPOSALS = 20;
 
     public enum ProposalResolution {
@@ -38,6 +40,8 @@ public final class EmpireState {
     private int legitimacy = 50;
     private long lastTaxDay = -1L;
     private long lastScholarWorkTick = -1L;
+    private long lastTaxCollectorWorkTick = -1L;
+    private int taxCollectionEfficiencyPercent;
 
     private long nextProposalId = 1L;
     private final List<ParliamentProposal> parliamentProposals = new ArrayList<>();
@@ -102,6 +106,28 @@ public final class EmpireState {
             final long nextProposalId,
             final List<ParliamentProposal> loadedProposals,
             final int legitimacy) {
+        this(identity, colonyName, firstSeenGameTime, lastSeenGameTime, treasuryCrowns,
+                taxRatePercent, economicPolicy, knowledgePoints, stability, lastTaxDay,
+                lastScholarWorkTick, nextProposalId, loadedProposals, legitimacy, 0, -1L);
+    }
+
+    EmpireState(
+            final ColonyIdentity identity,
+            final String colonyName,
+            final long firstSeenGameTime,
+            final long lastSeenGameTime,
+            final long treasuryCrowns,
+            final int taxRatePercent,
+            final EconomicPolicy economicPolicy,
+            final long knowledgePoints,
+            final int stability,
+            final long lastTaxDay,
+            final long lastScholarWorkTick,
+            final long nextProposalId,
+            final List<ParliamentProposal> loadedProposals,
+            final int legitimacy,
+            final int taxCollectionEfficiencyPercent,
+            final long lastTaxCollectorWorkTick) {
         this.identity = Objects.requireNonNull(identity, "identity");
         this.colonyName = normalizeName(colonyName);
         this.firstSeenGameTime = Math.max(0L, firstSeenGameTime);
@@ -114,6 +140,9 @@ public final class EmpireState {
         this.legitimacy = clamp(legitimacy, 0, 100);
         this.lastTaxDay = lastTaxDay;
         this.lastScholarWorkTick = lastScholarWorkTick;
+        this.taxCollectionEfficiencyPercent = clamp(
+                taxCollectionEfficiencyPercent, 0, MAX_TAX_COLLECTION_EFFICIENCY_PERCENT);
+        this.lastTaxCollectorWorkTick = Math.max(-1L, lastTaxCollectorWorkTick);
         this.nextProposalId = Math.max(1L, nextProposalId);
 
         if (loadedProposals != null) {
@@ -176,6 +205,14 @@ public final class EmpireState {
 
     public long lastScholarWorkTick() {
         return lastScholarWorkTick;
+    }
+
+    public long lastTaxCollectorWorkTick() {
+        return lastTaxCollectorWorkTick;
+    }
+
+    public int taxCollectionEfficiencyPercent() {
+        return taxCollectionEfficiencyPercent;
     }
 
     public long nextProposalId() {
@@ -276,6 +313,24 @@ public final class EmpireState {
     }
 
     /**
+     * A working Tax Collector improves collection accuracy. One successful
+     * filing cycle adds one percentage point, capped at 25%, and is shared by
+     * the colony rather than multiplying for every worker on the same tick.
+     */
+    public boolean recordTaxCollectorWork(final long gameTime) {
+        final long safeTime = Math.max(0L, gameTime);
+        if (taxCollectionEfficiencyPercent >= MAX_TAX_COLLECTION_EFFICIENCY_PERCENT
+                || (lastTaxCollectorWorkTick >= 0L
+                    && (safeTime < lastTaxCollectorWorkTick
+                        || safeTime - lastTaxCollectorWorkTick < TAX_COLLECTOR_WORK_INTERVAL_TICKS))) {
+            return false;
+        }
+        taxCollectionEfficiencyPercent++;
+        lastTaxCollectorWorkTick = safeTime;
+        return true;
+    }
+
+    /**
      * Compatibility overload for simulations/tests without a MineColonies
      * happiness reading. The live integration uses the three-argument method.
      */
@@ -313,7 +368,8 @@ public final class EmpireState {
         final long safePopulation = Math.max(0L, Math.min(population, 1_000_000L));
         final long taxableBase = (safePopulation * taxRatePercent) / 5L;
         final long policyAdjusted = (taxableBase * economicPolicy.taxMultiplierPercent()) / 100L;
-        final long deposited = Math.max(0L, Math.min(policyAdjusted, MAX_TREASURY - treasuryCrowns));
+        final long efficientRevenue = (policyAdjusted * (100L + taxCollectionEfficiencyPercent)) / 100L;
+        final long deposited = Math.max(0L, Math.min(efficientRevenue, MAX_TREASURY - treasuryCrowns));
         treasuryCrowns += deposited;
         return deposited;
     }
