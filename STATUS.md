@@ -12,6 +12,7 @@ Last updated: 2026-10-09 12:18 Europe/Amsterdam.
 - Gradle wrapper has been generated.
 - Minimal NeoForge build succeeds.
 - Generated JAR: `build/libs/imperium_realms-0.1.0-milestone0.jar`.
+- Local Git checkpoint commit created: `6aa3a24 Initialize NeoForge milestone 0 baseline`.
 
 ## Current Milestone
 
@@ -47,3 +48,4 @@ Milestone 0 - Repository and Compatibility.
 - The current minimal build does not yet compile against MineColonies APIs; it declares MineColonies, Structurize, and BlockUI as required runtime mod dependencies in metadata.
 - `./gradlew test` had no test sources in Milestone 0; this is expected for the empty baseline but does not prove gameplay correctness.
 - `./gradlew runClient` was not run in Milestone 0 because required runtime mods are declared but not yet installed into the dev run configuration.
+- Push to GitHub is pending. HTTPS push could not prompt for credentials in this environment, and SSH to `github.com:22` failed.

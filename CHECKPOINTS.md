@@ -65,6 +65,16 @@
   - `assets/imperium_realms/lang/en_us.json`
   - `assets/imperium_realms/lang/nl_nl.json`
   - `com/imperium/realms/ImperiumRealms.class`
+- Local commit:
+  - `6aa3a24 Initialize NeoForge milestone 0 baseline`
+- Push attempt:
+  - `git push -u origin main`
+  - Result: failed.
+  - Error: `fatal: could not read Username for 'https://github.com': Device not configured`
+- SSH check:
+  - `ssh -T git@github.com`
+  - Result: failed.
+  - Error: `ssh: connect to host github.com port 22: Undefined error: 0`
 
 ### Known Issues
 
@@ -72,6 +82,7 @@
 - MineColonies/Structurize/BlockUI API inspection is pending.
 - The build has no test sources yet; `test NO-SOURCE` is not functional coverage.
 - `runClient` has not been executed in Milestone 0 because required runtime mods are declared but not yet wired into the dev run.
+- GitHub push is blocked until this environment has usable GitHub CLI credentials, a credential helper, or an SSH route/key.
 
 ### Next Recommended Action
 
