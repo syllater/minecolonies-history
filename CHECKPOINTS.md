@@ -1,89 +1,50 @@
 # Checkpoints
 
-## 2026-10-09 12:04 Europe/Amsterdam - Milestone 0 Started
+## 2026-10-09 — Milestone 2 API Investigation
 
-### Completed
+### Repository
 
-- Read the project master prompt from the pasted attachment.
-- Confirmed the repository was empty except `work/` and `outputs/`.
-- Confirmed Git remote:
-  - `origin https://github.com/syllater/minecolonies-history.git`
-- Confirmed local branch:
-  - `main`
-- Checked local Java:
-  - Temurin OpenJDK 21.0.11
-- Checked local Gradle:
-  - Gradle 8.14.5
-- Checked NeoForge Maven metadata and selected NeoForge `21.1.256`.
-- Checked ModDevGradle metadata and selected `2.0.148`.
-- Created minimal NeoForge source, metadata, and translation files.
-- Created required project documents.
+- Repository: https://github.com/syllater/minecolonies-history
+- Branch created: `milestone-2/colony-integration`
+- The GitHub connection provides GitHub API file operations, not local shell execution.
 
-### Changed Files
+### Upstream API inspection
 
-- `.gitignore`
-- `settings.gradle`
-- `build.gradle`
-- `gradle.properties`
-- `src/main/java/com/imperium/realms/ImperiumRealms.java`
-- `src/main/resources/META-INF/neoforge.mods.toml`
-- `src/main/resources/assets/imperium_realms/lang/en_us.json`
-- `src/main/resources/assets/imperium_realms/lang/nl_nl.json`
-- `PROJECT_GOAL.md`
-- `AGENTS.md`
-- `ROADMAP.md`
-- `STATUS.md`
-- `DECISIONS.md`
-- `COMPATIBILITY.md`
-- `CHECKPOINTS.md`
+Inspected public source files:
+- MineColonies `IMinecoloniesAPI.java`:
+  https://github.com/ldtteam/MineColonies/blob/version/main/src/main/java/com/minecolonies/api/IMinecoloniesAPI.java
+- MineColonies `IColonyManager.java`:
+  https://github.com/ldtteam/MineColonies/blob/version/main/src/main/java/com/minecolonies/api/colony/IColonyManager.java
+- MineColonies `IColony.java`:
+  https://github.com/ldtteam/MineColonies/blob/version/main/src/main/java/com/minecolonies/api/colony/IColony.java
+- MineColonies `ICitizenData.java`:
+  https://github.com/ldtteam/MineColonies/blob/version/main/src/main/java/com/minecolonies/api/colony/ICitizenData.java
+- MineColonies `IJob.java`:
+  https://github.com/ldtteam/MineColonies/blob/version/main/src/main/java/com/minecolonies/api/colony/jobs/IJob.java
+- MineColonies `BuildingEntry.java` and `JobEntry.java`:
+  public builder APIs inspected.
 
-### Commands Run
+### Confirmed API patterns
 
-- `git status --short`
-- `git remote -v`
-- `git branch --show-current`
-- `java -version`
-- `gradle -v`
-- `curl` checks against NeoForge Maven metadata
-- `curl` checks/searches for MineColonies-related dependency data
+- Use `IMinecoloniesAPI.getInstance().getColonyManager()` for the manager.
+- For server-side world and position lookups, `IColonyManager.getColonyByPosFromWorld(Level, BlockPos)` is available.
+- `IColonyManager.getColonyByWorld(int, Level)` and `getColonies(Level)` are available.
+- `IColony` exposes `getID()`, `getName()`, `getCenter()`, `getWorld()`, `getCitizenManager()` and `markDirty()`.
+- `ICitizenData` exposes job/workbuilding/happiness APIs.
+- Job and building entries use explicit producer/view-producer builders; full MineColonies job/building integrations require complete registration and implementation, not only one entry.
 
-### Build and Test Results
+### Dependency release evidence
 
-- `gradle wrapper --gradle-version 8.14.5`
-  - Result: success.
-- `./gradlew build`
-  - Result: success.
-  - Duration: 5m 6s.
-  - `compileJava`: success.
-  - `processResources`: success.
-  - `jar`: success.
-  - `test`: `NO-SOURCE`.
-- Generated JAR:
-  - `build/libs/imperium_realms-0.1.0-milestone0.jar`
-- JAR contents verified:
-  - `META-INF/neoforge.mods.toml`
-  - `assets/imperium_realms/lang/en_us.json`
-  - `assets/imperium_realms/lang/nl_nl.json`
-  - `com/imperium/realms/ImperiumRealms.class`
-- Local commit:
-  - `6aa3a24 Initialize NeoForge milestone 0 baseline`
-- Push attempt:
-  - `git push -u origin main`
-  - Result: failed.
-  - Error: `fatal: could not read Username for 'https://github.com': Device not configured`
-- SSH check:
-  - `ssh -T git@github.com`
-  - Result: failed.
-  - Error: `ssh: connect to host github.com port 22: Undefined error: 0`
+- MineColonies 1.21.1 release `v1.21.1-1.1.1403` lists Structurize, MultiPiston, BlockUI and Domum Ornamentum as required dependencies.
+- Structurize has a visible 1.21.1 release `v1.21.1-1.0.835-snapshot`.
+- BlockUI has a visible 1.21.1 snapshot `v1.21.1-1.0.212-snapshot`.
 
-### Known Issues
+### Verification status
 
-- No gameplay implementation exists yet.
-- MineColonies/Structurize/BlockUI API inspection is pending.
-- The build has no test sources yet; `test NO-SOURCE` is not functional coverage.
-- `runClient` has not been executed in Milestone 0 because required runtime mods are declared but not yet wired into the dev run.
-- GitHub push is blocked until this environment has usable GitHub CLI credentials, a credential helper, or an SSH route/key.
+- This checkpoint records source inspection only.
+- No compilation/test/run was possible from the GitHub-only tool interface.
+- Do not represent the implementation or this milestone as complete.
 
-### Next Recommended Action
+### Next
 
-Ask the user to approve Milestone 0 dependency choices and proceed to Milestone 1.
+Add the narrow colony integration adapter and world-scoped persistence code, then run Gradle in a local or shell-enabled checkout before treating the milestone as complete.
