@@ -1,3 +1,21 @@
 {
-  "modmenu.descriptionTranslation.imperium_realms": "Europese rijkssimulatie-uitbreiding voor MineColonies."
+  "modmenu.descriptionTranslation.imperium_realms": "Europese rijkssimulatie-uitbreiding voor MineColonies.",
+  "block.imperium_realms.imperial_chancery": "Keizerlijke Kanselarij",
+  "item.imperium_realms.imperial_chancery": "Keizerlijke Kanselarij",
+  "itemGroup.imperium_realms.imperium": "Imperium: Europese Rijken",
+  "com.imperium_realms.building.imperial_chancery": "Keizerlijke Kanselarij",
+  "com.imperium_realms.job.diplomat": "Diplomaat",
+  "com.imperium_realms.job.diplomat.desc": "Een bestuurlijke specialist die diplomatieke invloed voor het rijk opbouwt.",
+  "imperium.policy.low_tax": "Lage Belastingen",
+  "imperium.policy.balanced": "Evenwichtige Belasting",
+  "imperium.policy.emergency_levy": "Noodheffing",
+  "imperium.command.no_colony": "Je moet in een MineColonies-kolonie staan om het rijk te beheren.",
+  "imperium.command.no_permission": "Je hebt de MineColonies-permissie 'Hutten beheren' nodig om dit rijk te besturen.",
+  "imperium.command.invalid_policy": "Onbekend beleid. Gebruik low_tax, balanced of emergency_levy.",
+  "imperium.command.not_enough_emeralds": "Je hebt niet genoeg smaragden in je inventaris.",
+  "imperium.command.treasury_full": "De keizerlijke schatkist kan deze storting niet verwerken.",
+  "imperium.command.status": "Rijk: {0} | Beleid: {1} | Schatkist: {2} kronen | Invloed: {3} | Inwoners: {4}",
+  "imperium.command.treasury_status": "Saldo van de keizerlijke schatkist: {0} kronen.",
+  "imperium.command.policy_set": "Belastingbeleid ingesteld op {0}: {1} kronen per inwoner per Minecraft-dag.",
+  "imperium.command.deposit_complete": "{0} smaragd(en) gestort voor {1} kronen. Nieuw saldo: {2} kronen."
 }
