@@ -2,32 +2,32 @@
 
 Last checked: 2026-10-09.
 
-## Selected baseline
+## Project-selected versions
 
-| Component | Selected version | Status |
+| Component | Version / coordinate | Status |
 | --- | --- | --- |
 | Minecraft | `1.21.1` | Selected |
-| Java | `21` | Configured; not executed in this GitHub-only session |
-| NeoForge | `21.1.256` | Pinned in baseline; not compile-verified in this session |
-| ModDevGradle | `2.0.148` | Pinned in baseline; not compile-verified in this session |
-| MineColonies | `1.1.1403-1.21.1` | Candidate artifact coordinate derived from the official 1.21.1 release and addon-template convention; Gradle resolution must verify it |
-| Structurize | `1.0.835-1.21.1-snapshot` | Candidate artifact coordinate from the 1.21.1 release line; Gradle resolution must verify it |
-| BlockUI | `1.0.212-1.21.1-snapshot` | Candidate artifact coordinate from the 1.21.1 release line; Gradle resolution must verify it |
-| Domum Ornamentum | `1.0.233-snapshot` | Candidate runtime dependency; artifact ID is `multipiston`; Gradle resolution must verify it |
-| MultiPiston | `1.2.51-1.21.1-snapshot` | Candidate runtime dependency; Gradle resolution must verify it |
+| Java | `21` | Required by the pinned MineColonies 1.21.1 build line |
+| NeoForge | `21.1.256` | Pinned by this project |
+| ModDevGradle | `2.0.148` | Pinned by this project |
+| MineColonies | `com.ldtteam:minecolonies:1.1.1403-1.21.1` | Version derived from the official 1.21.1 release tag; Gradle resolution/build still pending |
+| Structurize | `com.ldtteam:structurize:1.0.832-1.21.1-snapshot` | Minimum version in MineColonies release metadata |
+| BlockUI | `com.ldtteam:blockui:1.0.199-1.21.1-snapshot` | Minimum version in MineColonies release metadata |
+| Domum Ornamentum | `com.ldtteam:domum-ornamentum:1.0.223-snapshot` | Required by MineColonies release metadata |
+| MultiPiston | `com.ldtteam:multipiston:1.2.51-1.21.1-snapshot` | Required by MineColonies release metadata |
 
-## Upstream evidence
+The MineColonies/Structurize/BlockUI artifacts are declared compile-only and runtime-only so they are available for compilation and the development launch, but are not bundled into the Imperium JAR.
 
-- MineColonies 1.21.1 release: https://github.com/ldtteam/MineColonies/releases/tag/v1.21.1-1.1.1403
-- Structurize 1.21.1 release line: https://github.com/ldtteam/Structurize/releases
-- BlockUI 1.21.1 release line: https://github.com/ldtteam/BlockUI/releases
-- MineColonies exact release source: https://github.com/ldtteam/MineColonies/tree/v1.21.1-1.1.1403
-- MineColonies addon template dependency convention: https://github.com/talking-colonists/talking-colonists-addon-template/blob/main/build.neoforge.gradle.kts
-- LDTTeam Maven repository used by established addons: https://ldtteam.jfrog.io/ldtteam/mods-maven/
+## Upstream references
 
-## Target-version API signatures inspected
+- MineColonies release metadata and pinned source tag: https://github.com/ldtteam/MineColonies/releases/tag/v1.21.1-1.1.1403
+- MineColonies 1.21.1 API source: https://github.com/ldtteam/MineColonies/tree/v1.21.1-1.1.1403/src/main/java/com/minecolonies/api
+- Structurize 1.21.1 release: https://github.com/ldtteam/Structurize/releases/tag/v1.21.1-1.0.835-snapshot
+- BlockUI 1.21.1 release: https://github.com/ldtteam/BlockUI/releases/tag/v1.21.1-1.0.212-snapshot
+- NeoForge 1.21.1 source: https://github.com/neoforged/NeoForge/tree/1.21.1
+- LDTTeam Maven repository used by upstream projects: https://ldtteam.jfrog.io/ldtteam/modding/
 
-The following interfaces were inspected from MineColonies tag `v1.21.1-1.1.1403`, not from the unrelated 1.20.1 source branch:
+## MineColonies API declarations inspected from the exact 1.21.1 release tag
 
 - `com.minecolonies.api.IMinecoloniesAPI.getInstance()`
 - `IMinecoloniesAPI.getColonyManager()`
@@ -39,32 +39,28 @@ The following interfaces were inspected from MineColonies tag `v1.21.1-1.1.1403`
 - `IColony.getCenter()`
 - `IColony.getWorld()`
 - `IColony.getCitizenManager()`
-- MineColonies public job and building registry builder types also exist in the API, but custom jobs and buildings require their complete associated implementations and registrations.
+- `IColony.markDirty()`
+- `JobEntry.Builder.setJobProducer(...)`, `setJobViewProducer(...)`, `setRegistryName(...)`, `createJobEntry()`
+- `BuildingEntry.Builder.setBuildingBlock(...)`, `setBuildingProducer(...)`, `setBuildingViewProducer(...)`, `setRegistryName(...)`, `createBuildingEntry()`
 
-Source inspection does not prove that the selected Maven artifacts resolve or compile. CI/Gradle verification is mandatory.
+Source links:
+- [IMinecoloniesAPI.java](https://github.com/ldtteam/MineColonies/blob/v1.21.1-1.1.1403/src/main/java/com/minecolonies/api/IMinecoloniesAPI.java)
+- [IColonyManager.java](https://github.com/ldtteam/MineColonies/blob/v1.21.1-1.1.1403/src/main/java/com/minecolonies/api/colony/IColonyManager.java)
+- [IColony.java](https://github.com/ldtteam/MineColonies/blob/v1.21.1-1.1.1403/src/main/java/com/minecolonies/api/colony/IColony.java)
+- [IJob.java](https://github.com/ldtteam/MineColonies/blob/v1.21.1-1.1.1403/src/main/java/com/minecolonies/api/colony/jobs/IJob.java)
+- [JobEntry.java](https://github.com/ldtteam/MineColonies/blob/v1.21.1-1.1.1403/src/main/java/com/minecolonies/api/colony/jobs/registry/JobEntry.java)
+- [BuildingEntry.java](https://github.com/ldtteam/MineColonies/blob/v1.21.1-1.1.1403/src/main/java/com/minecolonies/api/colony/buildings/registry/BuildingEntry.java)
 
-## Integration boundary
+## Integration design conclusion
 
-For Milestone 2, Imperium uses MineColonies public API types to discover real server-side colonies. Imperium's own empire data is stored separately in world SavedData using a compound identity: dimension identifier plus colony ID.
+MineColonies exposes public extension registries for jobs and buildings, but a registry entry alone does not create a working profession or hut. A fully functional MineColonies profession/building needs the complete compatible block/building/job/view/AI/module/registration and schematic integration. This milestone only introduces a public API lookup adapter and a separate persistent state record; it does not claim custom jobs or buildings are finished.
 
-Colony names and center positions are mutable and are not used as identity. Imperium does not write into MineColonies' private NBT or inject private implementation state.
+The selected 1.21.1 source tag is used for API inspection. Earlier notes that referenced MineColonies `version/main` were not reliable for 1.21.1 and have been superseded.
 
-The periodic discovery is idempotent: existing records are not reset when a colony is seen again. The global state is stored via the server overworld's data storage so colonies in other dimensions can be keyed without collisions.
+## Build verification
 
-## Runtime companion dependencies
+The selected coordinates and source signatures have been inspected but this GitHub-only session cannot run Gradle locally. Actual dependency resolution, compilation, tests and `runClient` must be reported from GitHub Actions or a shell-enabled checkout. A successful metadata/source inspection is not proof of a working build.
 
-The MineColonies release metadata names the following as required:
-- Structurize: `1.0.832-1.21.1-snapshot` or above
-- MultiPiston: `1.2.51-1.21.1-snapshot` or above
-- BlockUI: `1.0.199-1.21.1-snapshot` or above
-- Domum Ornamentum: `1.0.223-snapshot` or above
+## Licensing
 
-Imperium declares Structurize, BlockUI, Domum Ornamentum and MultiPiston as runtime dependencies for the development client. MultiPiston's Maven artifact ID is `multipiston` (not the mod ID `multi-piston`). Domum Ornamentum's POM resolves JEI API artifacts, so the build includes Jared's Maven repository (`https://maven.blamejared.com/`).
-
-## Repository-resolution note
-
-CI showed that ModDevGradle adds project-level repositories, which means the build cannot rely solely on `settings.gradle` dependency repositories. The LDTTeam Maven, NeoForge Maven, Jared's Maven, CurseMaven and Maven Central repositories are therefore declared explicitly in `build.gradle` as well as being documented in the settings.
-
-## Known verification limitation
-
-The connected environment has GitHub file read/write operations but no local shell. No claim is made here that `./gradlew test`, `./gradlew build`, or `./gradlew runClient` succeeded. A GitHub Actions workflow has been added to run the unit tests and build on branch updates.
+This repository currently declares `All Rights Reserved` for its own project. No MineColonies source or assets have been copied into Imperium. Review dependency licenses before distributing release bundles.
