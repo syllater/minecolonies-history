@@ -2,50 +2,62 @@
 
 Last updated: 2026-10-09 Europe/Amsterdam.
 
-## Current State
+## Current state
 
 - Repository: https://github.com/syllater/minecolonies-history
 - Working branch: `milestone-2/colony-integration`
-- A GitHub Actions build/test workflow is configured at `.github/workflows/verify.yml`.
-- A CI run on commit `46e2fe20c8a2eb5a87602d4856f514a66e6b0081` completed `./gradlew --no-daemon test build` successfully and uploaded a mod JAR artifact. The artifact was 10,615 bytes. This green run included the corrected `multipiston` artifact ID and Jared's Maven repository.
-- A subsequent repository-centralization attempt failed because ModDevGradle project repositories overrode the settings repositories. Project-level repositories were restored; the latest repository configuration is being reverified by CI.
-- The connected tool environment can read/write GitHub repository content but cannot directly invoke a local shell.
+- Changes are committed to that branch using GitHub's repository file APIs.
+- This environment cannot execute a local shell or Gradle tasks, so build success must come from CI or a shell-enabled checkout.
 
-## Current Milestone
+## Current milestone
 
 Milestone 2 — MineColonies Integration.
 
-## Implemented in source
+## Implemented in this branch
 
-- `ColonyIdentity`: namespaced dimension + MineColonies colony ID, with validation and a deterministic storage key.
-- `EmpireState`: Imperium-owned per-colony state with first-seen and last-seen game times, safe colony display names and rename observation.
-- `EmpireStateSavedData`: versioned world SavedData persisted through the server overworld's data storage.
-- `MineColoniesIntegration`: public API adapter for server-side colony lookup by position, enumeration of colonies in a level and idempotent state initialization.
-- `MineColoniesLifecycleEvents`: periodic server-level scan for existing/new colonies.
-- Unit tests for identity uniqueness/validation and state observation semantics.
-- Pinned candidate 1.21.1 dependencies and the LDTTeam Maven repository.
-- GitHub Actions workflow to run `./gradlew --no-daemon test build`, upload the mod JAR, and run a headless client-startup smoke test that checks for the `Sound engine started` marker.
+- `ColonyIdentity`: dimension + MineColonies colony ID as stable key.
+- `EmpireState`: custom state for first seen, last-seen heartbeat and colony name.
+- `EmpireStateSavedData`: Imperium-owned world save storage under the overworld's DataStorage.
+- `MineColoniesIntegration`: read-only public API adapter and idempotent reconciliation of colonies.
+- `MineColoniesLifecycleEvents`: periodic server-side colony scanning.
+- Unit tests for stable identity and core state behaviour.
+- Gradle coordinates for MineColonies and its required dependency baseline.
+- English and Dutch starter language files retained.
+- GitHub Actions workflow: `.github/workflows/gradle.yml`, intended to run `./gradlew --no-daemon clean build` and upload the mod JAR on success.
 
-## API investigation
+## Dependency candidates pinned
 
-Public APIs were inspected from the exact MineColonies source tag `v1.21.1-1.1.1403`, including `IMinecoloniesAPI`, `IColonyManager` and `IColony`. This is source inspection only; compile compatibility remains to be established by CI.
+- Minecraft 1.21.1.
+- NeoForge 21.1.256.
+- Java 21.
+- ModDevGradle 2.0.148.
+- MineColonies 1.1.1403-1.21.1.
+- Structurize 1.0.832-1.21.1-snapshot.
+- BlockUI 1.0.199-1.21.1-snapshot.
+- Domum Ornamentum 1.0.223-snapshot.
+- MultiPiston 1.2.51-1.21.1-snapshot.
 
-## Not yet verified on the latest commit
+The versions align with the dependency baseline declared by the official MineColonies 1.21.1 release metadata. Gradle artifact resolution still needs confirmation from the build.
 
-- Dependency resolution after restoring project-level repositories.
-- The latest commit's unit test/build run.
-- The new headless `runClient` smoke test.
-- Actual save/reload behavior in a real MineColonies world.
-- Dedicated-server startup with MineColonies and all required companions.
+## Verification status
 
-## Current blocker
+- Public API source reviewed from the pinned MineColonies 1.21.1 release tag.
+- No local `./gradlew build` executed by this session.
+- No local `./gradlew test` executed by this session.
+- No `./gradlew runClient` executed by this session.
+- Remote CI result still needs to be retrieved/verified before Milestone 2 can be marked accepted.
 
-The GitHub-connected environment cannot invoke a local shell. A prior CI revision did pass tests and build, but the latest repository configuration still needs its own green result. The workflow now also attempts a bounded headless client startup. A client startup marker is not a substitute for validating save/reload with an actual MineColonies colony.
+## Known limitations
+
+- No new MineColonies building, profession, worker AI, or Structurize schematic has been added yet.
+- Runtime persistence and automatic colony discovery are implemented but not verified in an actual Minecraft world here.
+- The first version scans colonies once per 200 ticks per server level; this is intentionally low-frequency and idempotent.
+- GitHub Actions runner and remote network access are prerequisites for remote build verification.
 
 ## Next actions
 
-1. Confirm the latest `build-and-test` CI job succeeds.
-2. Confirm the headless client smoke job reaches its startup marker.
-3. Fix any dependency, compile, test or runtime errors found.
-4. Verify persistence and first-seen initialization in a real MineColonies world, including save/reload.
-5. Request user approval before Milestone 3.
+1. Retrieve the workflow run triggered by the last branch push.
+2. If the build fails, inspect logs and fix the actual root cause.
+3. Repeat the CI build until it passes or a concrete external blocker remains.
+4. Update this file with the actual CI result and artifact details.
+5. Submit Milestone 2 for user review; do not start Milestone 3 without approval.
