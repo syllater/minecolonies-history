@@ -22,8 +22,7 @@ neoForge {
 
     runs {
         configureEach {
-            systemProperty 'forge.logging.markers', 'REGISTRIES'
-            logLevel = org.slf4j.event.Level.DEBUG
+            logLevel = org.slf4j.event.Level.INFO
         }
 
         client {
@@ -43,44 +42,22 @@ neoForge {
     }
 }
 
-repositories {
-    // ModDevGradle adds project repositories, so declare dependency repositories here
-    // rather than relying only on settings.gradle's dependencyResolutionManagement.
-    maven {
-        name = 'NeoForge'
-        url = uri('https://maven.neoforged.net/releases')
-    }
-    maven {
-        name = 'LDTTeam - Mods Maven'
-        url = uri('https://ldtteam.jfrog.io/ldtteam/mods-maven/')
-    }
-    maven {
-        name = "Jared's Maven"
-        url = uri('https://maven.blamejared.com/')
-    }
-    maven {
-        name = 'CurseMaven'
-        url = uri('https://cursemaven.com')
-        content {
-            includeGroup 'curse.maven'
-        }
-    }
-    mavenCentral()
-}
-
 dependencies {
-    // MineColonies public APIs are used by the colony integration adapter.
-    implementation "com.ldtteam:minecolonies:${minecolonies_version}"
+    // MineColonies is a required integration target. Compile-only dependencies
+    // provide API types; runtimeOnly makes the actual mods available to runClient.
+    compileOnly "com.ldtteam:minecolonies:${minecolonies_version}"
+    compileOnly "com.ldtteam:structurize:${structurize_version}"
+    compileOnly "com.ldtteam:blockui:${blockui_version}"
+    compileOnly "com.ldtteam:domum-ornamentum:${domum_ornamentum_version}"
+    compileOnly "com.ldtteam:multipiston:${multipiston_version}"
 
-    // Make MineColonies' required companions available to the development client.
-    // These are not shaded into the Imperium JAR.
+    runtimeOnly "com.ldtteam:minecolonies:${minecolonies_version}"
     runtimeOnly "com.ldtteam:structurize:${structurize_version}"
     runtimeOnly "com.ldtteam:blockui:${blockui_version}"
     runtimeOnly "com.ldtteam:domum-ornamentum:${domum_ornamentum_version}"
     runtimeOnly "com.ldtteam:multipiston:${multipiston_version}"
 
-    testImplementation platform("org.junit:junit-bom:${junit_version}")
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation "org.junit.jupiter:junit-jupiter:${junit_version}"
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -89,9 +66,6 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
-    testLogging {
-        events 'passed', 'skipped', 'failed'
-    }
 }
 
 processResources {
