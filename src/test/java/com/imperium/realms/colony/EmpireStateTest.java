@@ -80,6 +80,19 @@ final class EmpireStateTest {
     }
 
     @Test
+    void politicalAdjustmentsRemainWithinValidBounds() {
+        final EmpireState state = EmpireState.create(new ColonyIdentity("minecraft:overworld", 74), "County", 0L);
+        state.adjustPoliticalMetrics(500, -500, 500);
+        assertEquals(100, state.stability());
+        assertEquals(0, state.legitimacy());
+        assertEquals(100, state.unrest());
+        state.adjustPoliticalMetrics(-500, 500, -500);
+        assertEquals(0, state.stability());
+        assertEquals(100, state.legitimacy());
+        assertEquals(0, state.unrest());
+    }
+
+    @Test
     void governorAddsDailyAdministrativeBenefits() {
         final EmpireState unmanaged = EmpireState.create(
                 new ColonyIdentity("minecraft:overworld", 71), "County", 0L);
