@@ -18,7 +18,7 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 10;
+    private static final int SCHEMA_VERSION = 11;
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -213,6 +213,50 @@ public final class EmpireStateSavedData extends SavedData {
                         ProvinceFocus.fromId(entry.getString("province_focus"))
                                 .orElse(ProvinceFocus.AGRICULTURE),
                         entry.contains("province_development") ? entry.getInt("province_development") : 0);
+
+                final List<MilitaryCampaign> campaigns = new ArrayList<>();
+                if (entry.contains("military_campaigns", Tag.TAG_LIST)) {
+                    final ListTag savedCampaigns = entry.getList("military_campaigns", Tag.TAG_COMPOUND);
+                    for (int campaignIndex = 0; campaignIndex < savedCampaigns.size(); campaignIndex++) {
+                        final CompoundTag campaignTag = savedCampaigns.getCompound(campaignIndex);
+                        try {
+                            final MilitaryCampaign.Type type = MilitaryCampaign.Type
+                                    .fromId(campaignTag.getString("type")).orElse(null);
+                            if (type == null) {
+                                continue;
+                            }
+                            final ColonyIdentity target = new ColonyIdentity(
+                                    campaignTag.getString("target_dimension"),
+                                    campaignTag.getInt("target_colony_id"));
+                            MilitaryCampaign.Outcome outcome = MilitaryCampaign.Outcome.PENDING;
+                            try {
+                                if (campaignTag.contains("outcome", Tag.TAG_STRING)) {
+                                    outcome = MilitaryCampaign.Outcome.valueOf(
+                                            campaignTag.getString("outcome"));
+                                }
+                            } catch (IllegalArgumentException ignored) {
+                                // Unknown future outcomes are kept pending and can expire by normal resolution.
+                            }
+                            campaigns.add(MilitaryCampaign.restore(
+                                    campaignTag.getLong("id"),
+                                    type,
+                                    target,
+                                    campaignTag.getString("target_name"),
+                                    campaignTag.getString("commander"),
+                                    campaignTag.getLong("started_day"),
+                                    campaignTag.getLong("resolves_day"),
+                                    campaignTag.getInt("launch_readiness"),
+                                    outcome,
+                                    campaignTag.contains("resolved_day")
+                                            ? campaignTag.getLong("resolved_day") : -1L));
+                        } catch (IllegalArgumentException exception) {
+                            // Ignore malformed operations without discarding the colony's economy or politics.
+                        }
+                    }
+                }
+                state.restoreMilitaryCampaigns(
+                        campaigns,
+                        entry.contains("next_campaign_id") ? entry.getLong("next_campaign_id") : 1L);
                 data.colonies.put(identity, state);
             } catch (IllegalArgumentException exception) {
                 // Skip malformed records instead of failing the whole world load.
@@ -245,6 +289,32 @@ public final class EmpireStateSavedData extends SavedData {
             setDirty();
         }
         return false;
+    }
+
+    /**
+     * Resolve due operations for colony records stored in the same world index.
+     * The operation and both colonies' consequences are saved atomically in
+     * this SavedData instance.
+     *
+     * @return number of operations resolved during this daily turn.
+     */
+    public int resolveDueMilitaryCampaigns(final long dayIndex) {
+        int resolved = 0;
+        for (final EmpireState source : new ArrayList<>(colonies.values())) {
+            for (final MilitaryCampaign campaign : source.pendingMilitaryCampaigns()) {
+                final EmpireState target = colonies.get(campaign.targetIdentity());
+                if (target == null) {
+                    continue;
+                }
+                if (source.resolveMilitaryCampaign(campaign.id(), target, dayIndex).isPresent()) {
+                    resolved++;
+                }
+            }
+        }
+        if (resolved > 0) {
+            setDirty();
+        }
+        return resolved;
     }
 
     public void markChanged() {
@@ -334,6 +404,25 @@ public final class EmpireStateSavedData extends SavedData {
                 proposals.add(proposalTag);
             }
             entry.put("parliament_proposals", proposals);
+
+            entry.putLong("next_campaign_id", state.nextCampaignId());
+            final ListTag campaigns = new ListTag();
+            for (final MilitaryCampaign campaign : state.storedMilitaryCampaigns()) {
+                final CompoundTag campaignTag = new CompoundTag();
+                campaignTag.putLong("id", campaign.id());
+                campaignTag.putString("type", campaign.type().id());
+                campaignTag.putString("target_dimension", campaign.targetIdentity().dimensionId());
+                campaignTag.putInt("target_colony_id", campaign.targetIdentity().colonyId());
+                campaignTag.putString("target_name", campaign.targetName());
+                campaignTag.putString("commander", campaign.commander());
+                campaignTag.putLong("started_day", campaign.startedDay());
+                campaignTag.putLong("resolves_day", campaign.resolvesDay());
+                campaignTag.putInt("launch_readiness", campaign.launchReadiness());
+                campaignTag.putString("outcome", campaign.outcome().name());
+                campaignTag.putLong("resolved_day", campaign.resolvedDay());
+                campaigns.add(campaignTag);
+            }
+            entry.put("military_campaigns", campaigns);
             entries.add(entry);
         }
         root.put(TAG_COLONIES, entries);
