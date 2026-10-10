@@ -74,6 +74,8 @@ public final class ImperiumCommands {
                                 .executes(context -> showSupplyRoutes(context.getSource())))
                         .then(Commands.literal("defenses")
                                 .executes(context -> showDefensiveOrders(context.getSource())))
+                        .then(Commands.literal("theatre")
+                                .executes(context -> showImperialTheatre(context.getSource())))
                         .then(Commands.literal("defense")
                                 .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                         .executes(context -> issueDefensiveOrder(
@@ -683,6 +685,81 @@ public final class ImperiumCommands {
             case REALM_NOT_FOUND -> source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
         }
         return 0;
+    }
+
+    /**
+     * Text-based strategic theatre overview: one line per real MineColonies
+     * province plus the active operations originating there.
+     */
+    private static int showImperialTheatre(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            return 0;
+        }
+
+        final long day = currentDay(source);
+        final EmpireState capitalState = context.data().get(realm.capital()).orElse(null);
+        final String capitalName = capitalState == null
+                ? realm.capital().storageKey() : capitalState.colonyName();
+        final long activeRoutes = realm.supplyRoutes().values().stream()
+                .filter(ImperialSupplyRoute::isActive).count();
+        final long activeOrders = realm.defensiveOrders().values().stream()
+                .filter(order -> order.isActive(day)).count();
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.theatre_header",
+                realm.name(), capitalName, realm.provinceCount(), realm.imperialTreasuryCrowns(),
+                activeRoutes, activeOrders), false);
+
+        int operationsListed = 0;
+        for (final ColonyIdentity province : realm.provinces()) {
+            final EmpireState state = context.data().get(province).orElse(null);
+            if (state == null) continue;
+
+            final ImperialSupplyRoute route = realm.supplyRouteTo(province).orElse(null);
+            final Component supplyStatus;
+            if (realm.capital().equals(province)) {
+                supplyStatus = Component.translatable("imperium_realms.message.theatre_supply_capital");
+            } else if (route == null) {
+                supplyStatus = Component.translatable("imperium_realms.message.theatre_supply_none");
+            } else {
+                supplyStatus = Component.translatable(route.isActive()
+                                ? "imperium_realms.message.theatre_supply_active"
+                                : "imperium_realms.message.theatre_supply_inactive",
+                        route.condition());
+            }
+
+            final ImperialDefensiveOrder order = realm.defensiveOrders().get(province);
+            final Component defenceStatus = order != null && order.isActive(day)
+                    ? Component.translatable("imperium_realms.message.theatre_defense_active", order.expiresDay())
+                    : Component.translatable("imperium_realms.message.theatre_defense_none");
+            final Component focus = Component.translatable("imperium_realms.province_focus." + state.provinceFocus().id());
+            final Component tier = Component.translatable("imperium_realms.province_tier." + state.provinceTierId());
+
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.theatre_province",
+                    tier, state.colonyName(), province.colonyId(), focus,
+                    realm.provincialLoyalty(province), state.treasuryCrowns(),
+                    state.stability(), state.unrest(), state.pendingMilitaryCampaigns().size(),
+                    supplyStatus, defenceStatus), false);
+
+            for (final MilitaryCampaign campaign : state.pendingMilitaryCampaigns()) {
+                operationsListed++;
+                source.sendSuccess(() -> Component.translatable(
+                        "imperium_realms.message.theatre_campaign",
+                        campaign.id(),
+                        Component.translatable("imperium_realms.military_campaign.type." + campaign.type().id()),
+                        campaign.targetName(), campaign.resolvesDay()), false);
+            }
+        }
+
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.theatre_footer", operationsListed), false);
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.theatre_help"), false);
+        return 1;
     }
 
     private static int showDefensiveOrders(final CommandSourceStack source) {

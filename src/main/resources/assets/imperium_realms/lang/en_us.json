@@ -260,5 +260,17 @@
   "imperium_realms.message.defensive_order_issued": "Defensive order issued to %1$s for %2$d crowns. It lasts %3$d in-game days and adds +%4$d readiness when defending. Imperial reserve remaining: %5$d.",
   "imperium_realms.message.defensive_order_active": "That province already has an active defensive order.",
   "imperium_realms.message.defensive_order_funds": "The imperial reserve needs at least %1$d crowns for this order.",
-  "imperium_realms.message.defensive_order_failed": "The defensive order could not be issued. Check membership, funds and order status."
+  "imperium_realms.message.defensive_order_failed": "The defensive order could not be issued. Check membership, funds and order status.",
+  "imperium_realms.gui.empire_theatre": "Strategic theatre",
+  "imperium_realms.message.theatre_header": "Strategic theatre — %1$s | Capital: %2$s | Provinces: %3$d | Imperial reserve: %4$d crowns | Active routes: %5$d | Defensive orders: %6$d",
+  "imperium_realms.message.theatre_province": "[%1$s] %2$s (#%3$d) | Focus: %4$s | Loyalty: %5$d/100 | Treasury: %6$d | Stability: %7$d | Unrest: %8$d | Active operations: %9$d | Supply: %10$s | Defence: %11$s",
+  "imperium_realms.message.theatre_supply_capital": "Capital hub",
+  "imperium_realms.message.theatre_supply_none": "No route",
+  "imperium_realms.message.theatre_supply_active": "Operational (%1$d/100)",
+  "imperium_realms.message.theatre_supply_inactive": "Needs upkeep (%1$d/100)",
+  "imperium_realms.message.theatre_defense_active": "Fortified until day %1$d",
+  "imperium_realms.message.theatre_defense_none": "No active order",
+  "imperium_realms.message.theatre_campaign": "  Operation #%1$d: %2$s against %3$s — resolves on day %4$d",
+  "imperium_realms.message.theatre_footer": "Total pending operations: %1$d",
+  "imperium_realms.message.theatre_help": "This overview is read-only. Use /imperium empire routes, /imperium empire defenses and /imperium empire defense <colonyId> to manage logistics and defensive orders."
 }

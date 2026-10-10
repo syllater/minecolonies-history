@@ -33,6 +33,7 @@ Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38062626
 - Up to three concurrent operations against distinct targets with persisted balanced/offensive/defensive doctrine.
 - Temporary seven-day defensive orders, costing 50 central crowns and adding +20 defensive readiness at resolution.
 - Emperor-managed supply routes connect the capital to member provinces, persist condition/upkeep history and add military logistics readiness while operational.
+- The text-based strategic theatre overview lists province tier/focus/loyalty/treasury/stability/unrest, active operations, route condition and active defensive orders.
 - English and Dutch translations.
 - CI for build/tests, dedicated server/schematic validation and client startup.
 

@@ -49,4 +49,5 @@
     <button id="empire_petitions" pos="208 357" size="190 20" label="$(imperium_realms.gui.empire_petitions)"/>
     <button id="empire_routes" pos="22 385" size="170 20" label="$(imperium_realms.gui.empire_routes)"/>
     <button id="empire_defenses" pos="208 385" size="190 20" label="$(imperium_realms.gui.empire_defenses)"/>
+    <button id="empire_theatre" pos="22 413" size="170 20" label="$(imperium_realms.gui.empire_theatre)"/>
 </window>

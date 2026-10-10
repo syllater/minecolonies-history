@@ -61,3 +61,9 @@ Verify the current full workflow, then implement regional events and repeat the 
 - Orders are stored per realm, removed when a province leaves, and expired on the authoritative daily turn.
 - Only the Emperor or server operator can issue orders spending central funds.
 - Added command/status listing, BlockUI access, English/Dutch translations and tests. Verification pending.
+
+## 2026-10-10 — Strategic theatre overview
+
+- Added `/imperium empire theatre` to show a realm-level snapshot of all tracked provinces and pending operations.
+- Added route condition and temporary defensive-order status per province, including current readiness infrastructure.
+- Added BlockUI entry and English/Dutch translations. Coordinate map remains future work; this is the low-risk text-first overview.

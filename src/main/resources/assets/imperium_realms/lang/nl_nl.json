@@ -260,5 +260,17 @@
   "imperium_realms.message.defensive_order_issued": "Verdedigingsbevel uitgevaardigd voor %1$s voor %2$d kronen. Het duurt %3$d speldagen en geeft +%4$d verdedigingskracht. Resterende keizerlijke reserve: %5$d.",
   "imperium_realms.message.defensive_order_active": "Deze provincie heeft al een actief verdedigingsbevel.",
   "imperium_realms.message.defensive_order_funds": "De keizerlijke reserve heeft minstens %1$d kronen nodig voor dit bevel.",
-  "imperium_realms.message.defensive_order_failed": "Het verdedigingsbevel kon niet worden uitgevaardigd. Controleer lidmaatschap, middelen en status."
+  "imperium_realms.message.defensive_order_failed": "Het verdedigingsbevel kon niet worden uitgevaardigd. Controleer lidmaatschap, middelen en status.",
+  "imperium_realms.gui.empire_theatre": "Strategisch overzicht",
+  "imperium_realms.message.theatre_header": "Strategisch overzicht — %1$s | Hoofdstad: %2$s | Provincies: %3$d | Keizerlijke reserve: %4$d kronen | Actieve routes: %5$d | Verdedigingsbevelen: %6$d",
+  "imperium_realms.message.theatre_province": "[%1$s] %2$s (#%3$d) | Focus: %4$s | Loyaliteit: %5$d/100 | Schatkist: %6$d | Stabiliteit: %7$d | Onrust: %8$d | Actieve operaties: %9$d | Bevoorrading: %10$s | Verdediging: %11$s",
+  "imperium_realms.message.theatre_supply_capital": "Hoofdstadsknooppunt",
+  "imperium_realms.message.theatre_supply_none": "Geen route",
+  "imperium_realms.message.theatre_supply_active": "Operationeel (%1$d/100)",
+  "imperium_realms.message.theatre_supply_inactive": "Onderhoud nodig (%1$d/100)",
+  "imperium_realms.message.theatre_defense_active": "Versterkt tot dag %1$d",
+  "imperium_realms.message.theatre_defense_none": "Geen actief bevel",
+  "imperium_realms.message.theatre_campaign": "  Operatie #%1$d: %2$s tegen %3$s — wordt afgehandeld op dag %4$d",
+  "imperium_realms.message.theatre_footer": "Totaal aantal lopende operaties: %1$d",
+  "imperium_realms.message.theatre_help": "Dit overzicht is alleen-lezen. Gebruik /imperium empire routes, /imperium empire defenses en /imperium empire defense <colonyId> om bevoorrading en verdedigingsbevelen te beheren."
 }
