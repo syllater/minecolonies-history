@@ -212,5 +212,21 @@
   "imperium_realms.regional_event.civic-reconciliation": "Burgerlijke verzoening: stabiliteit en legitimiteit herstellen terwijl onrust afneemt.",
   "imperium_realms.regional_event.border-tensions": "Grensspanningen: de provincies worden minder stabiel en het rijk moet extra middelen besteden.",
   "imperium_realms.regional_event.winter-shortages": "Wintertekorten: minder voorraden en kennis zetten stabiliteit en het humeur van burgers onder druk.",
-  "imperium_realms.regional_event.royal-progress": "Koninklijke rondreis: een bezoek versterkt het vertrouwen, maar kost lokaal en centraal geld."
+  "imperium_realms.regional_event.royal-progress": "Koninklijke rondreis: een bezoek versterkt het vertrouwen, maar kost lokaal en centraal geld.",
+  "imperium_realms.gui.empire_petitions": "Separatistische verzoeken",
+  "imperium_realms.message.empire_province_loyalty": "%1$s — loyaliteit %2$d/100; separatistisch verzoek: %3$s.",
+  "imperium_realms.message.empire_petition_pending": "openstaand",
+  "imperium_realms.message.empire_petition_none": "geen",
+  "imperium_realms.message.empire_petitions_header": "Separatistische verzoeken in %1$s (%2$d openstaand).",
+  "imperium_realms.message.empire_petitions_empty": "Er zijn momenteel geen separatistische verzoeken. Loyaliteit daalt bij instabiliteit, lage legitimiteit, hoge onrust of buitensporige belastingen.",
+  "imperium_realms.message.empire_petition_entry": "%1$s (kolonie %2$d): loyaliteit %3$d/100; verzoek ingediend op dag %4$d.",
+  "imperium_realms.message.empire_petition_help": "De keizer kan een verzoek afhandelen met /imperium empire resolve <colonyId> reassure of /imperium empire resolve <colonyId> crackdown. Verzoening kost 50 kronen en verbetert legitimiteit/stabiliteit; hard optreden kost 25 kronen maar vergroot onrust en verlaagt legitimiteit.",
+  "imperium_realms.message.empire_petition_invalid_response": "Kies reassure of crackdown.",
+  "imperium_realms.message.empire_petition_missing": "Deze provincie heeft geen openstaand separatistisch verzoek.",
+  "imperium_realms.message.empire_petition_funds": "De keizerlijke reserve moet minstens %1$d kronen bevatten voor deze keuze.",
+  "imperium_realms.message.empire_petition_reassured": "%1$s is gerustgesteld voor %2$d kronen. Loyaliteit is nu %3$d/100; stabiliteit, legitimiteit en onrust verbeteren.",
+  "imperium_realms.message.empire_petition_crackdown": "De kroon heeft hard opgetreden in %1$s voor %2$d kronen. Loyaliteit is nu %3$d/100, maar stabiliteit en legitimiteit dalen en onrust stijgt.",
+  "imperium_realms.audit.action.separatist-petition": "Separatistisch verzoek ingediend",
+  "imperium_realms.audit.action.petition-reassured": "Separatistisch verzoek beantwoord met verzoening",
+  "imperium_realms.audit.action.petition-crackdown": "Separatistisch verzoek beantwoord met hard optreden"
 }

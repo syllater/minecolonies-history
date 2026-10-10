@@ -212,5 +212,21 @@
   "imperium_realms.regional_event.civic-reconciliation": "Civic reconciliation: stability and legitimacy recover while unrest falls.",
   "imperium_realms.regional_event.border-tensions": "Border tensions: the provinces become less stable and maintaining the realm costs crowns.",
   "imperium_realms.regional_event.winter-shortages": "Winter shortages: reduced stores and knowledge strain stability and the public mood.",
-  "imperium_realms.regional_event.royal-progress": "Royal progress: an imperial tour boosts confidence but requires local and central expenditure."
+  "imperium_realms.regional_event.royal-progress": "Royal progress: an imperial tour boosts confidence but requires local and central expenditure.",
+  "imperium_realms.gui.empire_petitions": "Separatist petitions",
+  "imperium_realms.message.empire_province_loyalty": "%1$s — loyalty %2$d/100; separatist petition: %3$s.",
+  "imperium_realms.message.empire_petition_pending": "pending",
+  "imperium_realms.message.empire_petition_none": "none",
+  "imperium_realms.message.empire_petitions_header": "Separatist petitions in %1$s (%2$d pending).",
+  "imperium_realms.message.empire_petitions_empty": "No separatist petitions are currently pending. Loyalty falls when provinces are unstable, legitimacy is low, unrest is high or taxes are excessive.",
+  "imperium_realms.message.empire_petition_entry": "%1$s (colony %2$d): loyalty %3$d/100; petition filed on day %4$d.",
+  "imperium_realms.message.empire_petition_help": "The Emperor may resolve a petition with /imperium empire resolve <colonyId> reassure or /imperium empire resolve <colonyId> crackdown. Reassurance costs 50 crowns and improves local legitimacy/stability; crackdown costs 25 crowns but worsens unrest and legitimacy.",
+  "imperium_realms.message.empire_petition_invalid_response": "Choose either reassure or crackdown.",
+  "imperium_realms.message.empire_petition_missing": "That province has no pending separatist petition.",
+  "imperium_realms.message.empire_petition_funds": "The imperial reserve needs at least %1$d crowns to carry out that response.",
+  "imperium_realms.message.empire_petition_reassured": "%1$s has been reassured for %2$d crowns. Loyalty is now %3$d/100; stability, legitimacy and unrest improve.",
+  "imperium_realms.message.empire_petition_crackdown": "The crown has imposed a crackdown in %1$s for %2$d crowns. Loyalty is now %3$d/100, but stability and legitimacy fall and unrest rises.",
+  "imperium_realms.audit.action.separatist-petition": "Separatist petition opened",
+  "imperium_realms.audit.action.petition-reassured": "Separatist petition answered with reassurance",
+  "imperium_realms.audit.action.petition-crackdown": "Separatist petition answered with crackdown"
 }

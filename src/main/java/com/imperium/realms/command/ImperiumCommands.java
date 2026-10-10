@@ -67,6 +67,17 @@ public final class ImperiumCommands {
                                 .executes(context -> showEmpireAudit(context.getSource())))
                         .then(Commands.literal("events")
                                 .executes(context -> showRegionalEvents(context.getSource())))
+                        .then(Commands.literal("petitions")
+                                .executes(context -> showSeparatistPetitions(context.getSource())))
+                        .then(Commands.literal("resolve")
+                                .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                        .then(Commands.argument("response", StringArgumentType.word())
+                                                .suggests((context, builder) -> SharedSuggestionProvider.suggest(
+                                                        List.of("reassure", "crackdown"), builder))
+                                                .executes(context -> resolveSeparatistPetition(
+                                                        context.getSource(),
+                                                        IntegerArgumentType.getInteger(context, "colonyId"),
+                                                        StringArgumentType.getString(context, "response"))))))
                         .then(Commands.literal("found")
                                 .then(Commands.argument("name", StringArgumentType.greedyString())
                                         .executes(context -> foundEmpire(
@@ -556,13 +567,97 @@ public final class ImperiumCommands {
                 "imperium_realms.message.empire_law_status", imperialTaxLaw, imperialPolicyLaw), false);
         for (final ColonyIdentity province : realm.provinces()) {
             final EmpireState provinceState = context.data().get(province).orElse(null);
+            final String provinceName = provinceState == null ? province.storageKey() : provinceState.colonyName();
             source.sendSuccess(() -> Component.translatable(
                     "imperium_realms.message.empire_province",
-                    provinceState == null ? province.storageKey() : provinceState.colonyName(),
-                    province.dimensionId(), province.colonyId(), province.equals(realm.capital())), false);
+                    provinceName, province.dimensionId(), province.colonyId(), province.equals(realm.capital())), false);
+            final Component petitionStatus = realm.hasSeparatistPetition(province)
+                    ? Component.translatable("imperium_realms.message.empire_petition_pending")
+                    : Component.translatable("imperium_realms.message.empire_petition_none");
+            final int loyalty = realm.provincialLoyalty(province);
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.empire_province_loyalty", provinceName, loyalty, petitionStatus), false);
         }
         source.sendSuccess(() -> Component.translatable("imperium_realms.message.empire_help"), false);
         return 1;
+    }
+
+    private static int showSeparatistPetitions(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            return 0;
+        }
+        final List<java.util.Map.Entry<ColonyIdentity, Long>> petitions =
+                realm.separatistPetitions().entrySet().stream().toList();
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.empire_petitions_header", realm.name(), petitions.size()), false);
+        if (petitions.isEmpty()) {
+            source.sendSuccess(() -> Component.translatable("imperium_realms.message.empire_petitions_empty"), false);
+            return 1;
+        }
+        for (final java.util.Map.Entry<ColonyIdentity, Long> petition : petitions) {
+            final EmpireState state = context.data().get(petition.getKey()).orElse(null);
+            final String provinceName = state == null ? petition.getKey().storageKey() : state.colonyName();
+            final int loyalty = realm.provincialLoyalty(petition.getKey());
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.empire_petition_entry",
+                    provinceName, petition.getKey().colonyId(), loyalty, petition.getValue()), false);
+        }
+        source.sendSuccess(() -> Component.translatable("imperium_realms.message.empire_petition_help"), false);
+        return 1;
+    }
+
+    private static int resolveSeparatistPetition(
+            final CommandSourceStack source, final int targetColonyId, final String requestedResponse) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            return 0;
+        }
+        if (!mayManageRealm(context, realm)) {
+            source.sendFailure(Component.translatable("imperium_realms.message.governor_emperor_only"));
+            return 0;
+        }
+        final String response = requestedResponse.toLowerCase(java.util.Locale.ROOT);
+        if (!response.equals("reassure") && !response.equals("crackdown")) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_petition_invalid_response"));
+            return 0;
+        }
+        final IColony target = MineColoniesIntegration
+                .colonyById(context.player().serverLevel(), targetColonyId).orElse(null);
+        if (target == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.governor_target_not_found", targetColonyId));
+            return 0;
+        }
+        final ColonyIdentity province = ColonyIdentity.from(target);
+        final EmpireStateSavedData.PetitionResolutionResult result = context.data().resolveSeparatistPetition(
+                realm.id(), province, response.equals("crackdown"),
+                context.player().getGameProfile().getName(), currentDay(source));
+        switch (result) {
+            case RESOLVED -> {
+                final int newLoyalty = realm.provincialLoyalty(province);
+                final long cost = response.equals("crackdown") ? 25L : 50L;
+                final Component policy = Component.translatable(
+                        response.equals("crackdown")
+                                ? "imperium_realms.message.empire_petition_crackdown"
+                                : "imperium_realms.message.empire_petition_reassured",
+                        target.getName(), cost, newLoyalty);
+                source.sendSuccess(() -> policy, true);
+                return 1;
+            }
+            case INSUFFICIENT_TREASURY -> source.sendFailure(Component.translatable(
+                    "imperium_realms.message.empire_petition_funds", response.equals("crackdown") ? 25 : 50));
+            case NO_PETITION -> source.sendFailure(Component.translatable("imperium_realms.message.empire_petition_missing"));
+            case CAPITAL_PROVINCE -> source.sendFailure(Component.translatable("imperium_realms.message.governor_capital"));
+            case NOT_MEMBER -> source.sendFailure(Component.translatable("imperium_realms.message.governor_not_member"));
+            case REALM_NOT_FOUND -> source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+        }
+        return 0;
     }
 
     private static int showRegionalEvents(final CommandSourceStack source) {
