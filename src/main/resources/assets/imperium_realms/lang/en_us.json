@@ -272,5 +272,15 @@
   "imperium_realms.message.theatre_defense_none": "No active order",
   "imperium_realms.message.theatre_campaign": "  Operation #%1$d: %2$s against %3$s — resolves on day %4$d",
   "imperium_realms.message.theatre_footer": "Total pending operations: %1$d",
-  "imperium_realms.message.theatre_help": "This overview is read-only. Use /imperium empire routes, /imperium empire defenses and /imperium empire defense <colonyId> to manage logistics and defensive orders."
+  "imperium_realms.message.theatre_help": "This overview is read-only. Use /imperium empire routes, /imperium empire defenses and /imperium empire defense <colonyId> to manage logistics and defensive orders.",
+  "imperium_realms.gui.strategy_heading": "Priority strategy actions",
+  "imperium_realms.gui.strategy_posture_balanced": "Balanced",
+  "imperium_realms.gui.strategy_posture_defensive": "Defensive",
+  "imperium_realms.gui.strategy_posture_offensive": "Offensive",
+  "imperium_realms.gui.strategy_route_priority": "Build priority route",
+  "imperium_realms.gui.strategy_defense_priority": "Defend priority province",
+  "imperium_realms.message.supply_route_priority_no_target": "No unsupplied member province needs a new route, or the realm has no registered province state.",
+  "imperium_realms.message.supply_route_priority_built": "Priority supply route built to %1$s (colony %2$d) for %3$d crowns. Remaining central reserve: %4$d crowns.",
+  "imperium_realms.message.defense_priority_no_target": "No eligible province was found for an emergency defensive order.",
+  "imperium_realms.message.defense_priority_issued": "Emergency defence was prioritised for %1$s (colony %2$d). Cost: %3$d crowns; duration: %4$d days; readiness bonus: +%5$d. Central reserve remaining: %6$d crowns."
 }
