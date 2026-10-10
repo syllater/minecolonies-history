@@ -5,45 +5,43 @@ Last updated: 2026-10-10 Europe/Amsterdam.
 ## Repository
 - Repository: https://github.com/syllater/minecolonies-history
 - Active branch: `milestone-2/colony-integration`
-- Repository changes are made through GitHub APIs; GitHub Actions handles compile/test/client/server checks.
+- GitHub Actions performs compile/test/client/server checks; this session does not have a local shell.
 
 ## Latest fully verified commit
-Commit `20a8d8c7b93dce96171e9a7f713dcc33ef607256` passed the complete workflow:
-- English/Dutch validator: success for 265 literal and dynamic localization keys with placeholder index/type checks.
-- Gradle compile, tests and mod JAR upload: success.
+Commit `6ceed484e4ca0d567e9b81555351eae1abadd422` passed the complete workflow:
+- English/Dutch validation: 265 literal and dynamic localization keys checked, including placeholder indices/types.
+- Gradle compile, unit tests and mod JAR upload: success.
 - Headless Minecraft client startup smoke test: success.
 - Dedicated server startup and validation of all 10 Structurize schematics: success.
 
-Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38075571737
+Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38075771050
 
-The next commit adds a reusable clamped five-tier workforce limit and unit tests. It has not yet been through CI.
+The test suite includes NBT round-trips for economic/profession progress and realm state, strategic map grid tests, and building capacity tests for level 0 through 5 plus over-cap values.
 
-## Major systems implemented
+## Current pending change
+This commit adds `tools/validate_blueprint_progression.py` to CI. It validates five unique NBT structures for each building family, non-shrinking dimensions with at least one dimension expanding at every tier, and valid hut anchor offsets. Its own CI result is pending.
+
+## Implemented systems
 - MineColonies API integration with stable identity (dimension + colony ID) and Imperium-owned versioned SavedData.
 - Five-tier Imperial Archive and Imperial Guard Tower with ten generated Structurize schematics.
-- Philosopher, Tax Collector and Diplomat MineColonies professions with work AI.
-- Imperial Siege Engineer, Field Medic and Cavalier specialist training tracks.
-- Archive and guard-tower hiring limits scale with building level, from one worker slot at level 1 to five at level 5.
-- Daily taxation, treasury, knowledge investment, economic policies, faction voting and parliamentary decisions.
-- Citizen-happiness feedback, faction approval, legitimacy, stability, unrest, strikes and revolts.
+- Philosopher, Tax Collector and Diplomat professions; Siege Engineer, Field Medic and Cavalier guard roles.
+- Archive and tower hiring limits scale by building level, from one slot at tier 1 to five at tier 5.
+- Daily taxes, treasury, knowledge investment, economic policies, faction voting and parliament bills.
+- Citizen-happiness feedback, approval, legitimacy, stability, unrest, strikes, revolts and separatist petitions.
 - Diplomatic relations and persisted strategic military campaigns.
-- Province ranks and agriculture, trade, scholarship, military and civic focus.
-- Federated realms with Emperor/capital, up to 64 real colony provinces, invitations and shared central reserve.
-- Imperial tax/policy laws, audits, governors, regional events, cohesion and separatist petitions.
-- Up to three concurrent operations against distinct targets, persisted doctrine, direct supply routes and temporary emergency defence orders.
-- Strategic priority planner and BlockUI controls for doctrine, priority route construction and priority defence.
-- `/imperium empire map` renders a coordinate grid from loaded MineColonies colony centers; other-dimension/unresolved colonies are reported separately.
-- English/Dutch translation validation for literal and known dynamic keys.
-- CI for build/tests, dedicated-server schematic validation and client startup.
+- Provincial focus, governors, federation/capital, invitations, shared reserve, common laws, audit history and regional events.
+- Three-front cap, military doctrine, direct supply routes, temporary defensive orders and deterministic priority actions.
+- BlockUI Imperial Ledger; `/imperium empire map` shows loaded MineColonies centers in a coordinate grid.
+- English/Dutch translations and dynamic localization validation.
 
 ## Remaining acceptance gaps
-- Real survival test: place both buildings, hire workers, upgrade levels 1–5, then save/reload an existing and a new MineColonies colony.
-- Multiplayer playtest with at least two players for permissions, realm membership, governor appointments and concurrent treasury actions.
-- More mechanical/visual differentiation between building levels and deeper building modules.
-- The coordinate map is a compact text-grid/chat view, not a fully interactive pan/zoom theatre map.
-- Release notes, final artifact/package review and an explicit distribution/license decision.
+- Actual survival test: place both buildings, hire workers, upgrade levels 1–5 and save/reload a new and an existing colony.
+- Actual two-player permission, realm membership and concurrent treasury tests.
+- More mechanical/visual differentiation and deeper modules for building levels.
+- Interactive pan/zoom theatre map; current map is a text grid.
+- Release notes, final JAR/package review and distribution/license decision.
 
 ## Next actions
-1. Verify the shared hiring-limit helper/tests with a complete CI run.
-2. Continue improving high-value runtime/persistence features and defer non-blocking cosmetic warnings.
-3. Keep survival and multiplayer tests marked pending until actually performed in Minecraft.
+1. Verify blueprint progression validator on the current commit.
+2. Continue high-value runtime/persistence validation and defer cosmetic polish.
+3. Keep survival/multiplayer tests marked pending until actually performed in Minecraft.

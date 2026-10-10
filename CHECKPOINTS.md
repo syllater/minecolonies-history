@@ -1,29 +1,31 @@
 # Checkpoints
 
-## 2026-10-10 — Five-tier staffing capacity
+## 2026-10-10 — Five-tier worker capacity and blueprint progression validation
 
 ### Repository
 - Repository: https://github.com/syllater/minecolonies-history
 - Branch: `milestone-2/colony-integration`
 
-### Verified preceding commit
-Commit `20a8d8c7b93dce96171e9a7f713dcc33ef607256` passed all CI checks:
-- 265 literal/dynamic EN/NL keys and placeholder indices/types validated.
-- Gradle build/tests and JAR upload passed.
-- Client startup smoke test passed.
+### Latest fully verified commit
+Commit `6ceed484e4ca0d567e9b81555351eae1abadd422` passed the complete GitHub Actions workflow:
+- 265 literal/dynamic EN/NL localization keys validated, including placeholder indices/types.
+- Gradle compile, tests and JAR upload passed.
+- Headless client startup smoke test passed.
 - Dedicated server startup and all 10 Structurize schematic checks passed.
-- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38075571737
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38075771050
 
-### Added in this commit
-- `ImperialBuildingProgression.workerLimitForLevel` maps level 0 to zero available worker slots; levels 1–5 to one through five; and clamps unusual higher levels to the five-tier maximum.
-- All three Archive worker modules and three Guard Tower guard modules use the shared progression rule.
-- `ImperialBuildingProgressionTest` covers all five supported levels, unbuilt/negative levels and over-cap values.
-- The survival acceptance checklist explicitly includes tier-by-tier worker-cap verification.
+### New verified functionality
+- `ImperialBuildingProgression.workerLimitForLevel`: level 0/negative -> 0; level 1–5 -> one through five; over-cap input -> five.
+- All six Archive/Guard Tower worker modules use that shared rule.
+- Unit tests cover valid tiers, unbuilt/negative levels and values above five.
+- Existing tests cover NBT persistence, strategic map geometry, route priority and defensive orders.
 
-### Verification status
-The previous commit is verified. The new helper and its tests have not yet run through CI; the new commit triggers a fresh complete workflow.
+### Added in this commit, pending CI
+- `tools/validate_blueprint_progression.py` generates test payloads from the original generator and checks five unique tiers per building family, non-shrinking dimensions with at least one dimension increasing per tier, and valid hut anchor offsets.
+- `.github/workflows/verify.yml` runs the new validation before the Gradle build.
+- The new validator still needs its own green workflow result.
 
 ### Still pending
-- Actual in-world building placement/hiring/upgrade/save-reload testing.
-- Actual two-player multiplayer permission/economy testing.
-- A full-screen interactive theatre map; current map is a text grid.
+- Actual in-world building placement, worker hiring, level 1–5 upgrades and save/reload.
+- Actual two-player permissions/economy tests.
+- The map remains a chat grid rather than a full-screen interactive theatre map.
