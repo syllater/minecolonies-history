@@ -85,7 +85,7 @@ public final class ImperiumCommands {
                                                 LongArgumentType.longArg(1L, EmpireState.MAX_TREASURY))
                                         .executes(context -> withdrawEmpireTreasury(
                                                 context.getSource(),
-                                                LongArgumentType.getLong(context, "crowns")))))
+                                                LongArgumentType.getLong(context, "crowns"))))))
                 .then(Commands.literal("campaign")
                         .then(Commands.literal("status")
                                 .executes(context -> showCampaigns(context.getSource())))
