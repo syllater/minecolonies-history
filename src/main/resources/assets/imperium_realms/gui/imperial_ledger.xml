@@ -4,8 +4,9 @@
     <text id="help" pos="18 32" size="384 20" textalign="MIDDLE" color="white"
           label="$(imperium_realms.gui.help)"/>
 
-    <button id="status" pos="24 58" size="170 20" label="$(imperium_realms.gui.status)"/>
-    <button id="parliament" pos="226 58" size="170 20" label="$(imperium_realms.gui.parliament)"/>
+    <button id="status" pos="22 58" size="112 20" label="$(imperium_realms.gui.status)"/>
+    <button id="province" pos="154 58" size="112 20" label="$(imperium_realms.gui.province)"/>
+    <button id="parliament" pos="286 58" size="112 20" label="$(imperium_realms.gui.parliament)"/>
 
     <text id="taxLabel" pos="22 89" size="376 12" color="white"
           label="$(imperium_realms.gui.tax_heading)"/>
