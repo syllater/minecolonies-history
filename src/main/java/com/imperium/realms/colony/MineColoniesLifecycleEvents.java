@@ -68,9 +68,16 @@ public final class MineColoniesLifecycleEvents {
             }
         }
 
+        // Campaign resolution uses the same authoritative overworld day clock as taxation.
+        final int resolvedCampaigns = data.resolveDueMilitaryCampaigns(dayIndex);
+
         // The turn index, stability changes and zero-income turns are persisted too.
-        if (coloniesAssessed > 0) {
+        if (coloniesAssessed > 0 || resolvedCampaigns > 0) {
             data.markChanged();
+        }
+        if (resolvedCampaigns > 0) {
+            LOGGER.info("Resolved {} strategic military operation(s) for day {}",
+                    resolvedCampaigns, dayIndex);
         }
         if (totalRevenue > 0L) {
             LOGGER.info("Imperium collected {} crown(s) across {} loaded colony record(s) for day {}",
