@@ -1,38 +1,38 @@
 # Checkpoints
 
-## 2026-10-10 — Strategic priority controls and coordinate map
+## 2026-10-10 — Strategic map verified; persistence test coverage expanding
 
 ### Repository
 - Repository: https://github.com/syllater/minecolonies-history
 - Branch: `milestone-2/colony-integration`
 
-### Verified baseline
-Commit `e06f7c71cd8f6e1572df3e35d16996bfa37f1a57` passed the full GitHub Actions workflow:
+### Verified strategic map baseline
+Commit `f804506970104b9c0a48f64a04e92e8665e1581e` passed the complete GitHub Actions workflow:
 - Build, unit tests and JAR upload: success.
 - Headless client startup smoke test: success.
 - Dedicated-server startup and all 10 Structurize schematic checks: success.
-- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38073979260
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38074390495
 
-### Strategic priority controls delivered in that verified revision
-- `ImperialStrategyPlanner` deterministically ranks provinces by instability, unrest, disorder and loyalty.
+### Verified strategic features
+- `ImperialStrategyPlanner` deterministically ranks provinces by stability, unrest, disorder and loyalty.
 - `/imperium empire route build-priority` builds a route to the most vulnerable unsupplied member province.
 - `/imperium empire defense priority` issues an emergency order to the most at-risk eligible province.
-- The BlockUI ledger exposes balanced/defensive/offensive posture and priority route/defence actions.
-- Unit tests cover route eligibility, vulnerability scoring and defence-order exclusion.
+- The BlockUI ledger exposes balanced/defensive/offensive doctrine and priority route/defence actions.
+- `/imperium empire map` plots colony centers for the capital dimension and reports other-dimension and unresolved colonies explicitly.
 
-### Current pending map change
-- Resolve a persisted colony identity to its real MineColonies colony across dimensions.
-- `/imperium empire map` plots loaded colony centers into a compact coordinate grid for the capital dimension.
-- Colonies in other dimensions and saved but currently unresolved colonies are reported separately.
-- Add the BlockUI ledger shortcut and English/Dutch strings.
-- A new full CI result is required for the map change; do not treat its build/smoke status as passed until the workflow finishes.
+### Pending next verification
+The next prepared commit adds:
+- `StrategicMapGrid`, a pure deterministic coordinate-grid renderer with unit tests for orientation, collisions, empty maps and one-point maps.
+- `EmpireStateSavedDataTest`, NBT round-trip coverage for economic/profession progression, cross-dimension realm membership, laws, routes, defence orders, governors and audit entries.
+- Package-private SavedData constructor/loader visibility for same-package tests.
+The commit must run the complete workflow before these changes can be considered verified.
 
-### Remaining
+### Remaining acceptance gaps
 - No actual two-player Minecraft session was performed via the GitHub file API environment.
 - No in-world placement/hiring/upgrade/save-reload survival test has been performed.
-- The coordinate map is a text-grid view, not a fully interactive graphical map.
+- The coordinate map is a chat text-grid view, not a fully interactive graphical theatre map.
 
 ### Next
-1. Commit the map, translations and checkpoint/docs together to avoid needless workflow restarts.
-2. Check the full CI run for the new commit and fix blocking errors.
-3. Continue with high-value gameplay polish, while retaining the survival/multiplayer tests as explicit acceptance gaps.
+1. Apply the prepared grid/refactor/persistence-test commit only after confirming the branch head is still `f804506970104b9c0a48f64a04e92e8665e1581e`.
+2. Fix blocking CI failures, but defer cosmetic/non-blocking issues.
+3. Continue with survival, progression and multiplayer acceptance work while keeping unperformed tests marked pending.

@@ -16,6 +16,7 @@ import com.imperium.realms.colony.MilitaryPosture;
 import com.imperium.realms.colony.ParliamentProposal;
 import com.imperium.realms.colony.ProvinceGovernor;
 import com.imperium.realms.colony.ProvinceFocus;
+import com.imperium.realms.colony.StrategicMapGrid;
 import com.minecolonies.api.colony.IColony;
 import com.minecolonies.api.colony.permissions.Action;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -749,17 +750,17 @@ public final class ImperiumCommands {
             source.sendSuccess(() -> Component.translatable(
                     "imperium_realms.message.empire_map_no_centers"), false);
         } else {
-            final int width = 25;
-            final int height = 9;
-            final int minX = mapped.stream().mapToInt(ProvinceMapPoint::x).min().orElse(0);
-            final int maxX = mapped.stream().mapToInt(ProvinceMapPoint::x).max().orElse(0);
-            final int minZ = mapped.stream().mapToInt(ProvinceMapPoint::z).min().orElse(0);
-            final int maxZ = mapped.stream().mapToInt(ProvinceMapPoint::z).max().orElse(0);
-            final char[][] grid = new char[height][width];
-            for (int row = 0; row < height; row++) {
-                java.util.Arrays.fill(grid[row], '.');
-            }
+            final List<StrategicMapGrid.Point> points = mapped.stream()
+                    .map(point -> new StrategicMapGrid.Point(point.marker(), point.x(), point.z()))
+                    .toList();
+            final List<String> gridRows = StrategicMapGrid.render(
+                    points, StrategicMapGrid.DEFAULT_WIDTH, StrategicMapGrid.DEFAULT_HEIGHT);
 
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.empire_map_orientation"), false);
+            for (final String line : gridRows) {
+                source.sendSuccess(() -> Component.literal(line), false);
+            }
             for (final ProvinceMapPoint point : mapped) {
                 final int column = maxX == minX ? width / 2
                         : (int) Math.round((point.x() - minX) * (width - 1.0) / (maxX - minX));

@@ -15,7 +15,8 @@ Status: substantial gameplay slice implemented:
 - Philosopher, Tax Collector and Diplomat professions; specialist guard roles.
 - Treasury, tax collection, investment, policies, province focus and BlockUI ledger.
 - Persistence for politics, diplomacy, training, campaigns, realm membership, audits and governors.
-- Needs actual in-world placement/hiring/upgrade/save-reload playtesting.
+- Automated save/load round-trip coverage is now being added.
+- Still requires in-world placement/hiring/upgrade/save-reload playtesting.
 
 ## Milestone 4 — Parliament and politics
 Status: four faction votes, tax/policy bills, imperial assent/veto, common laws, happiness-linked approval/stability/legitimacy/unrest, strikes, revolts and separatist petitions implemented.
@@ -26,8 +27,7 @@ Status: daily taxation, policy multipliers, investment, worker progression, prov
 Remaining: more industries/resources and deeper resource coupling.
 
 ## Milestone 6 — Military systems
-Status: specialist roles/training, persistent delayed operations, three-front cap, military postures, direct supply routes and temporary defensive orders implemented.
-Added deterministic strategic priority actions for routing and emergency defence.
+Status: specialist roles/training, persistent delayed operations, three-front cap, military postures, direct supply routes, temporary defensive orders and deterministic strategic-priority actions implemented.
 Remaining: verify long-running strategic balances in a survival world.
 
 ## Milestone 7 — Buildings and progression
@@ -35,9 +35,8 @@ Status: two registered MineColonies huts with levels 1–5 and ten generated Str
 Remaining: richer level silhouettes/modules and actual construction/upgrade playtesting.
 
 ## Milestone 8 — Empire and provincial simulation
-Status: realm/capital, invitations, shared treasury, common laws, audited flows, governors, weekly regional events, cohesion and separatist pressure implemented.
-A coordinate-based text theatre map from actual MineColonies colony centers is being added.
-Remaining: verify the new map and improve realm/event balancing in longer sessions.
+Status: realm/capital, invitations, shared treasury, common laws, audited flows, governors, weekly regional events, cohesion and separatist pressure implemented. A coordinate-based chat map resolves actual colony centers, including separate reporting for other dimensions.
+Remaining: verify map behavior and improve event balancing in longer sessions.
 
 ## Milestone 9 — Multiplayer and compatibility hardening
 Status: server-authoritative commands, permission checks and CI build/server/client checks exist.

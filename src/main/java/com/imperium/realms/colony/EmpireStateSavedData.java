@@ -47,10 +47,10 @@ public final class EmpireStateSavedData extends SavedData {
         return level.getServer().overworld().getDataStorage().computeIfAbsent(FACTORY, DATA_NAME);
     }
 
-    private EmpireStateSavedData() {
+    EmpireStateSavedData() {
     }
 
-    private static EmpireStateSavedData load(
+    static EmpireStateSavedData load(
             final CompoundTag root,
             final HolderLookup.Provider registries) {
         final EmpireStateSavedData data = new EmpireStateSavedData();
