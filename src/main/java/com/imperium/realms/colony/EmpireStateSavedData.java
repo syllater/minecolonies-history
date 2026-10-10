@@ -18,7 +18,11 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 17;
+    private static final int SCHEMA_VERSION = 18;
+
+    public enum PetitionResolutionResult {
+        RESOLVED, REALM_NOT_FOUND, NOT_MEMBER, CAPITAL_PROVINCE, NO_PETITION, INSUFFICIENT_TREASURY
+    }
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -348,6 +352,34 @@ public final class EmpireStateSavedData extends SavedData {
                         }
                     }
 
+                    final Map<ColonyIdentity, Integer> loyalty = new LinkedHashMap<>();
+                    if (realmTag.contains("provincial_loyalty", Tag.TAG_LIST)) {
+                        final ListTag list = realmTag.getList("provincial_loyalty", Tag.TAG_COMPOUND);
+                        for (int i = 0; i < list.size(); i++) {
+                            final CompoundTag tag = list.getCompound(i);
+                            try { loyalty.put(new ColonyIdentity(tag.getString("dimension"), tag.getInt("colony_id")), tag.getInt("value")); }
+                            catch (IllegalArgumentException ignored) { /* Skip malformed loyalty. */ }
+                        }
+                    }
+                    final Map<ColonyIdentity, Integer> pressureDays = new LinkedHashMap<>();
+                    if (realmTag.contains("loyalty_pressure_days", Tag.TAG_LIST)) {
+                        final ListTag list = realmTag.getList("loyalty_pressure_days", Tag.TAG_COMPOUND);
+                        for (int i = 0; i < list.size(); i++) {
+                            final CompoundTag tag = list.getCompound(i);
+                            try { pressureDays.put(new ColonyIdentity(tag.getString("dimension"), tag.getInt("colony_id")), tag.getInt("days")); }
+                            catch (IllegalArgumentException ignored) { /* Skip malformed pressure data. */ }
+                        }
+                    }
+                    final Map<ColonyIdentity, Long> petitions = new LinkedHashMap<>();
+                    if (realmTag.contains("separatist_petitions", Tag.TAG_LIST)) {
+                        final ListTag list = realmTag.getList("separatist_petitions", Tag.TAG_COMPOUND);
+                        for (int i = 0; i < list.size(); i++) {
+                            final CompoundTag tag = list.getCompound(i);
+                            try { petitions.put(new ColonyIdentity(tag.getString("dimension"), tag.getInt("colony_id")), Math.max(0L, tag.getLong("day"))); }
+                            catch (IllegalArgumentException ignored) { /* Skip malformed petitions. */ }
+                        }
+                    }
+
                     final EmpireRealm realm = EmpireRealm.restore(
                             realmId,
                             realmTag.getString("name"),
@@ -364,6 +396,8 @@ public final class EmpireStateSavedData extends SavedData {
                             auditEntries,
                             governors,
                             Math.max(0L, realmTag.getLong("last_regional_event_day")));
+                    realm.restoreCohesionState(loyalty, pressureDays, petitions,
+                            Math.max(0L, realmTag.getLong("last_cohesion_day")));
                     data.realms.put(realmId, realm);
                     if (realmId < Long.MAX_VALUE) {
                         data.nextRealmId = Math.max(data.nextRealmId, realmId + 1L);
@@ -409,6 +443,56 @@ public final class EmpireStateSavedData extends SavedData {
      *
      * @return number of operations resolved during this daily turn.
      */
+    /** Advance province loyalty once per in-game day; prolonged low loyalty raises a petition. */
+    public int updateProvincialLoyalty(final long dayIndex) {
+        if (dayIndex < 0L) return 0;
+        int processed = 0;
+        for (final EmpireRealm realm : new ArrayList<>(realms.values())) {
+            if (!realm.beginCohesionTurn(dayIndex)) continue;
+            processed++;
+            for (final ColonyIdentity province : realm.provinces()) {
+                final EmpireState state = colonies.get(province);
+                if (state == null) continue;
+                int delta = 0;
+                if (state.stability() >= 65 && state.legitimacy() >= 60 && state.unrest() < 25) delta++;
+                if (state.stability() < 35) delta--;
+                if (state.legitimacy() < 35) delta--;
+                if (state.unrest() >= 60) delta -= 2;
+                else if (state.unrest() >= 35) delta--;
+                if (realm.hasGovernor(province)) delta++;
+                if (state.taxRatePercent() >= 15) delta--;
+                if (state.economicPolicy() == EconomicPolicy.WELFARE) delta++;
+                else if (state.economicPolicy() == EconomicPolicy.AUSTERITY) delta--;
+                if (realm.updateProvinceLoyalty(province, delta, dayIndex)) {
+                    realm.recordAudit(dayIndex, "System", "separatist-petition", province.storageKey(), realm.provincialLoyalty(province));
+                }
+            }
+        }
+        if (processed > 0) setDirty();
+        return processed;
+    }
+
+    public PetitionResolutionResult resolveSeparatistPetition(final long realmId, final ColonyIdentity province,
+            final boolean crackdown, final String actor, final long dayIndex) {
+        final EmpireRealm realm = realms.get(realmId);
+        if (realm == null) return PetitionResolutionResult.REALM_NOT_FOUND;
+        if (province == null || !colonies.containsKey(province) || !realm.containsProvince(province)) return PetitionResolutionResult.NOT_MEMBER;
+        if (realm.capital().equals(province)) return PetitionResolutionResult.CAPITAL_PROVINCE;
+        if (!realm.hasSeparatistPetition(province)) return PetitionResolutionResult.NO_PETITION;
+        final long cost = crackdown ? 25L : 50L;
+        if (realm.imperialTreasuryCrowns() < cost || !realm.withdrawImperialTreasury(cost)) return PetitionResolutionResult.INSUFFICIENT_TREASURY;
+        final EmpireState state = colonies.get(province);
+        if (!realm.resolveSeparatistPetition(province, crackdown ? 10 : 25)) {
+            realm.depositImperialTreasury(cost);
+            return PetitionResolutionResult.NO_PETITION;
+        }
+        if (crackdown) state.adjustPoliticalMetrics(-5, -10, 15);
+        else state.adjustPoliticalMetrics(3, 5, -10);
+        realm.recordAudit(dayIndex, actor, crackdown ? "petition-crackdown" : "petition-reassured", province.storageKey(), cost);
+        setDirty();
+        return PetitionResolutionResult.RESOLVED;
+    }
+
     /** Resolves at most one deterministic realm event every seven in-game days. */
     public int resolveDueRegionalEvents(final long dayIndex) {
         if (dayIndex < 0L) return 0;
@@ -803,6 +887,7 @@ public final class EmpireStateSavedData extends SavedData {
             realmTag.putString("emperor_name", realm.emperorName());
             realmTag.putLong("founded_day", realm.foundedDay());
             realmTag.putLong("last_regional_event_day", realm.lastRegionalEventDay());
+            realmTag.putLong("last_cohesion_day", realm.lastCohesionDay());
             realmTag.putLong("imperial_treasury", realm.imperialTreasuryCrowns());
             realmTag.putInt("imperial_tax_rate", realm.imperialTaxRatePercent());
             realmTag.putString("imperial_policy", realm.imperialEconomicPolicyId());
@@ -849,6 +934,28 @@ public final class EmpireStateSavedData extends SavedData {
                 savedGovernors.add(governorTag);
             }
             realmTag.put("governors", savedGovernors);
+
+            final ListTag loyalty = new ListTag();
+            realm.provincialLoyalties().forEach((province, value) -> {
+                final CompoundTag tag = new CompoundTag();
+                tag.putString("dimension", province.dimensionId()); tag.putInt("colony_id", province.colonyId()); tag.putInt("value", value);
+                loyalty.add(tag);
+            });
+            realmTag.put("provincial_loyalty", loyalty);
+            final ListTag pressure = new ListTag();
+            realm.separatistPressureDays().forEach((province, days) -> {
+                final CompoundTag tag = new CompoundTag();
+                tag.putString("dimension", province.dimensionId()); tag.putInt("colony_id", province.colonyId()); tag.putInt("days", days);
+                pressure.add(tag);
+            });
+            realmTag.put("loyalty_pressure_days", pressure);
+            final ListTag petitions = new ListTag();
+            realm.separatistPetitions().forEach((province, day) -> {
+                final CompoundTag tag = new CompoundTag();
+                tag.putString("dimension", province.dimensionId()); tag.putInt("colony_id", province.colonyId()); tag.putLong("day", day);
+                petitions.add(tag);
+            });
+            realmTag.put("separatist_petitions", petitions);
             savedRealms.add(realmTag);
         }
         root.put("realms", savedRealms);
