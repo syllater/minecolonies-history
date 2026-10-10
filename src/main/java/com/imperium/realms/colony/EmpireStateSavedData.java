@@ -18,7 +18,7 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 9;
+    private static final int SCHEMA_VERSION = 10;
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -209,6 +209,10 @@ public final class EmpireStateSavedData extends SavedData {
                                 ? entry.getLong("field_medicine_points") : 0L,
                         entry.contains("cavalry_drill_points")
                                 ? entry.getLong("cavalry_drill_points") : 0L);
+                state.restoreProvinceState(
+                        ProvinceFocus.fromId(entry.getString("province_focus"))
+                                .orElse(ProvinceFocus.AGRICULTURE),
+                        entry.contains("province_development") ? entry.getInt("province_development") : 0);
                 data.colonies.put(identity, state);
             } catch (IllegalArgumentException exception) {
                 // Skip malformed records instead of failing the whole world load.
@@ -275,6 +279,8 @@ public final class EmpireStateSavedData extends SavedData {
             entry.putLong("field_medicine_points", state.fieldMedicinePoints());
             entry.putLong("cavalry_drill_points", state.cavalryDrillPoints());
             entry.putLong("last_tax_day", state.lastTaxDay());
+            entry.putString("province_focus", state.provinceFocus().id());
+            entry.putInt("province_development", state.provinceDevelopmentPoints());
 
             final ListTag factionApproval = new ListTag();
             state.factionApproval().forEach((factionId, approval) -> {
