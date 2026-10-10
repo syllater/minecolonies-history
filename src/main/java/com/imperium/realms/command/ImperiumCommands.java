@@ -91,7 +91,7 @@ public final class ImperiumCommands {
                                                         context.getSource(),
                                                         IntegerArgumentType.getInteger(context, "colonyId")))))
                                 .then(Commands.literal("build-priority")
-                                        .executes(context -> buildPrioritySupplyRoute(context.getSource())))
+                                        .executes(context -> buildPrioritySupplyRoute(context.getSource()))))
                         .then(Commands.literal("petitions")
                                 .executes(context -> showSeparatistPetitions(context.getSource())))
                         .then(Commands.literal("resolve")
