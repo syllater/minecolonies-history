@@ -80,6 +80,25 @@ final class EmpireStateTest {
     }
 
     @Test
+    void governorAddsDailyAdministrativeBenefits() {
+        final EmpireState unmanaged = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 71), "County", 0L);
+        final EmpireState governed = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 72), "County", 0L);
+        unmanaged.restorePoliticalSimulation(java.util.Map.of(), 40,
+                EmpireState.CivicDisorder.CALM, 0L);
+        governed.restorePoliticalSimulation(java.util.Map.of(), 40,
+                EmpireState.CivicDisorder.CALM, 0L);
+
+        unmanaged.collectDailyTaxes(1L, 10L, Double.NaN, false);
+        governed.collectDailyTaxes(1L, 10L, Double.NaN, true);
+
+        assertEquals(unmanaged.stability() + 1, governed.stability());
+        assertEquals(unmanaged.legitimacy() + 1, governed.legitimacy());
+        assertEquals(unmanaged.unrest() - 1, governed.unrest());
+    }
+
+    @Test
     void taxRateRejectsValuesOutsideThePermittedRange() {
         final EmpireState state = EmpireState.create(
                 new ColonyIdentity("minecraft:overworld", 3), "Port", 0L);

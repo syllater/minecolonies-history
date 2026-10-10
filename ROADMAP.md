@@ -1,84 +1,44 @@
 # Roadmap
 
 ## Milestone 0 — Repository and compatibility
-
-Status: baseline created. The MineColonies 1.21.1 source tag and dependency metadata were inspected; dependency resolution has previously passed in CI.
+Status: dependency baseline and MineColonies 1.21.1 public API inspection are in place.
 
 ## Milestone 1 — Technical foundation
-
-Status: complete as a development foundation. NeoForge 1.21.1 / Java 21, Gradle wrapper, localization, test setup and GitHub Actions verification exist.
+Status: complete as a development foundation: NeoForge 1.21.1, Java 21, Gradle wrapper, localization, test setup and CI.
 
 ## Milestone 2 — MineColonies integration
-
-Status: implementation and build verified on prior CI runs.
-- Public API lookup and discovery for real MineColonies colonies.
-- Stable identity (dimension + colony ID).
-- Imperium-owned versioned SavedData separate from MineColonies-private NBT.
-- Idempotent initialization for existing and new colonies.
+Status: implementation and CI verified. Real colony lookup, identity keyed by dimension + colony ID, idempotent initialization and Imperium-owned SavedData.
 
 ## Milestone 3 — First playable vertical slice
-
-Status: core content implemented; in-world playtest remains open.
-- Five-tier Imperial Archive and Guard Tower with generated original Structurize blueprints.
-- Three citizen professions (Philosopher, Tax Collector, Diplomat) with work AI.
-- Specialist military guard roles.
-- Treasury, daily taxes, knowledge investment, server-validated commands and BlockUI ledger.
-- Persistence for economy, politics, diplomatic relations and military training.
-- Previous complete CI baseline verified build/tests, dedicated-server schema validation and client startup. Latest province changes await a green CI run.
+Status: substantial gameplay slice implemented and covered by build/client/server smoke tests.
+- Five-tier Imperial Archive and Imperial Guard Tower with ten generated Structurize blueprints.
+- Philosopher, Tax Collector and Diplomat professions; specialist guard roles.
+- Treasury, tax collection, investment, policies, province focus and BlockUI ledger.
+- Persistence for politics, diplomacy, training, campaigns, realm membership, audit records and governor appointments.
+Still requires in-world placement/hiring/upgrade/save-reload playtesting.
 
 ## Milestone 4 — Parliament and politics
+Status: substantial implementation: four faction votes, tax/policy bills, imperial assent/veto, common laws, happiness-linked approval/stability/legitimacy/unrest, strikes and revolts.
+Remaining: more bill types and richer in-world proposal controls.
 
-Status: substantial implementation exists.
-- Parliamentary tax/policy bills, faction votes, imperial assent/veto, expiration and audit entries.
-- Faction approval, legitimacy, stability, unrest, strikes and revolts based in part on MineColonies happiness.
-
-Remaining: expand decision variety and add in-world UI for proposal resolution.
-
-## Milestone 5 — Economy and citizen professions
-
-Status: substantial implementation exists.
-- Economic policies, taxation, treasury investment and knowledge generation.
-- Tax Collector and Philosopher roles affect the state; Diplomat generates influence.
-- Provincial specialization adds distinct trade, scholarship, civic, military and agricultural effects.
+## Milestone 5 — Economy and professions
+Status: daily taxation, policy multipliers, investment, worker progression, province specialization and a 10% remittance of existing provincial receipts under an enacted imperial tax law.
 Remaining: more industries/resources and deeper policy/resource coupling.
 
 ## Milestone 6 — Military systems
-
-Status: specialist roles, training and time-delayed strategic operations are implemented.
-- Imperial Siege Engineer, Field Medic, Cavalier; guard tower hiring modules.
-- Three persistent training tracks and army status command.
-- Persisted operations: border patrol, relief expedition and war campaign against a real MineColonies colony; costs, duration, training requirements and deterministic outcomes.
-- Outcomes change stability, legitimacy, treasury, training and bilateral diplomatic relations without automatically transferring territory.
-Remaining: operational theatre/map, supply routes, multiple active fronts, defensive response orders and battle formations. Keep conquest secondary to internal development.
+Status: specialist roles/training and persistent delayed strategic operations (border patrol, relief expedition, war campaign) against real MineColonies colonies.
+Remaining: theatre map, supply routes, multi-front operations and defensive orders.
 
 ## Milestone 7 — Buildings and progression
+Status: two registered MineColonies huts with levels 1–5 and ten generated Structurize blueprints. More distinct visuals/modules remain future work.
 
-Status: two registered custom MineColonies huts support levels 1–5, with ten original Structurize blueprints. Further work should differentiate tiers visually and mechanically and add more buildings.
-
-## Milestone 8 — Empire/provincial simulation
-
-Status: first provincial system now implemented in source:
-- Administrative tiers: settlement, county, duchy, principality and kingdom.
-- Province focus: agriculture, trade, scholarship, military or civic administration.
-- Development consumes 10 knowledge points per action; focus affects economy, stability, unrest, knowledge or military training.
-- Status/focus/develop commands and a BlockUI entry point.
-
-Now includes a federated realm registry with Emperor/capital, up to 64 member provinces, seven-day invitations, and a separate imperial reserve funded by explicit province deposits. Realm membership is persisted in versioned SavedData. Provincial tax receipts and parliament/policies remain local for now.
-Remaining: verify the shared-treasury CI, then distinguish imperial law from province-level law and add governors, regional events and empire-level cohesion.
+## Milestone 8 — Empire and provincial simulation
+Status: province tiers/focus; federated realm with Emperor/capital, member invitations, common laws, central reserve, audited financial flows and persistent governor appointments.
+Governed provinces receive +1 daily stability, +1 legitimacy and reduce unrest by one per processed daily turn.
+Remaining: regional events and broader realm cohesion.
 
 ## Milestone 9 — Multiplayer and compatibility hardening
-
-Status: server-authoritative command mutations and client-side GUI segregation exist; CI includes client and dedicated-server smoke checks. Further acceptance still requires a real multiplayer/in-world save/reload playtest and permission review.
-
-## Federated realm work (cross-milestone addition)
-
-- /imperium empire found <name> creates a realm with the current MineColonies colony as capital.
-- The Emperor can invite a colony by ID; its owner accepts from that colony. Invitations expire after seven in-game days.
-- Non-capital provinces can leave. A colony cannot belong to more than one realm.
-- /imperium empire status shows membership and aggregate provincial state.
-- The realm has a separate imperial reserve; provinces can deposit crowns and only the Emperor can withdraw to the current province, with transaction rollback on capacity/funds failures.
-- Central realm identity is persisted in EmpireStateSavedData. Common empire-wide taxes and shared parliament have not yet replaced local colony policies.
+Status: server-authoritative mutations and CI smoke tests exist. Still requires a real two-player permission/economy session and a survival save/reload playtest.
 
 ## Milestone 10 — Release
-
-Not complete. Requires green current CI, actual in-world testing of construction and save/reload, changelog/license/distribution decisions, and a release JAR artifact.
+Not complete. Requires in-world acceptance, release notes, distribution/license choice and final artifact/package review.

@@ -1,66 +1,31 @@
 # Checkpoints
 
-## 2026-10-10 — Provincial system added; CI verification pending
+## 2026-10-10 — Imperial audit trail and governors
 
-### Branch
-- Repository: https://github.com/syllater/minecolonies-history
+### Repository
 - Branch: `milestone-2/colony-integration`
+- Last fully green feature revision: `489fcf9311883230d1b6b50038ad7560ad59b35b`
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38062626937
 
-### Added in the province slice
-- `ProvinceFocus` models agricultural, trade, scholarship, military and civic specializations.
-- `EmpireState` now persists abstract development progress and computes ranks: settlement, county, duchy, principality and kingdom.
-- Developing a province consumes 10 knowledge points and advances progress to a 1,000-point cap.
-- Province focuses influence daily taxes, daily knowledge, civic stability/legitimacy, unrest or specialist training.
-- `EmpireStateSavedData` schema advanced to version 10 and stores province focus/development, while old saves receive safe defaults.
-- Server-validated commands: `/imperium province status`, `focus`, and `develop`.
-- Unit tests cover province rank progression, knowledge costs, daily focus effects and military specialization.
-- Province options are available from the imperial ledger.
-
-### Test failures and correction
-The first CI run for this feature identified two test issues:
-- The default agricultural tax bonus unintentionally changed legacy tax-yield expectations; it was removed, while agricultural specialization still reduces unrest.
-- A test expected revenue on the second tax call of the same day; it was corrected to expect zero, preserving idempotent daily turns.
-
-The current corrected revision is still awaiting a complete CI run. Do not claim this feature is verified until the workflow returns success.
-
-### Existing verified baseline
-At commit `9653908cb359e426a50f7588662c45a1d0c4c184`, the build/tests, dedicated-server Structurize validation and headless client-start smoke passed:
-https://github.com/syllater/minecolonies-history/actions/runs/37975778358
-
-### Next
-After the current CI passes, continue with province GUI polish, strategic military operations and save/reload hardening; only fix bugs that block build/playable acceptance immediately.
-
-
-## 2026-10-10 — Strategic military operations added; CI pending
-
-### Added
-- `MilitaryCampaign`: persistent operation IDs, targets, launch readiness, type, start/due/resolved days and final outcome.
-- `EmpireState`: launch validation, crown/influence costs, military-training requirement, one active operation per realm and campaign consequences.
-- `EmpireStateSavedData`: schema version 11, campaign serialization, next-ID handling, and daily operation resolution.
-- Commands: `/imperium campaign status` and `/imperium campaign launch <border_patrol|relief_expedition|war_campaign> <colonyId>`.
-- BlockUI campaign-status button, English/Dutch strings, and unit tests for operation costs, duration, resolution and bilateral effects.
-
-### Rules
-- Border Patrol: 25 crowns, 1 day; can improve stability and relations.
-- Relief Expedition: 75 crowns + 5 influence, 2 days; success assists the target colony.
-- War Campaign: 150 crowns + 10 influence, requires 3 training points, 3 days; may affect stability, legitimacy, training, treasury and relations.
-- Only real MineColonies colonies in the same dimension can be targeted. One operation can be pending per realm.
-- Operations never automatically transfer territory.
-
-### Verification
-The source is committed. The latest GitHub Actions run must be inspected before marking the campaign addition verified. Do not conflate the earlier green baseline with this new revision.
-
-
-## 2026-10-10 — Federated realm layer and treasury
+### Verified on that revision
+- Gradle build and unit tests: passed.
+- Dedicated server and Structurize schematic validation: passed.
+- Headless client startup: passed.
+- Mod JAR artifact uploaded by CI.
 
 ### Implemented
-- EmpireRealm persists an Emperor, capital colony, realm name, up to 64 colony provinces and seven-day invitations.
-- EmpireStateSavedData advances to schema 13 and serializes realm membership, invitations, next realm ID and central treasury, while loading older schema-12 records with a zero-balance realm default.
-- Commands: /imperium empire found <name>, status, invite <colonyId>, join, leave, deposit <crowns> and withdraw <crowns>.
-- The province owner must accept an invitation from inside the invited colony; the Emperor manages invitations and central withdrawals.
-- The imperial reserve is distinct from local province treasuries. Deposits debit a local province and credit the reserve; withdrawals debit the reserve and credit the current province. Failed destination transactions are rolled back.
-- GUI has separate rows for province development/campaign status and realm status/deposit/withdraw controls.
-- Unit tests cover realm membership/invitation expiry/capital protection and bounded central-treasury transactions.
+- Empire-wide tax and policy laws propagate from the capital parliament; joining provinces inherit enacted laws.
+- A 10% remittance transfers already-collected provincial taxes into the central treasury while an imperial tax law is active.
+- SavedData schema 15 added bounded (100 entries/realm) audit logs; schema 16 now additionally persists governor appointments.
+- `/imperium empire audit` and BlockUI audit access show recent financial, legal and membership changes.
+- An Emperor/server operator can appoint or dismiss a player as governor for a non-capital province via `/imperium governor appoint|dismiss`; appointments are saved and have daily political benefits.
 
-### Verification
-Baseline immediately before the shared-treasury change is green at commit f7518c88fb1d86a7ca29cc821f42547376b8264f: test build, headless client startup, and dedicated-server schematic validation all passed in CI run 38050735740 (https://github.com/syllater/minecolonies-history/actions/runs/38050735740). The shared-treasury change is not verified until the next CI run completes.
+### Pending on the follow-on commit
+- A focused unit test for the daily governor effect has been added; it awaits CI verification alongside the latest command, GUI and data schema update.
+
+### Known gaps
+- Automated smoke tests do not replace survival-world testing of structure placement, worker hiring, upgrades 1–5 and save/reload.
+- Real multiplayer testing and strategic supply-route/map features remain open.
+
+### Next
+Verify the current full workflow, then implement regional events and repeat the same test gates.
