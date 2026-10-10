@@ -447,4 +447,56 @@ final class EmpireStateTest {
         assertEquals(17L, state.cavalryDrillPoints());
     }
 
+
+    @Test
+    void provinceDevelopmentConsumesKnowledgeAndAdvancesAdministrativeRanks() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 41), "March", 0L);
+
+        assertEquals("settlement", state.provinceTierId());
+        assertFalse(state.developProvince());
+        assertTrue(state.creditTreasury(1_000L));
+        assertTrue(state.investInKnowledge(1_000L));
+        assertEquals(100L, state.knowledgePoints());
+
+        for (int i = 0; i < 10; i++) {
+            assertTrue(state.developProvince());
+        }
+        assertEquals(250, state.provinceDevelopmentPoints());
+        assertEquals("duchy", state.provinceTierId());
+        assertEquals(0L, state.knowledgePoints());
+        assertFalse(state.developProvince());
+    }
+
+    @Test
+    void provinceFocusChangesRevenueAndDailyKnowledge() {
+        final EmpireState tradeProvince = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 42), "Port", 0L);
+        assertTrue(tradeProvince.setProvinceFocus(ProvinceFocus.TRADE));
+        assertEquals(115L, tradeProvince.collectDailyTaxes(1L, 100L));
+
+        final EmpireState scholarlyProvince = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 43), "University", 0L);
+        assertTrue(scholarlyProvince.setProvinceFocus(ProvinceFocus.SCHOLARSHIP));
+        assertEquals(100L, scholarlyProvince.collectDailyTaxes(1L, 100L));
+        assertEquals(1L, scholarlyProvince.knowledgePoints());
+        assertEquals(100L, scholarlyProvince.collectDailyTaxes(1L, 100L));
+        assertEquals(1L, scholarlyProvince.knowledgePoints());
+    }
+
+    @Test
+    void civicAndMilitaryProvinceFocusesImproveTheirSpecialties() {
+        final EmpireState civicProvince = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 44), "Old Town", 0L);
+        assertTrue(civicProvince.setProvinceFocus(ProvinceFocus.CIVIC));
+        civicProvince.collectDailyTaxes(1L, 20L);
+        assertEquals(52, civicProvince.stability());
+        assertEquals(52, civicProvince.legitimacy());
+
+        final EmpireState militaryProvince = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 45), "March", 0L);
+        assertTrue(militaryProvince.setProvinceFocus(ProvinceFocus.MILITARY));
+        assertTrue(militaryProvince.recordMilitaryTraining(EmpireState.MilitaryDiscipline.SIEGE_ENGINEERING));
+        assertEquals(2L, militaryProvince.siegeEngineeringPoints());
+    }
 }
