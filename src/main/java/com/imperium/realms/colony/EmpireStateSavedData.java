@@ -18,7 +18,7 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 12;
+    private static final int SCHEMA_VERSION = 13;
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -319,6 +319,7 @@ public final class EmpireStateSavedData extends SavedData {
                             realmTag.getString("emperor_uuid"),
                             realmTag.getString("emperor_name"),
                             Math.max(0L, realmTag.getLong("founded_day")),
+                            Math.max(0L, realmTag.getLong("imperial_treasury")),
                             memberProvinces,
                             invitations);
                     data.realms.put(realmId, realm);
@@ -611,6 +612,7 @@ public final class EmpireStateSavedData extends SavedData {
             realmTag.putString("emperor_uuid", realm.emperorUuid());
             realmTag.putString("emperor_name", realm.emperorName());
             realmTag.putLong("founded_day", realm.foundedDay());
+            realmTag.putLong("imperial_treasury", realm.imperialTreasuryCrowns());
 
             final ListTag members = new ListTag();
             for (final ColonyIdentity province : realm.provinces()) {

@@ -42,6 +42,7 @@ The current source includes:
 - Faction approval, stability, legitimacy, strikes and revolts driven by MineColonies citizen happiness.
 - Diplomatic influence and relationship scores between actual MineColonies colonies.
 - Military training tracks and a development ledger.
+- Federated imperial realms that unite up to 64 real MineColonies colonies under one Emperor, with saved invitations, province membership, aggregate status and a separate imperial treasury.
 - Abstract provincial administration: settlement/county/duchy/principality/kingdom tiers, five provincial focuses, focus effects and knowledge-funded development.
 - English and Dutch translations, a BlockUI imperial ledger and permission-checked server commands.
 - Ten original generated Structurize blueprints covering the Archive and Guard Tower at levels 1–5.
@@ -63,6 +64,20 @@ Province development costs 10 knowledge points. Province focus changes daily eco
 - `/imperium campaign launch war_campaign <colonyId>` costs 150 crowns and 10 influence, requires at least 3 specialist military training points, and resolves after three days.
 - Only real MineColonies colonies in the same dimension are valid targets. A realm can run one operation at a time; campaigns and consequences persist across save/reload.
 - War outcomes affect stability, legitimacy, training, treasury and relations, but never automatically transfer territory.
+
+## Imperial realms
+
+Each real MineColonies colony can remain independent or join a multi-colony realm. The capital owner can found a realm, and the Emperor can invite additional colonies. The owner of an invited colony must accept while standing in that colony; invitations expire after seven in-game days. Non-capital provinces can leave.
+
+- /imperium empire status — view Emperor, capital, member provinces, combined provincial reserves, knowledge and stability.
+- /imperium empire found <name> — found a realm with the current colony as capital.
+- /imperium empire invite <colonyId> — invite a real MineColonies colony in the same dimension.
+- /imperium empire join — accept an invitation while in the invited colony.
+- /imperium empire leave — leave from a non-capital province.
+- /imperium empire deposit <crowns> — move crowns from the current province's local treasury into the shared imperial reserve.
+- /imperium empire withdraw <crowns> — Emperor-only withdrawal from the imperial reserve to the current province's local treasury.
+
+The shared reserve is separate from provincial treasuries. Province tax receipts and policy/parliament decisions remain local to each colony in this iteration; contribution to the imperial reserve is explicit rather than silently double-taxing every province.
 
 ## Project documents
 

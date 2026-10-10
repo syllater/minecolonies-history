@@ -63,11 +63,21 @@ Status: first provincial system now implemented in source:
 - Development consumes 10 knowledge points per action; focus affects economy, stability, unrest, knowledge or military training.
 - Status/focus/develop commands and a BlockUI entry point.
 
-Remaining: verify the latest CI and expand provincial governance, governors, regional events and empire-level cohesion.
+Now includes a federated realm registry with Emperor/capital, up to 64 member provinces, seven-day invitations, and a separate imperial reserve funded by explicit province deposits. Realm membership is persisted in versioned SavedData. Provincial tax receipts and parliament/policies remain local for now.
+Remaining: verify the shared-treasury CI, then distinguish imperial law from province-level law and add governors, regional events and empire-level cohesion.
 
 ## Milestone 9 — Multiplayer and compatibility hardening
 
 Status: server-authoritative command mutations and client-side GUI segregation exist; CI includes client and dedicated-server smoke checks. Further acceptance still requires a real multiplayer/in-world save/reload playtest and permission review.
+
+## Federated realm work (cross-milestone addition)
+
+- /imperium empire found <name> creates a realm with the current MineColonies colony as capital.
+- The Emperor can invite a colony by ID; its owner accepts from that colony. Invitations expire after seven in-game days.
+- Non-capital provinces can leave. A colony cannot belong to more than one realm.
+- /imperium empire status shows membership and aggregate provincial state.
+- The realm has a separate imperial reserve; provinces can deposit crowns and only the Emperor can withdraw to the current province, with transaction rollback on capacity/funds failures.
+- Central realm identity is persisted in EmpireStateSavedData. Common empire-wide taxes and shared parliament have not yet replaced local colony policies.
 
 ## Milestone 10 — Release
 

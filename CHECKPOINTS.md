@@ -49,3 +49,18 @@ After the current CI passes, continue with province GUI polish, strategic milita
 
 ### Verification
 The source is committed. The latest GitHub Actions run must be inspected before marking the campaign addition verified. Do not conflate the earlier green baseline with this new revision.
+
+
+## 2026-10-10 — Federated realm layer and treasury
+
+### Implemented
+- EmpireRealm persists an Emperor, capital colony, realm name, up to 64 colony provinces and seven-day invitations.
+- EmpireStateSavedData advances to schema 13 and serializes realm membership, invitations, next realm ID and central treasury, while loading older schema-12 records with a zero-balance realm default.
+- Commands: /imperium empire found <name>, status, invite <colonyId>, join, leave, deposit <crowns> and withdraw <crowns>.
+- The province owner must accept an invitation from inside the invited colony; the Emperor manages invitations and central withdrawals.
+- The imperial reserve is distinct from local province treasuries. Deposits debit a local province and credit the reserve; withdrawals debit the reserve and credit the current province. Failed destination transactions are rolled back.
+- GUI has separate rows for province development/campaign status and realm status/deposit/withdraw controls.
+- Unit tests cover realm membership/invitation expiry/capital protection and bounded central-treasury transactions.
+
+### Verification
+Baseline immediately before the shared-treasury change is green at commit f7518c88fb1d86a7ca29cc821f42547376b8264f: test build, headless client startup, and dedicated-server schematic validation all passed in CI run 38050735740 (https://github.com/syllater/minecolonies-history/actions/runs/38050735740). The shared-treasury change is not verified until the next CI run completes.

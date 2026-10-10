@@ -23,6 +23,9 @@ Last updated: 2026-10-10 Europe/Amsterdam.
 - Abstract province ranks (settlement through kingdom), specialization focus, development paid with knowledge, and server-validated province commands.
 - Strategic campaign model with border patrols, relief expeditions and war campaigns against real MineColonies colonies; daily deterministic resolution, persisted outcomes, resource costs, training requirements and bilateral diplomacy/stability effects.
 - Campaign launch/status commands and a BlockUI ledger entry point, in English and Dutch.
+- Persisted federated realm membership: one Emperor/capital, up to 64 real colony provinces, seven-day invitations, and member leave rules.
+- Separate imperial treasury reserve with provincial deposits and Emperor-controlled withdrawals, including rollback if either side of a transfer cannot be completed.
+- Realm status and treasury transfer controls in the BlockUI ledger.
 - BlockUI ledger buttons for status, parliament, taxes, policies, investment and province specialization/development.
 - English and Dutch translations.
 - GitHub Actions build/test, dedicated-server blueprint validation and headless client smoke workflows.
@@ -36,18 +39,19 @@ The new province tests exposed two expectation regressions. One was fixed by rem
 
 ## Current verification
 
-Strategic campaign model, persistence, commands, UI and tests have been added on the working branch. This revision is still awaiting a full CI verdict; it is not considered verified until build/tests and client/server smoke jobs pass.
+Strategic campaigns and the initial imperial-realm membership layer are verified at commit f7518c88fb1d86a7ca29cc821f42547376b8264f: build/tests, client smoke and dedicated-server schema validation all passed in CI run 38050735740 (https://github.com/syllater/minecolonies-history/actions/runs/38050735740). The shared-treasury changes are being prepared on top of that green baseline and remain unverified until the next workflow passes.
 
 ## Known gaps
 
 - In-world survival testing of both buildings (placement, hiring, upgrades through all five levels, save/reload) has not yet been proven by CI.
 - Campaigns now have strategic resolution and consequences, but a larger war map, logistics/supply routes, multi-front orders and battle formations remain future work.
 - The five building tiers currently have valid packaged schematics, but their visual differentiation and gameplay modules can be expanded.
+- Realm membership/treasury now unifies identity and reserve, but province tax receipts and policy/parliament decisions remain local; a shared imperial parliament and common law system still needs deeper integration.
 - The latest province implementation is awaiting a green CI run.
 
 ## Next work
 
-1. Confirm the corrected province build/tests pass.
-2. Finish GUI entry points and add tests for province progression/persistence.
-3. Build a non-conquest strategic military campaign layer using the real colony, diplomacy and training state.
+1. Verify the shared imperial treasury changes with the full CI workflow.
+2. Route selected parliamentary decisions through the realm's central authority and distinguish imperial law from province-level law.
+3. Add imperial financial audits and regional administration where they create meaningful gameplay.
 4. Improve in-world save/reload and multiplayer verification; then package a release candidate when core acceptance criteria are satisfied.

@@ -45,9 +45,25 @@ final class EmpireRealmTest {
     void realmRestoreKeepsCapitalAndMembership() {
         final EmpireRealm realm = EmpireRealm.restore(
                 2L, "Realm", capital, "uuid", "Emperor", 4L,
-                java.util.List.of(province), java.util.Map.of());
+                0L, java.util.List.of(province), java.util.Map.of());
         assertEquals(2, realm.provinceCount());
         assertTrue(realm.containsProvince(capital));
         assertTrue(realm.containsProvince(province));
     }
+    @Test
+    void imperialTreasurySupportsBoundedDepositsAndWithdrawals() {
+        final EmpireRealm realm = EmpireRealm.found(
+                1L, "North Sea Union", capital, "uuid-emperor", "Ada", 0L);
+
+        assertEquals(0L, realm.imperialTreasuryCrowns());
+        assertFalse(realm.withdrawImperialTreasury(1L));
+        assertFalse(realm.depositImperialTreasury(0L));
+        assertTrue(realm.depositImperialTreasury(500L));
+        assertEquals(500L, realm.imperialTreasuryCrowns());
+        assertFalse(realm.depositImperialTreasury(EmpireRealm.MAX_IMPERIAL_TREASURY));
+        assertTrue(realm.withdrawImperialTreasury(200L));
+        assertEquals(300L, realm.imperialTreasuryCrowns());
+        assertFalse(realm.withdrawImperialTreasury(301L));
+    }
+
 }

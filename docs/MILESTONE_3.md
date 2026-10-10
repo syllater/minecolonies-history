@@ -72,3 +72,15 @@ The campaign model persists operation IDs, target colony identities, launch read
 - No operation automatically transfers territory; the model emphasizes strategic pressure, aid and readiness while keeping internal development central.
 
 The new campaign implementation and tests are awaiting a green CI run.
+
+
+## Federated realms and imperial treasury
+
+- A realm owns a stable ID, name, Emperor identity, capital colony and member province list.
+- The EmpireStateSavedData registry enforces that a province belongs to at most one realm.
+- The Emperor can invite another real MineColonies colony in the same dimension by ID. The target colony's owner accepts from inside that colony; invitations expire after seven in-game days.
+- Up to 64 provinces can belong to one realm. The capital cannot leave; other provinces can leave.
+- The realm treasury is separate from local provincial treasury balances. Province owners can deposit local crowns; withdrawals to the current province require the Emperor (or server operator) and will roll back if the destination balance cannot accept the transfer.
+- /imperium empire status reports the Emperor, capital, member provinces, central reserve, total local provincial treasury, knowledge and average stability.
+
+This is the foundation for multi-colony governance, not a full centralization of policy: taxes and parliamentary law proposals are still managed on each colony's own state in this iteration. The latest shared-treasury revision is awaiting CI.

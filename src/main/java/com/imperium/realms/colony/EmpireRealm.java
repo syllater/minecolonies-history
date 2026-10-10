@@ -17,6 +17,8 @@ import java.util.Set;
 public final class EmpireRealm {
     public static final long INVITATION_VALIDITY_DAYS = 7L;
     public static final int MAX_PROVINCES = 64;
+    public static final long MAX_INVITATIONS = 128L;
+    public static final long MAX_IMPERIAL_TREASURY = 10_000_000_000L;
 
     private final long id;
     private String name;
@@ -24,6 +26,7 @@ public final class EmpireRealm {
     private final String emperorUuid;
     private String emperorName;
     private final long foundedDay;
+    private long imperialTreasuryCrowns;
     private final Set<ColonyIdentity> provinces = new LinkedHashSet<>();
     private final Map<ColonyIdentity, Long> invitations = new LinkedHashMap<>();
 
@@ -33,7 +36,8 @@ public final class EmpireRealm {
             final ColonyIdentity capital,
             final String emperorUuid,
             final String emperorName,
-            final long foundedDay) {
+            final long foundedDay,
+            final long imperialTreasuryCrowns) {
         if (id < 1L || foundedDay < 0L) {
             throw new IllegalArgumentException("Invalid realm ID or founded day");
         }
@@ -43,6 +47,7 @@ public final class EmpireRealm {
         this.emperorUuid = normalize(emperorUuid, "unknown");
         this.emperorName = normalize(emperorName, "Unknown Emperor");
         this.foundedDay = foundedDay;
+        this.imperialTreasuryCrowns = clampTreasury(imperialTreasuryCrowns);
         this.provinces.add(capital);
     }
 
@@ -53,7 +58,7 @@ public final class EmpireRealm {
             final String emperorUuid,
             final String emperorName,
             final long foundedDay) {
-        return new EmpireRealm(id, name, capital, emperorUuid, emperorName, Math.max(0L, foundedDay));
+        return new EmpireRealm(id, name, capital, emperorUuid, emperorName, Math.max(0L, foundedDay), 0L);
     }
 
     static EmpireRealm restore(
@@ -63,10 +68,12 @@ public final class EmpireRealm {
             final String emperorUuid,
             final String emperorName,
             final long foundedDay,
+            final long savedImperialTreasury,
             final List<ColonyIdentity> savedProvinces,
             final Map<ColonyIdentity, Long> savedInvitations) {
         final EmpireRealm realm = new EmpireRealm(
-                id, name, capital, emperorUuid, emperorName, Math.max(0L, foundedDay));
+                id, name, capital, emperorUuid, emperorName, Math.max(0L, foundedDay),
+                clampTreasury(savedImperialTreasury));
         if (savedProvinces != null) {
             for (final ColonyIdentity province : savedProvinces) {
                 if (province != null && realm.provinces.size() < MAX_PROVINCES) {
@@ -109,6 +116,26 @@ public final class EmpireRealm {
         return foundedDay;
     }
 
+    public long imperialTreasuryCrowns() {
+        return imperialTreasuryCrowns;
+    }
+
+    public boolean depositImperialTreasury(final long amount) {
+        if (amount <= 0L || amount > MAX_IMPERIAL_TREASURY - imperialTreasuryCrowns) {
+            return false;
+        }
+        imperialTreasuryCrowns += amount;
+        return true;
+    }
+
+    public boolean withdrawImperialTreasury(final long amount) {
+        if (amount <= 0L || amount > imperialTreasuryCrowns) {
+            return false;
+        }
+        imperialTreasuryCrowns -= amount;
+        return true;
+    }
+
     public int provinceCount() {
         return provinces.size();
     }
@@ -132,7 +159,8 @@ public final class EmpireRealm {
     boolean inviteProvince(final ColonyIdentity identity, final long currentDay) {
         Objects.requireNonNull(identity, "identity");
         if (provinces.contains(identity) || invitations.containsKey(identity)
-                || provinces.size() >= MAX_PROVINCES || currentDay < 0L) {
+                || provinces.size() >= MAX_PROVINCES || invitations.size() >= MAX_INVITATIONS
+                || currentDay < 0L) {
             return false;
         }
         final long expires = currentDay > Long.MAX_VALUE - INVITATION_VALIDITY_DAYS
@@ -170,6 +198,10 @@ public final class EmpireRealm {
 
     boolean expireInvitations(final long currentDay) {
         return invitations.entrySet().removeIf(entry -> currentDay > entry.getValue());
+    }
+
+    private static long clampTreasury(final long treasury) {
+        return Math.max(0L, Math.min(MAX_IMPERIAL_TREASURY, treasury));
     }
 
     private static String normalizeRealmName(final String value) {

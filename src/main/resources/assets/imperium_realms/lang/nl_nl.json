@@ -141,7 +141,7 @@
   "imperium_realms.message.campaign_launched": "Operatie #%1$d — %2$s tegen %3$s is begonnen. De afhandeling vindt plaats op speldag %4$d.",
   "imperium_realms.message.empire_none": "Deze kolonie maakt geen deel uit van een keizerlijk rijk.",
   "imperium_realms.message.empire_found_help": "Gebruik /imperium empire found <naam> om met deze kolonie als hoofdstad een rijk te stichten.",
-  "imperium_realms.message.empire_status": "RIJK: %1$s (#%2$d) | Keizer: %3$s | Hoofdstad: %4$s | Provincies: %5$d | Gezamenlijke schatkist: %6$d kronen | Kennis: %7$d | Gemiddelde stabiliteit: %8$d",
+  "imperium_realms.message.empire_status": "RIJK: %1$s (#%2$d) | Keizer: %3$s | Hoofdstad: %4$s | Provincies: %5$d | Keizerlijke reserve: %6$d kronen | Provinciale schatkisten samen: %7$d kronen | Kennis: %8$d | Gemiddelde stabiliteit: %9$d",
   "imperium_realms.message.empire_province": "Provincie: %1$s | Dimensie: %2$s | Kolonie-ID: %3$d | Hoofdstad: %4$s",
   "imperium_realms.message.empire_help": "Gebruik /imperium empire invite <kolonieId> om een buur uit te nodigen. De keizer beheert het lidmaatschap; de eigenaar van de provincie accepteert met /imperium empire join. Uitnodigingen verlopen na 7 speldagen. Niet-hoofdstadprovincies kunnen vertrekken.",
   "imperium_realms.message.empire_already_member": "Deze kolonie behoort al tot een keizerlijk rijk.",
@@ -156,5 +156,13 @@
   "imperium_realms.message.empire_capital_cannot_leave": "De hoofdstad kan haar eigen rijk niet verlaten. Een opvolgende hoofdstad of ontbinding kan later worden toegevoegd.",
   "imperium_realms.message.empire_leave_failed": "Deze kolonie kon het rijk niet verlaten.",
   "imperium_realms.message.empire_left": "Deze kolonie heeft %1$s verlaten.",
-  "imperium_realms.gui.empire": "Rijksoverzicht"
+  "imperium_realms.gui.empire": "Rijksoverzicht",
+  "imperium_realms.message.empire_deposit_province_funds": "Storting mislukt. Deze provincie moet minstens %1$d kronen beschikbaar hebben in de lokale schatkist.",
+  "imperium_realms.message.empire_treasury_full": "De keizerlijke reserve is vol (%1$d kronen). Het provinciale geld is teruggestort.",
+  "imperium_realms.message.empire_deposited": "%1$d kronen naar de keizerlijke reserve overgemaakt. Nieuw saldo: %2$d.",
+  "imperium_realms.message.empire_treasury_insufficient": "De keizerlijke reserve kan geen %1$d kronen opnemen; het saldo is te laag.",
+  "imperium_realms.message.empire_province_treasury_full": "De provinciale schatkist is vol (%1$d kronen); het geld is teruggezet in de keizerlijke reserve.",
+  "imperium_realms.message.empire_withdrawn": "%1$d kronen naar deze provincie opgenomen. Resterende keizerlijke reserve: %2$d.",
+  "imperium_realms.gui.empire_deposit50": "Stort 50",
+  "imperium_realms.gui.empire_withdraw50": "Neem 50 op"
 }

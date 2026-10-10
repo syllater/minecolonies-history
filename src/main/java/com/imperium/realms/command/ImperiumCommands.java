@@ -73,7 +73,19 @@ public final class ImperiumCommands {
                         .then(Commands.literal("join")
                                 .executes(context -> joinEmpire(context.getSource())))
                         .then(Commands.literal("leave")
-                                .executes(context -> leaveEmpire(context.getSource()))))
+                                .executes(context -> leaveEmpire(context.getSource())))
+                        .then(Commands.literal("deposit")
+                                .then(Commands.argument("crowns",
+                                                LongArgumentType.longArg(1L, EmpireState.MAX_TREASURY))
+                                        .executes(context -> depositEmpireTreasury(
+                                                context.getSource(),
+                                                LongArgumentType.getLong(context, "crowns")))))
+                        .then(Commands.literal("withdraw")
+                                .then(Commands.argument("crowns",
+                                                LongArgumentType.longArg(1L, EmpireState.MAX_TREASURY))
+                                        .executes(context -> withdrawEmpireTreasury(
+                                                context.getSource(),
+                                                LongArgumentType.getLong(context, "crowns")))))
                 .then(Commands.literal("campaign")
                         .then(Commands.literal("status")
                                 .executes(context -> showCampaigns(context.getSource())))
@@ -467,12 +479,13 @@ public final class ImperiumCommands {
         final long realmTreasury = treasury;
         final long realmKnowledge = knowledge;
         final int realmAverageStability = averageStability;
+        final long imperialTreasury = realm.imperialTreasuryCrowns();
         final EmpireState capitalState = context.data().get(realm.capital()).orElse(null);
         source.sendSuccess(() -> Component.translatable(
                 "imperium_realms.message.empire_status",
                 realm.name(), realm.id(), realm.emperorName(),
                 capitalState == null ? realm.capital().storageKey() : capitalState.colonyName(),
-                realm.provinceCount(), realmTreasury, realmKnowledge, realmAverageStability), false);
+                realm.provinceCount(), imperialTreasury, realmTreasury, realmKnowledge, realmAverageStability), false);
         for (final ColonyIdentity province : realm.provinces()) {
             final EmpireState provinceState = context.data().get(province).orElse(null);
             source.sendSuccess(() -> Component.translatable(
@@ -589,6 +602,66 @@ public final class ImperiumCommands {
     private static long safeAdd(final long left, final long right) {
         if (right > 0L && left > Long.MAX_VALUE - right) return Long.MAX_VALUE;
         return left + right;
+    }
+
+    private static int depositEmpireTreasury(
+            final CommandSourceStack source, final long amount) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        if (!mayManageEconomy(context)) return denyPermission(source);
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            return 0;
+        }
+        if (amount <= 0L || amount > EmpireState.MAX_TREASURY
+                || !context.state().debitTreasury(amount)) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.empire_deposit_province_funds", amount));
+            return 0;
+        }
+        if (!realm.depositImperialTreasury(amount)) {
+            context.state().creditTreasury(amount);
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.empire_treasury_full",
+                    EmpireRealm.MAX_IMPERIAL_TREASURY));
+            return 0;
+        }
+        context.data().markChanged();
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.empire_deposited", amount,
+                realm.imperialTreasuryCrowns()), true);
+        return 1;
+    }
+
+    private static int withdrawEmpireTreasury(
+            final CommandSourceStack source, final long amount) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            return 0;
+        }
+        if (!mayManageRealm(context, realm)) return denyPermission(source);
+        if (amount <= 0L || amount > EmpireState.MAX_TREASURY
+                || !realm.withdrawImperialTreasury(amount)) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.empire_treasury_insufficient", amount));
+            return 0;
+        }
+        if (!context.state().creditTreasury(amount)) {
+            realm.depositImperialTreasury(amount);
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.empire_province_treasury_full",
+                    EmpireState.MAX_TREASURY));
+            return 0;
+        }
+        context.data().markChanged();
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.empire_withdrawn", amount,
+                realm.imperialTreasuryCrowns()), true);
+        return 1;
     }
 
     private static int showCampaigns(final CommandSourceStack source) {
