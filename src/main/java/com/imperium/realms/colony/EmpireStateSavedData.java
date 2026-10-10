@@ -160,11 +160,20 @@ public final class EmpireStateSavedData extends SavedData {
             final ColonyIdentity identity,
             final int population,
             final long gameTime) {
+        return collectTaxes(identity, population, 0, gameTime);
+    }
+
+    public Optional<EmpireState.TaxCollectionResult> collectTaxes(
+            final ColonyIdentity identity,
+            final int population,
+            final int taxCollectorCount,
+            final long gameTime) {
         final EmpireState state = colonies.get(identity);
         if (state == null) {
             return Optional.empty();
         }
-        final Optional<EmpireState.TaxCollectionResult> result = state.collectTaxes(population, gameTime);
+        final Optional<EmpireState.TaxCollectionResult> result =
+                state.collectTaxes(population, taxCollectorCount, gameTime);
         result.ifPresent(ignored -> setDirty());
         return result;
     }
