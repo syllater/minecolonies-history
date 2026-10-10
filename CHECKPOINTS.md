@@ -1,31 +1,29 @@
 # Checkpoints
 
-## 2026-10-10 — Dynamic localization coverage and in-world checklist
+## 2026-10-10 — Five-tier staffing capacity
 
 ### Repository
 - Repository: https://github.com/syllater/minecolonies-history
 - Branch: `milestone-2/colony-integration`
 
-### Latest verified commit
-Commit `d2cbad845583688e935153dae55ebb48e2169c5a` passed the complete GitHub Actions workflow:
-- Localization validation checked 265 literal and dynamic keys in English and Dutch.
-- Gradle build, unit tests and JAR upload: success.
-- Headless client startup smoke test: success.
-- Dedicated server startup and all 10 Structurize schematic checks: success.
-- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38075373770
+### Verified preceding commit
+Commit `20a8d8c7b93dce96171e9a7f713dcc33ef607256` passed all CI checks:
+- 265 literal/dynamic EN/NL keys and placeholder indices/types validated.
+- Gradle build/tests and JAR upload passed.
+- Client startup smoke test passed.
+- Dedicated server startup and all 10 Structurize schematic checks passed.
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38075571737
 
-### Verified test coverage
-- `ImperialStrategyPlanner` deterministic route/defence target selection.
-- `StrategicMapGrid`: empty map, north/east orientation, coincident centers and single-point map tests.
-- `EmpireStateSavedDataTest`: real Minecraft NBT round-trip for economy/profession progression and realm membership/laws/routes/defence/governors/audit entries.
-- Literal plus enumerated dynamic localization families are checked; all 265 known keys existed with matching placeholder types.
+### Added in this commit
+- `ImperialBuildingProgression.workerLimitForLevel` maps level 0 to zero available worker slots; levels 1–5 to one through five; and clamps unusual higher levels to the five-tier maximum.
+- All three Archive worker modules and three Guard Tower guard modules use the shared progression rule.
+- `ImperialBuildingProgressionTest` covers all five supported levels, unbuilt/negative levels and over-cap values.
+- The survival acceptance checklist explicitly includes tier-by-tier worker-cap verification.
 
-### Next prepared improvement
-- Make the three Imperial Archive worker limits scale with building level instead of remaining fixed at one. This makes the five visual building tiers provide an explicit workforce capacity benefit.
-- Compare placeholder index and conversion-type tuples across English and Dutch translations.
-- Extend `docs/IN_GAME_ACCEPTANCE.md` to test tier-dependent worker limits and guard hiring.
+### Verification status
+The previous commit is verified. The new helper and its tests have not yet run through CI; the new commit triggers a fresh complete workflow.
 
 ### Still pending
-- Actual in-world construction, hiring and level 1–5 upgrade test, plus save/reload.
-- Actual two-player permission/economy test.
-- The map remains a chat grid, not a full-screen interactive theatre map.
+- Actual in-world building placement/hiring/upgrade/save-reload testing.
+- Actual two-player multiplayer permission/economy testing.
+- A full-screen interactive theatre map; current map is a text grid.

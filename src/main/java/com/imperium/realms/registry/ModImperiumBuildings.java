@@ -2,6 +2,7 @@ package com.imperium.realms.registry;
 
 import com.imperium.realms.ImperiumRealms;
 import com.imperium.realms.building.BuildingImperialArchive;
+import com.imperium.realms.building.ImperialBuildingProgression;
 import com.imperium.realms.building.BuildingImperialGuardTower;
 import com.minecolonies.api.colony.buildings.registry.BuildingEntry;
 import com.minecolonies.api.entity.citizen.Skill;
@@ -36,7 +37,7 @@ public final class ModImperiumBuildings {
                                     Skill.Knowledge,
                                     Skill.Stamina,
                                     true,
-                                    building -> building.getBuildingLevel()),
+                                    building -> ImperialBuildingProgression.workerLimitForLevel(building.getBuildingLevel())),
                             () -> WorkerBuildingModuleView::new))
                     .addBuildingModuleProducer(new BuildingEntry.ModuleProducer<>(
                             "imperium_tax_collector_worker",
@@ -45,7 +46,7 @@ public final class ModImperiumBuildings {
                                     Skill.Knowledge,
                                     Skill.Stamina,
                                     true,
-                                    building -> building.getBuildingLevel()),
+                                    building -> ImperialBuildingProgression.workerLimitForLevel(building.getBuildingLevel())),
                             () -> WorkerBuildingModuleView::new))
                     .addBuildingModuleProducer(new BuildingEntry.ModuleProducer<>(
                             "imperium_diplomat_worker",
@@ -54,7 +55,7 @@ public final class ModImperiumBuildings {
                                     Skill.Knowledge,
                                     Skill.Stamina,
                                     true,
-                                    building -> building.getBuildingLevel()),
+                                    building -> ImperialBuildingProgression.workerLimitForLevel(building.getBuildingLevel())),
                             () -> WorkerBuildingModuleView::new))
                     .createBuildingEntry());
 
@@ -70,21 +71,21 @@ public final class ModImperiumBuildings {
                             () -> new GuardBuildingModule(
                                     ModImperiumGuardTypes.SIEGE_ENGINEER.get(),
                                     true,
-                                    building -> building.getBuildingLevel()),
+                                    building -> ImperialBuildingProgression.workerLimitForLevel(building.getBuildingLevel())),
                             () -> CombinedHiringLimitModuleView::new))
                     .addBuildingModuleProducer(new BuildingEntry.ModuleProducer<>(
                             "imperium_field_medic_work",
                             () -> new GuardBuildingModule(
                                     ModImperiumGuardTypes.FIELD_MEDIC.get(),
                                     true,
-                                    building -> building.getBuildingLevel()),
+                                    building -> ImperialBuildingProgression.workerLimitForLevel(building.getBuildingLevel())),
                             () -> CombinedHiringLimitModuleView::new))
                     .addBuildingModuleProducer(new BuildingEntry.ModuleProducer<>(
                             "imperium_cavalier_work",
                             () -> new GuardBuildingModule(
                                     ModImperiumGuardTypes.CAVALIER.get(),
                                     true,
-                                    building -> building.getBuildingLevel()),
+                                    building -> ImperialBuildingProgression.workerLimitForLevel(building.getBuildingLevel())),
                             () -> CombinedHiringLimitModuleView::new))
                     .addBuildingModuleProducer(BuildingModules.GUARD_TOOL)
                     .addBuildingModuleProducer(BuildingModules.GUARD_ENTITY_LIST)

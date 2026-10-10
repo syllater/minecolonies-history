@@ -16,7 +16,7 @@ Status: substantial gameplay slice implemented:
 - Treasury, tax collection, investment, policies, province focus and BlockUI ledger.
 - Persistent politics, diplomacy, training, campaigns, realm membership, audit history and governors.
 - JUnit NBT round-trip tests verify economic/profession progress and realm membership/laws/routes/defence/governor/audit persistence.
-- Archive worker hiring limits are being changed to scale from one role slot at level 1 to five at level 5.
+- Worker hiring limits scale with building level; a shared clamped five-tier helper and edge-case tests are added in this commit and need CI verification.
 - Still requires in-world placement/hiring/upgrade/save-reload playtesting.
 
 ## Milestone 4 — Parliament and politics
@@ -32,15 +32,15 @@ Status: specialist roles/training, persistent delayed operations, three-front ca
 Remaining: verify long-running strategic balances in a survival world.
 
 ## Milestone 7 — Buildings and progression
-Status: two registered MineColonies huts with levels 1–5 and ten generated Structurize blueprints; dedicated-server schematic validation passes.
-Remaining: level-dependent Archive workforce cap is being validated; richer level silhouettes/modules and actual construction/upgrade playtesting are still needed.
+Status: two registered MineColonies huts with levels 1–5 and ten generated Structurize blueprints; dedicated-server schematic validation passes. Staffing capacity now maps to the supported building level 0–5.
+Remaining: richer level silhouettes/modules and actual construction/upgrade playtesting.
 
 ## Milestone 8 — Empire and provincial simulation
 Status: realm/capital, invitations, shared treasury, common laws, audited flows, governors, weekly regional events, cohesion and separatist pressure implemented. A coordinate-based chat map resolves actual colony centers, with other dimensions/unloaded colonies reported separately.
 Remaining: verify map behavior and improve event balancing in longer sessions.
 
 ## Milestone 9 — Multiplayer and compatibility hardening
-Status: server-authoritative commands, permission checks, EN/NL dynamic localization validation, full CI build/server/client smoke checks, and NBT round-trip coverage exist.
+Status: server-authoritative commands, permission checks, EN/NL dynamic localization validation, NBT round-trip coverage and full CI build/server/client smoke checks exist.
 Remaining: actual two-player permission/economy session and real survival save/reload playtest.
 
 ## Milestone 10 — Release
