@@ -13,6 +13,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.bus.api.IEventBus;
@@ -43,6 +45,8 @@ public final class ImperialProfessionRegistry {
             DeferredRegister.create(Registries.BLOCK, ImperiumRealms.MOD_ID);
     private static final DeferredRegister<Item> ITEMS =
             DeferredRegister.create(Registries.ITEM, ImperiumRealms.MOD_ID);
+    private static final DeferredRegister<CreativeModeTab> CREATIVE_TABS =
+            DeferredRegister.create(Registries.CREATIVE_MODE_TAB, ImperiumRealms.MOD_ID);
 
     public static final DeferredHolder<JobEntry, JobEntry> TAX_COLLECTOR_JOB = JOBS.register(
             "tax_collector",
@@ -58,6 +62,14 @@ public final class ImperialProfessionRegistry {
     public static final DeferredHolder<Item, ItemBlockHut> TAX_COLLECTOR_HUT_ITEM = ITEMS.register(
             "tax_collector_hut",
             () -> new ItemBlockHut(TAX_COLLECTOR_HUT.get(), new Item.Properties()));
+
+    private static final DeferredHolder<CreativeModeTab, CreativeModeTab> IMPERIUM_TAB = CREATIVE_TABS.register(
+            "imperium_realms",
+            () -> CreativeModeTab.builder()
+                    .title(Component.translatable("itemGroup.imperium_realms"))
+                    .icon(() -> TAX_COLLECTOR_HUT_ITEM.get().getDefaultInstance())
+                    .displayItems((parameters, output) -> output.accept(TAX_COLLECTOR_HUT_ITEM.get()))
+                    .build());
 
     private static final BuildingEntry.ModuleProducer<WorkerBuildingModule, WorkerBuildingModuleView>
             TAX_COLLECTOR_WORK = new BuildingEntry.ModuleProducer<>(
@@ -89,5 +101,6 @@ public final class ImperialProfessionRegistry {
         BUILDINGS.register(modEventBus);
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
+        CREATIVE_TABS.register(modEventBus);
     }
 }
