@@ -20,6 +20,7 @@ public final class ImperiumLedgerWindow extends BOWindow implements ButtonHandle
             Map.entry("status", "imperium status"),
             Map.entry("parliament", "imperium parliament status"),
             Map.entry("province", "imperium province status"),
+            Map.entry("campaign", "imperium campaign status"),
             Map.entry("focus_agriculture", "imperium province focus agriculture"),
             Map.entry("focus_trade", "imperium province focus trade"),
             Map.entry("focus_scholarship", "imperium province focus scholarship"),

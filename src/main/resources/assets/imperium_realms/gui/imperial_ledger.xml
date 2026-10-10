@@ -39,4 +39,5 @@
     <button id="focus_military" pos="250 247" size="72 20" label="$(imperium_realms.province_focus.military)"/>
     <button id="focus_civic" pos="328 247" size="72 20" label="$(imperium_realms.province_focus.civic)"/>
     <button id="develop_province" pos="22 275" size="170 20" label="$(imperium_realms.gui.province_develop)"/>
+    <button id="campaign" pos="208 275" size="190 20" label="$(imperium_realms.gui.campaigns)"/>
 </window>

@@ -499,4 +499,61 @@ final class EmpireStateTest {
         assertTrue(militaryProvince.recordMilitaryTraining(EmpireState.MilitaryDiscipline.SIEGE_ENGINEERING));
         assertEquals(2L, militaryProvince.siegeEngineeringPoints());
     }
+
+    @Test
+    void strategicCampaignChargesResourcesAndResolvesOnlyOnItsDueDay() {
+        final EmpireState origin = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 51), "Imperial Capital", 0L);
+        final EmpireState target = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 52), "Border Realm", 0L);
+        assertTrue(origin.creditTreasury(500L));
+        for (int index = 0; index < 10; index++) {
+            assertTrue(origin.recordDiplomatWork(index * 2_400L));
+        }
+        for (int index = 0; index < 3; index++) {
+            assertTrue(origin.recordMilitaryTraining(EmpireState.MilitaryDiscipline.SIEGE_ENGINEERING));
+        }
+
+        final MilitaryCampaign campaign = origin.launchMilitaryCampaign(
+                "Test Emperor", target.identity(), target.colonyName(),
+                MilitaryCampaign.Type.WAR_CAMPAIGN, 5L).orElseThrow();
+
+        assertEquals(350L, origin.treasuryCrowns());
+        assertEquals(0L, origin.diplomaticInfluence());
+        assertEquals(8L, campaign.resolvesDay());
+        assertTrue(origin.resolveMilitaryCampaign(campaign.id(), target, 7L).isEmpty());
+        assertTrue(campaign.isPending());
+
+        final MilitaryCampaign.Outcome outcome = origin
+                .resolveMilitaryCampaign(campaign.id(), target, 8L).orElseThrow();
+        assertEquals(MilitaryCampaign.Outcome.STALEMATE, outcome);
+        assertFalse(campaign.isPending());
+        assertEquals(8L, campaign.resolvedDay());
+        assertEquals(49, origin.stability());
+        assertEquals(49, target.stability());
+        assertEquals(-3, origin.relationScore(target.identity()));
+        assertTrue(origin.resolveMilitaryCampaign(campaign.id(), target, 9L).isEmpty());
+    }
+
+    @Test
+    void borderPatrolImprovesRelationsAndCannotRunTwiceAtOnce() {
+        final EmpireState origin = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 53), "Harbour", 0L);
+        final EmpireState target = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 54), "Neighbour", 0L);
+        assertTrue(origin.creditTreasury(100L));
+
+        final MilitaryCampaign campaign = origin.launchMilitaryCampaign(
+                "Marshal", target.identity(), target.colonyName(),
+                MilitaryCampaign.Type.BORDER_PATROL, 1L).orElseThrow();
+        assertTrue(origin.launchMilitaryCampaign("Marshal", target.identity(), target.colonyName(),
+                MilitaryCampaign.Type.BORDER_PATROL, 1L).isEmpty());
+
+        assertEquals(MilitaryCampaign.Outcome.SUCCESS,
+                origin.resolveMilitaryCampaign(campaign.id(), target, 2L).orElseThrow());
+        assertEquals(52, origin.stability());
+        assertEquals(2, origin.relationScore(target.identity()));
+        assertEquals(2, target.relationScore(origin.identity()));
+        assertEquals(75L, origin.treasuryCrowns());
+    }
 }

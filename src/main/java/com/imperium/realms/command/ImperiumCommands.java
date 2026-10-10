@@ -6,6 +6,7 @@ import com.imperium.realms.colony.EconomicPolicy;
 import com.imperium.realms.colony.EmpireState;
 import com.imperium.realms.colony.EmpireStateSavedData;
 import com.imperium.realms.colony.MineColoniesIntegration;
+import com.imperium.realms.colony.MilitaryCampaign;
 import com.imperium.realms.colony.ParliamentProposal;
 import com.imperium.realms.colony.ProvinceFocus;
 import com.minecolonies.api.colony.IColony;
@@ -55,6 +56,18 @@ public final class ImperiumCommands {
                                         IntegerArgumentType.getInteger(context, "crowns")))))
                 .then(Commands.literal("army")
                         .executes(context -> showArmy(context.getSource())))
+                .then(Commands.literal("campaign")
+                        .then(Commands.literal("status")
+                                .executes(context -> showCampaigns(context.getSource())))
+                        .then(Commands.literal("launch")
+                                .then(Commands.argument("type", StringArgumentType.word())
+                                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(
+                                                new String[]{"border_patrol", "relief_expedition", "war_campaign"}, builder))
+                                        .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                                .executes(context -> launchCampaign(
+                                                        context.getSource(),
+                                                        StringArgumentType.getString(context, "type"),
+                                                        IntegerArgumentType.getInteger(context, "colonyId")))))))
                 .then(Commands.literal("politics")
                         .executes(context -> showPolitics(context.getSource())))
                 .then(Commands.literal("diplomacy")
@@ -406,6 +419,99 @@ public final class ImperiumCommands {
                 Component.translatable("imperium_realms.province_tier." + state.provinceTierId()),
                 state.provinceDevelopmentPoints(),
                 state.knowledgePoints()), true);
+        return 1;
+    }
+
+    private static int showCampaigns(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+
+        final EmpireState state = context.state();
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.campaign_header",
+                state.colonyName(), state.treasuryCrowns(), state.diplomaticInfluence(),
+                state.pendingMilitaryCampaigns().size()), false);
+
+        final List<MilitaryCampaign> campaigns = state.recentMilitaryCampaigns();
+        if (campaigns.isEmpty()) {
+            source.sendSuccess(() -> Component.translatable("imperium_realms.message.campaign_empty"), false);
+        } else {
+            for (final MilitaryCampaign campaign : campaigns) {
+                final Component type = Component.translatable(
+                        "imperium_realms.military_campaign.type." + campaign.type().id());
+                final Component outcome = Component.translatable(
+                        "imperium_realms.military_campaign.outcome."
+                                + campaign.outcome().name().toLowerCase(java.util.Locale.ROOT));
+                source.sendSuccess(() -> Component.translatable(
+                        "imperium_realms.message.campaign_entry",
+                        campaign.id(), type, campaign.targetName(), outcome,
+                        campaign.startedDay(), campaign.resolvesDay(),
+                        campaign.resolvedDay() < 0L ? "-" : Long.toString(campaign.resolvedDay())), false);
+            }
+        }
+        source.sendSuccess(() -> Component.translatable("imperium_realms.message.campaign_help"), false);
+        return 1;
+    }
+
+    private static int launchCampaign(
+            final CommandSourceStack source, final String requestedType, final int targetColonyId) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        if (!mayManageEconomy(context)) return denyPermission(source);
+
+        final MilitaryCampaign.Type type = MilitaryCampaign.Type.fromId(requestedType).orElse(null);
+        if (type == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.campaign_type_unknown"));
+            return 0;
+        }
+        final IColony target = MineColoniesIntegration
+                .colonyById(context.player().serverLevel(), targetColonyId).orElse(null);
+        if (target == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.campaign_target_not_found", targetColonyId));
+            return 0;
+        }
+        final ColonyIdentity targetIdentity = ColonyIdentity.from(target);
+        if (targetIdentity.equals(context.state().identity())) {
+            source.sendFailure(Component.translatable("imperium_realms.message.campaign_self_target"));
+            return 0;
+        }
+        MineColoniesIntegration.getOrCreateState(context.player().serverLevel(), target);
+        final EmpireState state = context.state();
+        if (!state.pendingMilitaryCampaigns().isEmpty()) {
+            source.sendFailure(Component.translatable("imperium_realms.message.campaign_already_active"));
+            return 0;
+        }
+        if (state.treasuryCrowns() < type.crownCost()) {
+            source.sendFailure(Component.translatable("imperium_realms.message.campaign_crowns_required", type.crownCost()));
+            return 0;
+        }
+        if (state.diplomaticInfluence() < type.influenceCost()) {
+            source.sendFailure(Component.translatable("imperium_realms.message.campaign_influence_required", type.influenceCost()));
+            return 0;
+        }
+        if (state.totalMilitaryTrainingPoints() < type.minimumTrainingPoints()) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.campaign_training_required", type.minimumTrainingPoints()));
+            return 0;
+        }
+        if (type == MilitaryCampaign.Type.WAR_CAMPAIGN && state.relationScore(targetIdentity) >= 75) {
+            source.sendFailure(Component.translatable("imperium_realms.message.campaign_target_allied"));
+            return 0;
+        }
+
+        final MilitaryCampaign campaign = state.launchMilitaryCampaign(
+                context.player().getGameProfile().getName(), targetIdentity, target.getName(),
+                type, currentDay(source)).orElse(null);
+        if (campaign == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.campaign_launch_failed"));
+            return 0;
+        }
+        context.data().markChanged();
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.campaign_launched",
+                campaign.id(),
+                Component.translatable("imperium_realms.military_campaign.type." + campaign.type().id()),
+                campaign.targetName(), campaign.resolvesDay()), true);
         return 1;
     }
 
