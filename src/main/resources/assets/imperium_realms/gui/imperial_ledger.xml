@@ -1,4 +1,4 @@
-<window size="420 336" lightbox="true" type="OVERSIZED_VANILLA">
+<window size="420 364" lightbox="true" type="OVERSIZED_VANILLA">
     <text id="title" pos="15 12" size="390 18" textalign="MIDDLE" color="white"
           label="$(imperium_realms.gui.title)"/>
     <text id="help" pos="18 32" size="384 20" textalign="MIDDLE" color="white"
@@ -43,4 +43,5 @@
     <button id="empire" pos="22 301" size="170 20" label="$(imperium_realms.gui.empire)"/>
     <button id="empire_deposit50" pos="208 301" size="88 20" label="$(imperium_realms.gui.empire_deposit50)"/>
     <button id="empire_withdraw50" pos="300 301" size="98 20" label="$(imperium_realms.gui.empire_withdraw50)"/>
+    <button id="empire_audit" pos="22 329" size="170 20" label="$(imperium_realms.gui.empire_audit)"/>
 </window>
