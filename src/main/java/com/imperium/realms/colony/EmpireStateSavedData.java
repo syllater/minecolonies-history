@@ -18,10 +18,14 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 19;
+    private static final int SCHEMA_VERSION = 20;
 
     public enum PetitionResolutionResult {
         RESOLVED, REALM_NOT_FOUND, NOT_MEMBER, CAPITAL_PROVINCE, NO_PETITION, INSUFFICIENT_TREASURY
+    }
+
+    public enum SupplyRouteBuildResult {
+        BUILT, REALM_NOT_FOUND, NOT_MEMBER, CAPITAL_PROVINCE, ALREADY_EXISTS, INSUFFICIENT_TREASURY, INVALID_DAY
     }
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
@@ -382,6 +386,25 @@ public final class EmpireStateSavedData extends SavedData {
                         }
                     }
 
+                    final Map<ColonyIdentity, ImperialSupplyRoute> supplyRoutes = new LinkedHashMap<>();
+                    if (realmTag.contains("supply_routes", Tag.TAG_LIST)) {
+                        final ListTag savedRoutes = realmTag.getList("supply_routes", Tag.TAG_COMPOUND);
+                        for (int routeIndex = 0; routeIndex < savedRoutes.size(); routeIndex++) {
+                            final CompoundTag routeTag = savedRoutes.getCompound(routeIndex);
+                            try {
+                                final ColonyIdentity destination = new ColonyIdentity(
+                                        routeTag.getString("destination_dimension"),
+                                        routeTag.getInt("destination_colony_id"));
+                                final long builtDay = Math.max(0L, routeTag.getLong("built_day"));
+                                supplyRoutes.put(destination, ImperialSupplyRoute.restore(
+                                        destination, builtDay, routeTag.getInt("condition"),
+                                        Math.max(builtDay, routeTag.getLong("last_upkeep_day"))));
+                            } catch (IllegalArgumentException ignored) {
+                                // Ignore a malformed route; preserve the rest of the realm.
+                            }
+                        }
+                    }
+
                     final EmpireRealm realm = EmpireRealm.restore(
                             realmId,
                             realmTag.getString("name"),
@@ -400,6 +423,7 @@ public final class EmpireStateSavedData extends SavedData {
                             Math.max(0L, realmTag.getLong("last_regional_event_day")));
                     realm.restoreCohesionState(loyalty, pressureDays, petitions,
                             Math.max(0L, realmTag.getLong("last_cohesion_day")));
+                    realm.restoreSupplyRoutes(supplyRoutes);
                     data.realms.put(realmId, realm);
                     if (realmId < Long.MAX_VALUE) {
                         data.nextRealmId = Math.max(data.nextRealmId, realmId + 1L);
@@ -521,6 +545,54 @@ public final class EmpireStateSavedData extends SavedData {
         return resolved;
     }
 
+    /** Build a single capital-to-province link from central funds. */
+    public SupplyRouteBuildResult buildSupplyRoute(
+            final long realmId,
+            final ColonyIdentity destination,
+            final String actor,
+            final long dayIndex) {
+        final EmpireRealm realm = realms.get(realmId);
+        if (realm == null) return SupplyRouteBuildResult.REALM_NOT_FOUND;
+        if (dayIndex < 0L) return SupplyRouteBuildResult.INVALID_DAY;
+        if (destination == null || !colonies.containsKey(destination)
+                || !realm.containsProvince(destination)) {
+            return SupplyRouteBuildResult.NOT_MEMBER;
+        }
+        if (realm.capital().equals(destination)) return SupplyRouteBuildResult.CAPITAL_PROVINCE;
+        if (realm.supplyRouteTo(destination).isPresent()) return SupplyRouteBuildResult.ALREADY_EXISTS;
+        if (realm.imperialTreasuryCrowns() < EmpireRealm.SUPPLY_ROUTE_BUILD_COST) {
+            return SupplyRouteBuildResult.INSUFFICIENT_TREASURY;
+        }
+        if (!realm.buildSupplyRoute(destination, dayIndex, actor)) {
+            return SupplyRouteBuildResult.ALREADY_EXISTS;
+        }
+        setDirty();
+        return SupplyRouteBuildResult.BUILT;
+    }
+
+    /** Advances every due route once; unpaid routes wear down and lose logistics bonuses. */
+    public int processSupplyRoutes(final long dayIndex) {
+        if (dayIndex < 0L) return 0;
+        int processed = 0;
+        for (final EmpireRealm realm : new ArrayList<>(realms.values())) {
+            processed += realm.processSupplyRoutes(dayIndex);
+        }
+        if (processed > 0) setDirty();
+        return processed;
+    }
+
+    public int militaryLaunchLogisticsBonus(final ColonyIdentity province) {
+        final EmpireRealm realm = realmForProvince(province).orElse(null);
+        return realm != null && realm.hasActiveSupplyRoute(province)
+                ? EmpireRealm.SUPPLY_ROUTE_LAUNCH_READINESS_BONUS : 0;
+    }
+
+    public int militaryDefenseLogisticsBonus(final ColonyIdentity province) {
+        final EmpireRealm realm = realmForProvince(province).orElse(null);
+        return realm != null && realm.hasActiveSupplyRoute(province)
+                ? EmpireRealm.SUPPLY_ROUTE_DEFENSE_READINESS_BONUS : 0;
+    }
+
     public int resolveDueMilitaryCampaigns(final long dayIndex) {
         int resolved = 0;
         for (final EmpireState source : new ArrayList<>(colonies.values())) {
@@ -529,7 +601,8 @@ public final class EmpireStateSavedData extends SavedData {
                 if (target == null) {
                     continue;
                 }
-                if (source.resolveMilitaryCampaign(campaign.id(), target, dayIndex).isPresent()) {
+                if (source.resolveMilitaryCampaign(campaign.id(), target, dayIndex,
+                        militaryDefenseLogisticsBonus(target.identity())).isPresent()) {
                     resolved++;
                 }
             }
@@ -959,6 +1032,18 @@ public final class EmpireStateSavedData extends SavedData {
                 petitions.add(tag);
             });
             realmTag.put("separatist_petitions", petitions);
+
+            final ListTag supplyRoutes = new ListTag();
+            for (final ImperialSupplyRoute route : realm.supplyRoutes().values()) {
+                final CompoundTag routeTag = new CompoundTag();
+                routeTag.putString("destination_dimension", route.destination().dimensionId());
+                routeTag.putInt("destination_colony_id", route.destination().colonyId());
+                routeTag.putLong("built_day", route.builtDay());
+                routeTag.putInt("condition", route.condition());
+                routeTag.putLong("last_upkeep_day", route.lastUpkeepDay());
+                supplyRoutes.add(routeTag);
+            }
+            realmTag.put("supply_routes", supplyRoutes);
             savedRealms.add(realmTag);
         }
         root.put("realms", savedRealms);

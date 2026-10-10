@@ -236,5 +236,19 @@
   "imperium_realms.message.campaign_posture_status": "Militaire doctrine: %1$s | Bonus bij lancering: +%2$d | Verdedigingsbonus: +%3$d",
   "imperium_realms.message.campaign_posture_changed": "%1$s gebruikt nu de doctrine %2$s. Bonus bij lancering: +%3$d; verdedigingsbonus: +%4$d. Lopende operaties behouden hun oorspronkelijke lanceerkracht.",
   "imperium_realms.message.campaign_posture_unchanged": "De provincie gebruikt de doctrine %1$s al.",
-  "imperium_realms.message.campaign_posture_unknown": "Onbekende militaire doctrine. Kies balanced, defensive of offensive."
+  "imperium_realms.message.campaign_posture_unknown": "Onbekende militaire doctrine. Kies balanced, defensive of offensive.",
+  "imperium_realms.gui.empire_routes": "Bevoorradingsroutes",
+  "imperium_realms.supply_route.status.active": "Operationeel",
+  "imperium_realms.supply_route.status.inactive": "Onderhoud nodig",
+  "imperium_realms.message.supply_routes_header": "Bevoorradingsroutes van %1$s — Routes: %2$d | Keizerlijke reserve: %3$d kronen",
+  "imperium_realms.message.supply_routes_empty": "Er zijn nog geen bevoorradingsroutes gebouwd. Leg een route aan van de keizerlijke hoofdstad naar een aangesloten provincie.",
+  "imperium_realms.message.supply_route_entry": "Naar %1$s (kolonie %2$d): conditie %3$d/100 | %4$s | Gebouwd op dag %5$d | Laatst onderhouden op dag %6$d",
+  "imperium_realms.message.supply_routes_help": "De keizer of serverbeheerder kan een directe route van de hoofdstad naar een provincie bouwen met /imperium empire route build <colonyId>. Kosten: %1$d kronen; onderhoud: %2$d kronen per speldag. Onder %3$d/100 conditie levert de route geen militaire logistieke bonussen meer.",
+  "imperium_realms.message.supply_route_emperor_only": "Alleen de keizer of serverbeheerder mag de keizerlijke reserve aan bevoorradingsinfrastructuur besteden.",
+  "imperium_realms.message.supply_route_not_member": "De doelkolonie moet al een aangesloten provincie in je rijk zijn.",
+  "imperium_realms.message.supply_route_capital": "De hoofdstad is het bevoorradingsknooppunt en heeft geen route naar zichzelf nodig.",
+  "imperium_realms.message.supply_route_exists": "Er bestaat al een bevoorradingsroute naar die provincie.",
+  "imperium_realms.message.supply_route_funds": "De keizerlijke reserve heeft minstens %1$d kronen nodig om deze route te bouwen.",
+  "imperium_realms.message.supply_route_build_failed": "De bevoorradingsroute kon niet worden gebouwd. Controleer lidmaatschap, kosten en status.",
+  "imperium_realms.message.supply_route_built": "De bevoorradingsroute naar %1$s is gebouwd voor %2$d kronen. Resterende keizerlijke reserve: %3$d."
 }

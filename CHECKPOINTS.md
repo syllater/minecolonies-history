@@ -39,3 +39,13 @@ Verify the current full workflow, then implement regional events and repeat the 
 - Incremented SavedData schema to 19; older records migrate to balanced posture by default.
 - Added command support and English/Dutch translations.
 - Verification is pending for this new commit; do not treat it as green until CI finishes.
+
+## 2026-10-10 — Supply routes and logistics
+
+- Added a persistent direct capital-to-member-province route model with condition and upkeep day.
+- Construction costs 100 crowns from the imperial reserve; active routes cost 2 crowns per in-game day. Unpaid routes degrade by 10 condition/day; funded routes repair by 5/day.
+- Routes below 40/100 condition no longer provide military logistics bonuses. The capital is intrinsically supplied.
+- Added /imperium empire routes and /imperium empire route build <colonyId>. Only the Emperor or a server operator may spend central funds on construction.
+- Connected route upkeep to the once-per-day authoritative economic turn.
+- SavedData schema increased to 20, with existing saves defaulting to no routes.
+- Added upkeep/build/maintenance tests, BlockUI access and English/Dutch translations. CI for this commit is pending.

@@ -47,4 +47,5 @@
     <button id="governors" pos="208 329" size="190 20" label="$(imperium_realms.gui.governors)"/>
     <button id="empire_events" pos="22 357" size="170 20" label="$(imperium_realms.gui.empire_events)"/>
     <button id="empire_petitions" pos="208 385" size="190 20" label="$(imperium_realms.gui.empire_petitions)"/>
+    <button id="empire_routes" pos="22 413" size="170 20" label="$(imperium_realms.gui.empire_routes)"/>
 </window>

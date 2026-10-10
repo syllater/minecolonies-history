@@ -37,3 +37,13 @@ Decision: Prefer public MineColonies API types under `com.minecolonies.api`; do 
 ## 2026-10-09 — Exact artifacts
 
 Decision: Update the candidate MineColonies/Structurize/BlockUI version notes using upstream 1.21.1 release metadata. Compilation against the actual artifacts remains unverified because this session has no local shell/build execution capability.
+
+## 2026-10-10 — Imperial supply routes
+
+Decision: Phase one logistics uses direct routes from the empire capital to a member province, not a graph/path network. Routes cost 100 central crowns to construct and 2 crowns/day to maintain.
+
+Rationale:
+- The direct model fits the current multi-colony identity and can be tested without relying on world-coordinate assumptions.
+- Active routes (condition >= 40/100) add +8 launch readiness from the routed province and +12 defensive readiness when that province is targeted. The capital is intrinsically supplied.
+- A route starts at 100 condition, repairs +5 per paid daily upkeep and wears -10 on unpaid upkeep.
+- Routes are stored in Imperium SavedData and removed if the province leaves the realm.

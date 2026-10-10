@@ -236,5 +236,19 @@
   "imperium_realms.message.campaign_posture_status": "Military posture: %1$s | Launch readiness bonus: +%2$d | Defensive readiness bonus: +%3$d",
   "imperium_realms.message.campaign_posture_changed": "%1$s now uses %2$s posture. Launch bonus: +%3$d; defence bonus: +%4$d. Ongoing operations keep their original launch readiness.",
   "imperium_realms.message.campaign_posture_unchanged": "The province already uses %1$s posture.",
-  "imperium_realms.message.campaign_posture_unknown": "Unknown military posture. Choose balanced, defensive or offensive."
+  "imperium_realms.message.campaign_posture_unknown": "Unknown military posture. Choose balanced, defensive or offensive.",
+  "imperium_realms.gui.empire_routes": "Supply routes",
+  "imperium_realms.supply_route.status.active": "Operational",
+  "imperium_realms.supply_route.status.inactive": "Needs upkeep",
+  "imperium_realms.message.supply_routes_header": "Supply routes of %1$s — Routes: %2$d | Imperial reserve: %3$d crowns",
+  "imperium_realms.message.supply_routes_empty": "No supply routes have been built. Build a route from the imperial capital to one of its member provinces.",
+  "imperium_realms.message.supply_route_entry": "To %1$s (colony %2$d): condition %3$d/100 | %4$s | Built day %5$d | Last upkeep day %6$d",
+  "imperium_realms.message.supply_routes_help": "An Emperor/server operator can build a direct capital-to-province route with /imperium empire route build <colonyId>. Cost: %1$d crowns; upkeep: %2$d crowns per in-game day. Routes below %3$d/100 condition stop providing military logistics bonuses.",
+  "imperium_realms.message.supply_route_emperor_only": "Only the Emperor or a server operator can spend the imperial reserve on supply infrastructure.",
+  "imperium_realms.message.supply_route_not_member": "The target colony must already be a member province in your empire.",
+  "imperium_realms.message.supply_route_capital": "The capital is the supply hub and does not need a route to itself.",
+  "imperium_realms.message.supply_route_exists": "A supply route to that province already exists.",
+  "imperium_realms.message.supply_route_funds": "The imperial reserve needs at least %1$d crowns to construct this route.",
+  "imperium_realms.message.supply_route_build_failed": "The supply route could not be built. Check membership, cost and route status.",
+  "imperium_realms.message.supply_route_built": "A supply route to %1$s has been built for %2$d crowns. Imperial reserve remaining: %3$d."
 }

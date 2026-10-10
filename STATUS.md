@@ -30,6 +30,8 @@ Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38062626
 - When an imperial tax law is active, 10% of already-collected provincial tax receipts transfer to the central reserve (not a second citizen tax).
 - Persistent audit history (max 100 entries per realm), visible via `/imperium empire audit` and the BlockUI ledger.
 - Persistent governor appointments for non-capital provinces; Emperor/server operator control, daily stability/legitimacy bonus and unrest reduction.
+- Up to three concurrent operations against distinct targets with persisted balanced/offensive/defensive doctrine.
+- Emperor-managed supply routes connect the capital to member provinces, persist condition/upkeep history and add military logistics readiness while operational.
 - English and Dutch translations.
 - CI for build/tests, dedicated server/schematic validation and client startup.
 
@@ -37,11 +39,11 @@ Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38062626
 - Real survival test: place both buildings, hire workers, upgrade levels 1–5, and save/reload an existing and a new colony.
 - Multiplayer playtest with at least two players for permissions, realm membership, governor appointments and concurrent treasury actions.
 - More mechanical/visual differentiation between building levels.
-- Strategic logistics: supply routes, multiple fronts and defensive orders; conquest remains secondary to internal development.
+- Strategic logistics: implemented direct supply routes and up to three fronts; theatre map and explicit defensive orders remain open.
 - Regional events and broader realm cohesion systems.
 - Release notes and a clear distribution/license arrangement.
 
 ## Next actions
-1. Verify multi-front operations and military posture with current build/tests/client/server smoke runs.
-2. Add supply routes and explicit defensive orders as the next military strategy slice.
+1. Verify supply-route persistence/upkeep and logistics bonuses with build/tests/client/server smoke runs.
+2. Add a strategic theatre map and explicit defensive orders.
 3. Continue save/reload and multiplayer acceptance checks before preparing a release candidate.

@@ -619,6 +619,16 @@ public final class EmpireState {
             final String targetName,
             final MilitaryCampaign.Type type,
             final long currentDay) {
+        return launchMilitaryCampaign(commander, target, targetName, type, currentDay, 0);
+    }
+
+    public Optional<MilitaryCampaign> launchMilitaryCampaign(
+            final String commander,
+            final ColonyIdentity target,
+            final String targetName,
+            final MilitaryCampaign.Type type,
+            final long currentDay,
+            final int logisticsReadinessBonus) {
         Objects.requireNonNull(target, "target");
         Objects.requireNonNull(type, "type");
         final List<MilitaryCampaign> pending = pendingMilitaryCampaigns();
@@ -638,9 +648,12 @@ public final class EmpireState {
 
         treasuryCrowns -= type.crownCost();
         diplomaticInfluence -= type.influenceCost();
+        final int logisticsBonus = Math.max(0, Math.min(50, logisticsReadinessBonus));
+        final int launchReadiness = (int) Math.min(1_000L,
+                (long) militaryLaunchReadinessScore() + logisticsBonus);
         final MilitaryCampaign campaign = MilitaryCampaign.start(
                 nextCampaignId++, type, target, targetName, commander,
-                Math.max(0L, currentDay), militaryLaunchReadinessScore());
+                Math.max(0L, currentDay), launchReadiness);
         militaryCampaigns.add(campaign);
         trimMilitaryCampaigns();
         return Optional.of(campaign);
@@ -654,6 +667,14 @@ public final class EmpireState {
             final long campaignId,
             final EmpireState targetState,
             final long currentDay) {
+        return resolveMilitaryCampaign(campaignId, targetState, currentDay, 0);
+    }
+
+    public Optional<MilitaryCampaign.Outcome> resolveMilitaryCampaign(
+            final long campaignId,
+            final EmpireState targetState,
+            final long currentDay,
+            final int defensiveLogisticsBonus) {
         Objects.requireNonNull(targetState, "targetState");
         if (identity.equals(targetState.identity())) {
             return Optional.empty();
@@ -668,8 +689,11 @@ public final class EmpireState {
         }
 
         final int relation = relationScore(targetState.identity());
+        final int logisticsBonus = Math.max(0, Math.min(50, defensiveLogisticsBonus));
+        final int defensiveReadiness = (int) Math.min(1_000L,
+                (long) targetState.militaryDefensiveReadinessScore() + logisticsBonus);
         final MilitaryCampaign.Outcome outcome = campaign.resolveIfDue(
-                currentDay, targetState.militaryDefensiveReadinessScore(), relation);
+                currentDay, defensiveReadiness, relation);
         if (outcome == MilitaryCampaign.Outcome.PENDING) {
             return Optional.empty();
         }

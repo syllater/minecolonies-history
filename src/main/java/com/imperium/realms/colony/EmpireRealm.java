@@ -22,6 +22,10 @@ public final class EmpireRealm {
     public static final long MAX_INVITATIONS = 128L;
     public static final long MAX_IMPERIAL_TREASURY = 10_000_000_000L;
     public static final int IMPERIAL_TAX_REMITTANCE_PERCENT = 10;
+    public static final long SUPPLY_ROUTE_BUILD_COST = 100L;
+    public static final long SUPPLY_ROUTE_DAILY_UPKEEP_CROWNS = 2L;
+    public static final int SUPPLY_ROUTE_LAUNCH_READINESS_BONUS = 8;
+    public static final int SUPPLY_ROUTE_DEFENSE_READINESS_BONUS = 12;
 
     private final long id;
     private String name;
@@ -39,6 +43,7 @@ public final class EmpireRealm {
     private final Map<ColonyIdentity, Long> invitations = new LinkedHashMap<>();
     private final List<ImperialAuditEntry> auditEntries = new ArrayList<>();
     private final Map<ColonyIdentity, ProvinceGovernor> governors = new LinkedHashMap<>();
+    private final Map<ColonyIdentity, ImperialSupplyRoute> supplyRoutes = new LinkedHashMap<>();
     private final Map<ColonyIdentity, Integer> provincialLoyalty = new LinkedHashMap<>();
     private final Map<ColonyIdentity, Integer> separatistPressureDays = new LinkedHashMap<>();
     private final Map<ColonyIdentity, Long> separatistPetitions = new LinkedHashMap<>();
@@ -244,6 +249,70 @@ public final class EmpireRealm {
         return Collections.unmodifiableMap(new LinkedHashMap<>(invitations));
     }
 
+    /** Routes keyed by their destination province, in build order. */
+    public Map<ColonyIdentity, ImperialSupplyRoute> supplyRoutes() {
+        return Collections.unmodifiableMap(new LinkedHashMap<>(supplyRoutes));
+    }
+
+    public java.util.Optional<ImperialSupplyRoute> supplyRouteTo(final ColonyIdentity destination) {
+        return java.util.Optional.ofNullable(supplyRoutes.get(destination));
+    }
+
+    boolean buildSupplyRoute(final ColonyIdentity destination, final long dayIndex, final String actor) {
+        if (destination == null || dayIndex < 0L || capital.equals(destination)
+                || !provinces.contains(destination) || supplyRoutes.containsKey(destination)
+                || supplyRoutes.size() >= MAX_PROVINCES - 1
+                || imperialTreasuryCrowns < SUPPLY_ROUTE_BUILD_COST) {
+            return false;
+        }
+        if (!withdrawImperialTreasury(SUPPLY_ROUTE_BUILD_COST)) {
+            return false;
+        }
+        supplyRoutes.put(destination, ImperialSupplyRoute.build(destination, dayIndex));
+        recordAudit(dayIndex, actor, "supply-route-built", destination.storageKey(), SUPPLY_ROUTE_BUILD_COST);
+        return true;
+    }
+
+    void restoreSupplyRoutes(final Map<ColonyIdentity, ImperialSupplyRoute> savedRoutes) {
+        supplyRoutes.clear();
+        if (savedRoutes == null) return;
+        for (final Map.Entry<ColonyIdentity, ImperialSupplyRoute> entry : savedRoutes.entrySet()) {
+            final ColonyIdentity destination = entry.getKey();
+            final ImperialSupplyRoute route = entry.getValue();
+            if (destination == null || route == null || !destination.equals(route.destination())
+                    || capital.equals(destination) || !provinces.contains(destination)
+                    || supplyRoutes.size() >= MAX_PROVINCES - 1) {
+                continue;
+            }
+            supplyRoutes.put(destination, route);
+        }
+    }
+
+    /** Advances due routes and audits only transitions between active and inactive. */
+    int processSupplyRoutes(final long dayIndex) {
+        if (dayIndex < 0L) return 0;
+        int processed = 0;
+        for (final ImperialSupplyRoute route : new ArrayList<>(supplyRoutes.values())) {
+            if (!route.isDue(dayIndex)) continue;
+            final boolean wasActive = route.isActive();
+            final boolean paid = withdrawImperialTreasury(SUPPLY_ROUTE_DAILY_UPKEEP_CROWNS);
+            if (!route.processDay(dayIndex, paid)) continue;
+            processed++;
+            if (wasActive != route.isActive()) {
+                recordAudit(dayIndex, "System",
+                        route.isActive() ? "supply-route-restored" : "supply-route-disabled",
+                        route.destination().storageKey(), route.condition());
+            }
+        }
+        return processed;
+    }
+
+    public boolean hasActiveSupplyRoute(final ColonyIdentity destination) {
+        if (capital.equals(destination)) return true;
+        final ImperialSupplyRoute route = supplyRoutes.get(destination);
+        return route != null && route.isActive();
+    }
+
     /** Recent audit entries in newest-first order. */
     public List<ImperialAuditEntry> recentAuditEntries() {
         final List<ImperialAuditEntry> recent = new ArrayList<>(auditEntries);
@@ -431,7 +500,7 @@ public final class EmpireRealm {
         if (capital.equals(identity)) {
             return false;
         }
-        invitations.remove(identity); governors.remove(identity);
+        invitations.remove(identity); governors.remove(identity); supplyRoutes.remove(identity);
         provincialLoyalty.remove(identity); separatistPressureDays.remove(identity); separatistPetitions.remove(identity);
         return provinces.remove(identity);
     }

@@ -167,4 +167,61 @@ final class EmpireRealmTest {
         assertFalse(realm.withdrawImperialTreasury(301L));
     }
 
+
+    @Test
+    void supplyRoutesRequireMemberProvinceAndCentralFunds() {
+        final EmpireRealm realm = EmpireRealm.found(
+                1L, "North Sea Union", capital, "uuid-emperor", "Ada", 0L);
+        assertFalse(realm.buildSupplyRoute(capital, 1L, "Ada"));
+
+        assertTrue(realm.inviteProvince(province, 0L));
+        assertTrue(realm.acceptInvitation(province, 0L));
+        assertFalse(realm.buildSupplyRoute(province, 1L, "Ada"),
+                "Building a route requires enough central treasury funds");
+        assertTrue(realm.depositImperialTreasury(EmpireRealm.SUPPLY_ROUTE_BUILD_COST));
+        assertTrue(realm.buildSupplyRoute(province, 1L, "Ada"));
+        assertFalse(realm.buildSupplyRoute(province, 1L, "Ada"),
+                "A route to a province must not be duplicated");
+        assertEquals(EmpireRealm.MAX_IMPERIAL_TREASURY - EmpireRealm.SUPPLY_ROUTE_BUILD_COST,
+                realm.imperialTreasuryCrowns());
+        assertTrue(realm.supplyRouteTo(province).orElseThrow().isActive());
+    }
+
+    @Test
+    void unpaidSupplyRoutesWearDownAndPaidRoutesRecover() {
+        final EmpireRealm realm = EmpireRealm.found(
+                1L, "North Sea Union", capital, "uuid-emperor", "Ada", 0L);
+        assertTrue(realm.inviteProvince(province, 0L));
+        assertTrue(realm.acceptInvitation(province, 0L));
+        assertTrue(realm.depositImperialTreasury(EmpireRealm.SUPPLY_ROUTE_BUILD_COST));
+        assertTrue(realm.buildSupplyRoute(province, 1L, "Ada"));
+        final ImperialSupplyRoute route = realm.supplyRouteTo(province).orElseThrow();
+
+        for (long day = 2L; day <= 8L; day++) {
+            assertEquals(1, realm.processSupplyRoutes(day));
+        }
+        assertEquals(30, route.condition());
+        assertFalse(route.isActive());
+        assertTrue(realm.depositImperialTreasury(EmpireRealm.SUPPLY_ROUTE_DAILY_UPKEEP_CROWNS * 8L));
+
+        for (long day = 9L; day <= 11L; day++) {
+            assertEquals(1, realm.processSupplyRoutes(day));
+        }
+        assertEquals(45, route.condition());
+        assertTrue(route.isActive());
+        assertEquals(11L, route.lastUpkeepDay());
+    }
+
+    @Test
+    void routeRemovalFollowsProvinceSeparation() {
+        final EmpireRealm realm = EmpireRealm.found(
+                1L, "North Sea Union", capital, "uuid-emperor", "Ada", 0L);
+        assertTrue(realm.inviteProvince(province, 0L));
+        assertTrue(realm.acceptInvitation(province, 0L));
+        assertTrue(realm.depositImperialTreasury(EmpireRealm.SUPPLY_ROUTE_BUILD_COST));
+        assertTrue(realm.buildSupplyRoute(province, 1L, "Ada"));
+        assertTrue(realm.removeProvince(province));
+        assertTrue(realm.supplyRoutes().isEmpty());
+    }
+
 }

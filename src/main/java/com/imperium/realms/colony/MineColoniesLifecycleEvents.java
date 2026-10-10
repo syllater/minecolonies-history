@@ -76,16 +76,22 @@ public final class MineColoniesLifecycleEvents {
 
         // Campaign resolution uses the same authoritative overworld day clock as taxation.
         final int resolvedCampaigns = data.resolveDueMilitaryCampaigns(dayIndex);
+        final int processedSupplyRoutes = data.processSupplyRoutes(dayIndex);
         final int regionalEvents = data.resolveDueRegionalEvents(dayIndex);
         final int cohesionTurns = data.updateProvincialLoyalty(dayIndex);
 
         // The turn index, stability changes and zero-income turns are persisted too.
-        if (coloniesAssessed > 0 || resolvedCampaigns > 0 || regionalEvents > 0 || cohesionTurns > 0) {
+        if (coloniesAssessed > 0 || resolvedCampaigns > 0 || processedSupplyRoutes > 0
+                || regionalEvents > 0 || cohesionTurns > 0) {
             data.markChanged();
         }
         if (resolvedCampaigns > 0) {
             LOGGER.info("Resolved {} strategic military operation(s) for day {}",
                     resolvedCampaigns, dayIndex);
+        }
+        if (processedSupplyRoutes > 0) {
+            LOGGER.info("Processed upkeep for {} imperial supply route(s) for day {}",
+                    processedSupplyRoutes, dayIndex);
         }
         if (regionalEvents > 0) {
             LOGGER.info("Resolved {} scheduled realm event(s) for day {}", regionalEvents, dayIndex);

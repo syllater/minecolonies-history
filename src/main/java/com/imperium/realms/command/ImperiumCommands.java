@@ -68,6 +68,14 @@ public final class ImperiumCommands {
                                 .executes(context -> showEmpireAudit(context.getSource())))
                         .then(Commands.literal("events")
                                 .executes(context -> showRegionalEvents(context.getSource())))
+                        .then(Commands.literal("routes")
+                                .executes(context -> showSupplyRoutes(context.getSource())))
+                        .then(Commands.literal("route")
+                                .then(Commands.literal("build")
+                                        .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                                .executes(context -> buildSupplyRoute(
+                                                        context.getSource(),
+                                                        IntegerArgumentType.getInteger(context, "colonyId"))))))
                         .then(Commands.literal("petitions")
                                 .executes(context -> showSeparatistPetitions(context.getSource())))
                         .then(Commands.literal("resolve")
@@ -668,6 +676,88 @@ public final class ImperiumCommands {
         return 0;
     }
 
+    private static int showSupplyRoutes(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            return 0;
+        }
+
+        final List<ImperialSupplyRoute> routes = List.copyOf(realm.supplyRoutes().values());
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.supply_routes_header",
+                realm.name(), routes.size(), realm.imperialTreasuryCrowns()), false);
+        if (routes.isEmpty()) {
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.supply_routes_empty"), false);
+        } else {
+            for (final ImperialSupplyRoute route : routes) {
+                final EmpireState destinationState = context.data().get(route.destination()).orElse(null);
+                final String provinceName = destinationState == null
+                        ? route.destination().storageKey() : destinationState.colonyName();
+                final Component routeStatus = Component.translatable(route.isActive()
+                        ? "imperium_realms.supply_route.status.active"
+                        : "imperium_realms.supply_route.status.inactive");
+                source.sendSuccess(() -> Component.translatable(
+                        "imperium_realms.message.supply_route_entry",
+                        provinceName, route.destination().colonyId(), route.condition(),
+                        routeStatus, route.builtDay(), route.lastUpkeepDay()), false);
+            }
+        }
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.supply_routes_help",
+                EmpireRealm.SUPPLY_ROUTE_BUILD_COST,
+                EmpireRealm.SUPPLY_ROUTE_DAILY_UPKEEP_CROWNS,
+                ImperialSupplyRoute.MIN_ACTIVE_CONDITION), false);
+        return 1;
+    }
+
+    private static int buildSupplyRoute(
+            final CommandSourceStack source, final int destinationColonyId) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            return 0;
+        }
+        if (!mayManageRealm(context, realm)) {
+            source.sendFailure(Component.translatable("imperium_realms.message.supply_route_emperor_only"));
+            return 0;
+        }
+
+        final IColony destination = MineColoniesIntegration
+                .colonyById(context.player().serverLevel(), destinationColonyId).orElse(null);
+        if (destination == null) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.empire_target_not_found", destinationColonyId));
+            return 0;
+        }
+
+        final ColonyIdentity destinationIdentity = ColonyIdentity.from(destination);
+        final EmpireStateSavedData.SupplyRouteBuildResult result = context.data().buildSupplyRoute(
+                realm.id(), destinationIdentity, context.player().getGameProfile().getName(), currentDay(source));
+        switch (result) {
+            case BUILT -> {
+                source.sendSuccess(() -> Component.translatable(
+                        "imperium_realms.message.supply_route_built",
+                        destination.getName(), EmpireRealm.SUPPLY_ROUTE_BUILD_COST,
+                        realm.imperialTreasuryCrowns()), true);
+                return 1;
+            }
+            case REALM_NOT_FOUND -> source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            case NOT_MEMBER -> source.sendFailure(Component.translatable("imperium_realms.message.supply_route_not_member"));
+            case CAPITAL_PROVINCE -> source.sendFailure(Component.translatable("imperium_realms.message.supply_route_capital"));
+            case ALREADY_EXISTS -> source.sendFailure(Component.translatable("imperium_realms.message.supply_route_exists"));
+            case INSUFFICIENT_TREASURY -> source.sendFailure(Component.translatable(
+                    "imperium_realms.message.supply_route_funds", EmpireRealm.SUPPLY_ROUTE_BUILD_COST));
+            case INVALID_DAY -> source.sendFailure(Component.translatable("imperium_realms.message.supply_route_build_failed"));
+        }
+        return 0;
+    }
+
     private static int showRegionalEvents(final CommandSourceStack source) {
         final ColonyContext context = resolveColony(source);
         if (context == null) return 0;
@@ -1130,7 +1220,8 @@ public final class ImperiumCommands {
 
         final MilitaryCampaign campaign = state.launchMilitaryCampaign(
                 context.player().getGameProfile().getName(), targetIdentity, target.getName(),
-                type, currentDay(source)).orElse(null);
+                type, currentDay(source),
+                context.data().militaryLaunchLogisticsBonus(state.identity())).orElse(null);
         if (campaign == null) {
             source.sendFailure(Component.translatable("imperium_realms.message.campaign_launch_failed"));
             return 0;
