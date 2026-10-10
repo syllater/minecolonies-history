@@ -44,10 +44,12 @@ Remaining: more industries/resources and deeper policy/resource coupling.
 
 ## Milestone 6 — Military systems
 
-Status: foundational specialist roles and training are implemented.
+Status: specialist roles, training and time-delayed strategic operations are implemented.
 - Imperial Siege Engineer, Field Medic, Cavalier; guard tower hiring modules.
 - Three persistent training tracks and army status command.
-Remaining: operational strategic campaigns, readiness, logistics, defensive operations and battle outcomes. Prefer strategic resolution over forced territorial conquest.
+- Persisted operations: border patrol, relief expedition and war campaign against a real MineColonies colony; costs, duration, training requirements and deterministic outcomes.
+- Outcomes change stability, legitimacy, treasury, training and bilateral diplomatic relations without automatically transferring territory.
+Remaining: operational theatre/map, supply routes, multiple active fronts, defensive response orders and battle formations. Keep conquest secondary to internal development.
 
 ## Milestone 7 — Buildings and progression
 

@@ -20,7 +20,9 @@ Last updated: 2026-10-10 Europe/Amsterdam.
 - Parliament proposals with four modeled faction votes and imperial assent/veto.
 - Faction approval, citizen-happiness feedback, legitimacy, stability, unrest, strikes and revolts.
 - Diplomatic influence and relations keyed to real MineColonies colony identities.
-- Abstract province ranks (settlement through kingdom), specialization focus, development paid with knowledge, and province commands.
+- Abstract province ranks (settlement through kingdom), specialization focus, development paid with knowledge, and server-validated province commands.
+- Strategic campaign model with border patrols, relief expeditions and war campaigns against real MineColonies colonies; daily deterministic resolution, persisted outcomes, resource costs, training requirements and bilateral diplomacy/stability effects.
+- Campaign launch/status commands and a BlockUI ledger entry point, in English and Dutch.
 - BlockUI ledger buttons for status, parliament, taxes, policies, investment and province specialization/development.
 - English and Dutch translations.
 - GitHub Actions build/test, dedicated-server blueprint validation and headless client smoke workflows.
@@ -32,10 +34,14 @@ https://github.com/syllater/minecolonies-history/actions/runs/37975778358
 
 The new province tests exposed two expectation regressions. One was fixed by removing an unintended default agriculture tax bonus; another was fixed by asserting that a repeated daily tax turn returns zero. The latest CI run for the corrected branch revision must still be checked before treating this addition as verified.
 
+## Current verification
+
+Strategic campaign model, persistence, commands, UI and tests have been added on the working branch. This revision is still awaiting a full CI verdict; it is not considered verified until build/tests and client/server smoke jobs pass.
+
 ## Known gaps
 
 - In-world survival testing of both buildings (placement, hiring, upgrades through all five levels, save/reload) has not yet been proven by CI.
-- Grand-strategy military campaigns/warfare are not implemented yet; the present military layer covers custom guard roles, training progression and readiness records.
+- Campaigns now have strategic resolution and consequences, but a larger war map, logistics/supply routes, multi-front orders and battle formations remain future work.
 - The five building tiers currently have valid packaged schematics, but their visual differentiation and gameplay modules can be expanded.
 - The latest province implementation is awaiting a green CI run.
 

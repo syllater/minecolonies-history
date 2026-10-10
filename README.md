@@ -55,6 +55,15 @@ Stand inside your MineColonies colony and use:
 
 Province development costs 10 knowledge points. Province focus changes daily economic/political effects or specialist military training. The GUI exposes the most common province actions; the server remains authoritative.
 
+## Strategic military operations
+
+- `/imperium campaign status` lists recent operations and their resolution day.
+- `/imperium campaign launch border_patrol <colonyId>` costs 25 crowns and resolves after one in-game day.
+- `/imperium campaign launch relief_expedition <colonyId>` costs 75 crowns and 5 diplomatic influence and resolves after two days.
+- `/imperium campaign launch war_campaign <colonyId>` costs 150 crowns and 10 influence, requires at least 3 specialist military training points, and resolves after three days.
+- Only real MineColonies colonies in the same dimension are valid targets. A realm can run one operation at a time; campaigns and consequences persist across save/reload.
+- War outcomes affect stability, legitimacy, training, treasury and relations, but never automatically transfer territory.
+
 ## Project documents
 
 - `PROJECT_GOAL.md`: long-term project goal.

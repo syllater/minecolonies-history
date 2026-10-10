@@ -29,3 +29,23 @@ https://github.com/syllater/minecolonies-history/actions/runs/37975778358
 
 ### Next
 After the current CI passes, continue with province GUI polish, strategic military operations and save/reload hardening; only fix bugs that block build/playable acceptance immediately.
+
+
+## 2026-10-10 — Strategic military operations added; CI pending
+
+### Added
+- `MilitaryCampaign`: persistent operation IDs, targets, launch readiness, type, start/due/resolved days and final outcome.
+- `EmpireState`: launch validation, crown/influence costs, military-training requirement, one active operation per realm and campaign consequences.
+- `EmpireStateSavedData`: schema version 11, campaign serialization, next-ID handling, and daily operation resolution.
+- Commands: `/imperium campaign status` and `/imperium campaign launch <border_patrol|relief_expedition|war_campaign> <colonyId>`.
+- BlockUI campaign-status button, English/Dutch strings, and unit tests for operation costs, duration, resolution and bilateral effects.
+
+### Rules
+- Border Patrol: 25 crowns, 1 day; can improve stability and relations.
+- Relief Expedition: 75 crowns + 5 influence, 2 days; success assists the target colony.
+- War Campaign: 150 crowns + 10 influence, requires 3 training points, 3 days; may affect stability, legitimacy, training, treasury and relations.
+- Only real MineColonies colonies in the same dimension can be targeted. One operation can be pending per realm.
+- Operations never automatically transfer territory.
+
+### Verification
+The source is committed. The latest GitHub Actions run must be inspected before marking the campaign addition verified. Do not conflate the earlier green baseline with this new revision.

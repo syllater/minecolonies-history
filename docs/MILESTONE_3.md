@@ -59,3 +59,16 @@ Each colony also has an abstract province progression track, persisted in Imperi
 - The SavedData schema is now version 10; legacy saves load with safe province defaults.
 
 The new province code is not marked verified until the current GitHub Actions run passes.
+
+
+## Strategic military operations (new work, CI pending)
+
+The campaign model persists operation IDs, target colony identities, launch readiness, operation type, start day, resolution day and final outcome.
+- Border Patrol is a low-cost, one-day operation that can improve stability and relations.
+- Relief Expedition costs crowns and diplomatic influence and can assist the target colony.
+- War Campaign costs more, requires three specialist training points, resolves after three days and can alter stability, legitimacy, military training, treasury and relations.
+- Targets must resolve to actual MineColonies colonies in the same dimension.
+- Only one campaign can be pending per colony. Due operations are processed on the authoritative daily server turn and survive save/reload.
+- No operation automatically transfers territory; the model emphasizes strategic pressure, aid and readiness while keeping internal development central.
+
+The new campaign implementation and tests are awaiting a green CI run.
