@@ -19,6 +19,7 @@ public final class ImperiumLedgerWindow extends BOWindow implements ButtonHandle
     private static final Map<String, String> COMMANDS = Map.ofEntries(
             Map.entry("status", "imperium status"),
             Map.entry("parliament", "imperium parliament status"),
+            Map.entry("province", "imperium province status"),
             Map.entry("tax0", "imperium tax 0"),
             Map.entry("tax5", "imperium tax 5"),
             Map.entry("tax10", "imperium tax 10"),
