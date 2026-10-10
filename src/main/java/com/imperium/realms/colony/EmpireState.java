@@ -710,6 +710,13 @@ public final class EmpireState {
         return true;
     }
 
+    /** Apply bounded political consequences from imperial or provincial decisions. */
+    public void adjustPoliticalMetrics(final int stabilityDelta, final int legitimacyDelta, final int unrestDelta) {
+        stability = clamp(stability + stabilityDelta, 0, 100);
+        legitimacy = clamp(legitimacy + legitimacyDelta, 0, 100);
+        unrest = clamp(unrest + unrestDelta, 0, 100);
+    }
+
     private void adjustStability(final int change) {
         stability = clamp(stability + change, 0, 100);
     }

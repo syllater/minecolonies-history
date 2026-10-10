@@ -39,6 +39,10 @@ public final class EmpireRealm {
     private final Map<ColonyIdentity, Long> invitations = new LinkedHashMap<>();
     private final List<ImperialAuditEntry> auditEntries = new ArrayList<>();
     private final Map<ColonyIdentity, ProvinceGovernor> governors = new LinkedHashMap<>();
+    private final Map<ColonyIdentity, Integer> provincialLoyalty = new LinkedHashMap<>();
+    private final Map<ColonyIdentity, Integer> separatistPressureDays = new LinkedHashMap<>();
+    private final Map<ColonyIdentity, Long> separatistPetitions = new LinkedHashMap<>();
+    private long lastCohesionDay;
 
     private EmpireRealm(
             final long id,
@@ -58,8 +62,10 @@ public final class EmpireRealm {
         this.emperorName = normalize(emperorName, "Unknown Emperor");
         this.foundedDay = foundedDay;
         this.lastRegionalEventDay = foundedDay;
+        this.lastCohesionDay = foundedDay;
         this.imperialTreasuryCrowns = clampTreasury(imperialTreasuryCrowns);
         this.provinces.add(capital);
+        this.provincialLoyalty.put(capital, 100);
     }
 
     static EmpireRealm found(
@@ -307,6 +313,82 @@ public final class EmpireRealm {
         }
     }
 
+    public long lastCohesionDay() { return lastCohesionDay; }
+
+    public int provincialLoyalty(final ColonyIdentity province) {
+        return provincialLoyalty.getOrDefault(province, capital.equals(province) ? 100 : 75);
+    }
+
+    public Map<ColonyIdentity, Integer> provincialLoyalties() {
+        return Collections.unmodifiableMap(new LinkedHashMap<>(provincialLoyalty));
+    }
+
+    public Map<ColonyIdentity, Integer> separatistPressureDays() {
+        return Collections.unmodifiableMap(new LinkedHashMap<>(separatistPressureDays));
+    }
+
+    public Map<ColonyIdentity, Long> separatistPetitions() {
+        return Collections.unmodifiableMap(new LinkedHashMap<>(separatistPetitions));
+    }
+
+    public boolean hasSeparatistPetition(final ColonyIdentity province) {
+        return separatistPetitions.containsKey(province);
+    }
+
+    public long separatistPetitionDay(final ColonyIdentity province) {
+        return separatistPetitions.getOrDefault(province, -1L);
+    }
+
+    boolean beginCohesionTurn(final long dayIndex) {
+        if (dayIndex < 0L || dayIndex <= lastCohesionDay) return false;
+        lastCohesionDay = dayIndex;
+        return true;
+    }
+
+    boolean updateProvinceLoyalty(final ColonyIdentity province, final int delta, final long dayIndex) {
+        if (province == null || !provinces.contains(province) || dayIndex < 0L) return false;
+        final int next = Math.max(0, Math.min(100, provincialLoyalty(province) + delta));
+        provincialLoyalty.put(province, next);
+        if (capital.equals(province)) return false;
+        if (next <= 20) {
+            final int pressure = Math.min(5, separatistPressureDays.getOrDefault(province, 0) + 1);
+            separatistPressureDays.put(province, pressure);
+            if (pressure >= 5 && !separatistPetitions.containsKey(province)) {
+                separatistPetitions.put(province, dayIndex);
+                return true;
+            }
+        } else {
+            separatistPressureDays.remove(province);
+        }
+        return false;
+    }
+
+    boolean resolveSeparatistPetition(final ColonyIdentity province, final int loyaltyDelta) {
+        if (province == null || capital.equals(province) || !provinces.contains(province) || !separatistPetitions.containsKey(province)) return false;
+        provincialLoyalty.put(province, Math.max(0, Math.min(100, provincialLoyalty(province) + loyaltyDelta)));
+        separatistPetitions.remove(province);
+        separatistPressureDays.remove(province);
+        return true;
+    }
+
+    void restoreCohesionState(final Map<ColonyIdentity, Integer> savedLoyalty, final Map<ColonyIdentity, Integer> savedPressure,
+            final Map<ColonyIdentity, Long> savedPetitions, final long savedLastCohesionDay) {
+        provincialLoyalty.clear(); separatistPressureDays.clear(); separatistPetitions.clear();
+        for (final ColonyIdentity province : provinces) provincialLoyalty.put(province, capital.equals(province) ? 100 : 75);
+        if (savedLoyalty != null) savedLoyalty.forEach((province, value) -> {
+            if (province != null && provinces.contains(province) && value != null) provincialLoyalty.put(province, Math.max(0, Math.min(100, value)));
+        });
+        if (savedPressure != null) savedPressure.forEach((province, days) -> {
+            if (province != null && provinces.contains(province) && !capital.equals(province) && days != null) separatistPressureDays.put(province, Math.max(0, Math.min(5, days)));
+        });
+        if (savedPetitions != null) savedPetitions.forEach((province, day) -> {
+            if (province != null && provinces.contains(province) && !capital.equals(province) && day != null) {
+                separatistPetitions.put(province, Math.max(0L, day)); separatistPressureDays.put(province, 5);
+            }
+        });
+        lastCohesionDay = Math.max(foundedDay, savedLastCohesionDay);
+    }
+
     public boolean isEmperor(final String playerUuid) {
         return playerUuid != null && emperorUuid.equals(playerUuid);
     }
@@ -339,7 +421,9 @@ public final class EmpireRealm {
             return false;
         }
         invitations.remove(identity);
-        return provinces.add(identity);
+        final boolean added = provinces.add(identity);
+        if (added) { provincialLoyalty.put(identity, 75); separatistPressureDays.remove(identity); separatistPetitions.remove(identity); }
+        return added;
     }
 
     boolean removeProvince(final ColonyIdentity identity) {
@@ -347,8 +431,8 @@ public final class EmpireRealm {
         if (capital.equals(identity)) {
             return false;
         }
-        invitations.remove(identity);
-        governors.remove(identity);
+        invitations.remove(identity); governors.remove(identity);
+        provincialLoyalty.remove(identity); separatistPressureDays.remove(identity); separatistPetitions.remove(identity);
         return provinces.remove(identity);
     }
 
