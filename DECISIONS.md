@@ -52,3 +52,9 @@ Rationale:
 
 - Defensive doctrine and current supply-route condition are evaluated when an operation resolves; launch readiness and source logistics are saved with the operation.
 - Supply-route CI initially caught a missing command-layer import and an incorrect unit-test treasury expectation. Both are corrected in the follow-up commit.
+
+## 2026-10-10 — Temporary defensive orders
+
+Decision: Give the Emperor a timed defensive-order mechanism, distinct from standing military posture. One active order is allowed per province; it costs 50 central crowns, lasts seven in-game days and adds +20 readiness when the province is targeted.
+
+Rationale: Strategic defense should be an explicit command choice, not just an automatic passive score. Orders are persistent, server-authoritative and expire during the daily turn.

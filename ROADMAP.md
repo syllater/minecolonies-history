@@ -27,7 +27,7 @@ Remaining: more industries/resources and deeper policy/resource coupling.
 
 ## Milestone 6 — Military systems
 Status: specialist roles/training and persistent delayed strategic operations (border patrol, relief expedition, war campaign) against real MineColonies colonies.
-Added up to three concurrent operations against distinct targets plus persistent balanced, offensive and defensive postures. Direct imperial supply routes now add logistics bonuses while operational. Remaining: theatre map and explicit defensive orders.
+Added up to three concurrent operations against distinct targets plus persistent balanced, offensive and defensive postures. Direct imperial supply routes now add logistics bonuses while operational. Temporary defensive orders are also implemented. Remaining: theatre map and in-world strategic planning.
 
 ## Milestone 7 — Buildings and progression
 Status: two registered MineColonies huts with levels 1–5 and ten generated Structurize blueprints. More distinct visuals/modules remain future work.

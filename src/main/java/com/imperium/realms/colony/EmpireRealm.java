@@ -44,6 +44,7 @@ public final class EmpireRealm {
     private final List<ImperialAuditEntry> auditEntries = new ArrayList<>();
     private final Map<ColonyIdentity, ProvinceGovernor> governors = new LinkedHashMap<>();
     private final Map<ColonyIdentity, ImperialSupplyRoute> supplyRoutes = new LinkedHashMap<>();
+    private final Map<ColonyIdentity, ImperialDefensiveOrder> defensiveOrders = new LinkedHashMap<>();
     private final Map<ColonyIdentity, Integer> provincialLoyalty = new LinkedHashMap<>();
     private final Map<ColonyIdentity, Integer> separatistPressureDays = new LinkedHashMap<>();
     private final Map<ColonyIdentity, Long> separatistPetitions = new LinkedHashMap<>();
@@ -254,6 +255,10 @@ public final class EmpireRealm {
         return Collections.unmodifiableMap(new LinkedHashMap<>(supplyRoutes));
     }
 
+    public Map<ColonyIdentity, ImperialDefensiveOrder> defensiveOrders() {
+        return Collections.unmodifiableMap(new LinkedHashMap<>(defensiveOrders));
+    }
+
     public java.util.Optional<ImperialSupplyRoute> supplyRouteTo(final ColonyIdentity destination) {
         return java.util.Optional.ofNullable(supplyRoutes.get(destination));
     }
@@ -311,6 +316,56 @@ public final class EmpireRealm {
         if (capital.equals(destination)) return true;
         final ImperialSupplyRoute route = supplyRoutes.get(destination);
         return route != null && route.isActive();
+    }
+
+    boolean issueDefensiveOrder(final ColonyIdentity province, final String actor, final long dayIndex) {
+        if (province == null || dayIndex < 0L || !provinces.contains(province)
+                || imperialTreasuryCrowns < ImperialDefensiveOrder.COST_CROWNS) {
+            return false;
+        }
+        final ImperialDefensiveOrder existing = defensiveOrders.get(province);
+        if (existing != null && existing.isActive(dayIndex)) return false;
+        if (!withdrawImperialTreasury(ImperialDefensiveOrder.COST_CROWNS)) return false;
+        final ImperialDefensiveOrder order = ImperialDefensiveOrder.issue(province, actor, dayIndex);
+        defensiveOrders.put(province, order);
+        recordAudit(dayIndex, actor, "defensive-order-issued",
+                province.storageKey(), ImperialDefensiveOrder.COST_CROWNS);
+        return true;
+    }
+
+    void restoreDefensiveOrders(final Map<ColonyIdentity, ImperialDefensiveOrder> savedOrders) {
+        defensiveOrders.clear();
+        if (savedOrders == null) return;
+        for (final Map.Entry<ColonyIdentity, ImperialDefensiveOrder> entry : savedOrders.entrySet()) {
+            final ColonyIdentity province = entry.getKey();
+            final ImperialDefensiveOrder order = entry.getValue();
+            if (province != null && order != null && province.equals(order.province())
+                    && provinces.contains(province) && defensiveOrders.size() < MAX_PROVINCES) {
+                defensiveOrders.put(province, order);
+            }
+        }
+    }
+
+    int processDefensiveOrders(final long dayIndex) {
+        if (dayIndex < 0L) return 0;
+        int expired = 0;
+        final var iterator = defensiveOrders.entrySet().iterator();
+        while (iterator.hasNext()) {
+            final Map.Entry<ColonyIdentity, ImperialDefensiveOrder> entry = iterator.next();
+            if (!entry.getValue().isActive(dayIndex)) {
+                iterator.remove();
+                recordAudit(dayIndex, "System", "defensive-order-expired",
+                        entry.getKey().storageKey(), 0L);
+                expired++;
+            }
+        }
+        return expired;
+    }
+
+    public int defensiveOrderBonus(final ColonyIdentity province, final long dayIndex) {
+        final ImperialDefensiveOrder order = defensiveOrders.get(province);
+        return order != null && order.isActive(dayIndex)
+                ? ImperialDefensiveOrder.READINESS_BONUS : 0;
     }
 
     /** Recent audit entries in newest-first order. */
@@ -500,7 +555,7 @@ public final class EmpireRealm {
         if (capital.equals(identity)) {
             return false;
         }
-        invitations.remove(identity); governors.remove(identity); supplyRoutes.remove(identity);
+        invitations.remove(identity); governors.remove(identity); supplyRoutes.remove(identity); defensiveOrders.remove(identity);
         provincialLoyalty.remove(identity); separatistPressureDays.remove(identity); separatistPetitions.remove(identity);
         return provinces.remove(identity);
     }

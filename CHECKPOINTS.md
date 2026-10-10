@@ -54,3 +54,10 @@ Verify the current full workflow, then implement regional events and repeat the 
 
 - The Gradle compile failed because `ImperiumCommands` referenced `ImperialSupplyRoute` without importing the class. A unit-test assertion also expected a full treasury balance after depositing only the construction cost; the correct remaining amount is zero.
 - Follow-up fixes are committed; retest with the new CI run.
+
+## 2026-10-10 — Temporary defensive orders
+
+- Added a seven-day defensive order per province, costing 50 central crowns and providing +20 defensive readiness while active.
+- Orders are stored per realm, removed when a province leaves, and expired on the authoritative daily turn.
+- Only the Emperor or server operator can issue orders spending central funds.
+- Added command/status listing, BlockUI access, English/Dutch translations and tests. Verification pending.

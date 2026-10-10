@@ -250,5 +250,15 @@
   "imperium_realms.message.supply_route_exists": "A supply route to that province already exists.",
   "imperium_realms.message.supply_route_funds": "The imperial reserve needs at least %1$d crowns to construct this route.",
   "imperium_realms.message.supply_route_build_failed": "The supply route could not be built. Check membership, cost and route status.",
-  "imperium_realms.message.supply_route_built": "A supply route to %1$s has been built for %2$d crowns. Imperial reserve remaining: %3$d."
+  "imperium_realms.message.supply_route_built": "A supply route to %1$s has been built for %2$d crowns. Imperial reserve remaining: %3$d.",
+  "imperium_realms.gui.empire_defenses": "Defensive orders",
+  "imperium_realms.message.defensive_orders_header": "Defensive orders in %1$s — Active: %2$d | Imperial reserve: %3$d crowns",
+  "imperium_realms.message.defensive_orders_empty": "There are no active defensive orders.",
+  "imperium_realms.message.defensive_order_entry": "%1$s (colony %2$d): issued by %3$s on day %4$d, expires day %5$d; +%6$d defensive readiness",
+  "imperium_realms.message.defensive_orders_help": "The Emperor/server operator can issue a temporary order with /imperium empire defense <colonyId>. Cost: %1$d crowns; duration: %2$d in-game days; effect: +%3$d defensive readiness when targeted.",
+  "imperium_realms.message.defensive_orders_emperor_only": "Only the Emperor or a server operator can spend the imperial reserve on defensive orders.",
+  "imperium_realms.message.defensive_order_issued": "Defensive order issued to %1$s for %2$d crowns. It lasts %3$d in-game days and adds +%4$d readiness when defending. Imperial reserve remaining: %5$d.",
+  "imperium_realms.message.defensive_order_active": "That province already has an active defensive order.",
+  "imperium_realms.message.defensive_order_funds": "The imperial reserve needs at least %1$d crowns for this order.",
+  "imperium_realms.message.defensive_order_failed": "The defensive order could not be issued. Check membership, funds and order status."
 }

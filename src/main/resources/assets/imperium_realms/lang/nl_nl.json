@@ -250,5 +250,15 @@
   "imperium_realms.message.supply_route_exists": "Er bestaat al een bevoorradingsroute naar die provincie.",
   "imperium_realms.message.supply_route_funds": "De keizerlijke reserve heeft minstens %1$d kronen nodig om deze route te bouwen.",
   "imperium_realms.message.supply_route_build_failed": "De bevoorradingsroute kon niet worden gebouwd. Controleer lidmaatschap, kosten en status.",
-  "imperium_realms.message.supply_route_built": "De bevoorradingsroute naar %1$s is gebouwd voor %2$d kronen. Resterende keizerlijke reserve: %3$d."
+  "imperium_realms.message.supply_route_built": "De bevoorradingsroute naar %1$s is gebouwd voor %2$d kronen. Resterende keizerlijke reserve: %3$d.",
+  "imperium_realms.gui.empire_defenses": "Verdedigingsbevelen",
+  "imperium_realms.message.defensive_orders_header": "Verdedigingsbevelen in %1$s — Actief: %2$d | Keizerlijke reserve: %3$d kronen",
+  "imperium_realms.message.defensive_orders_empty": "Er zijn geen actieve verdedigingsbevelen.",
+  "imperium_realms.message.defensive_order_entry": "%1$s (kolonie %2$d): uitgevaardigd door %3$s op dag %4$d, verloopt op dag %5$d; +%6$d verdedigingskracht",
+  "imperium_realms.message.defensive_orders_help": "De keizer/serverbeheerder kan een tijdelijk bevel uitvaardigen met /imperium empire defense <colonyId>. Kosten: %1$d kronen; duur: %2$d speldagen; effect: +%3$d verdedigingskracht wanneer de provincie wordt aangevallen.",
+  "imperium_realms.message.defensive_orders_emperor_only": "Alleen de keizer of serverbeheerder mag de keizerlijke reserve aan verdedigingsbevelen besteden.",
+  "imperium_realms.message.defensive_order_issued": "Verdedigingsbevel uitgevaardigd voor %1$s voor %2$d kronen. Het duurt %3$d speldagen en geeft +%4$d verdedigingskracht. Resterende keizerlijke reserve: %5$d.",
+  "imperium_realms.message.defensive_order_active": "Deze provincie heeft al een actief verdedigingsbevel.",
+  "imperium_realms.message.defensive_order_funds": "De keizerlijke reserve heeft minstens %1$d kronen nodig voor dit bevel.",
+  "imperium_realms.message.defensive_order_failed": "Het verdedigingsbevel kon niet worden uitgevaardigd. Controleer lidmaatschap, middelen en status."
 }

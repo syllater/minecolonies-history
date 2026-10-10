@@ -4,6 +4,7 @@ import com.imperium.realms.ImperiumRealms;
 import com.imperium.realms.colony.ColonyIdentity;
 import com.imperium.realms.colony.EconomicPolicy;
 import com.imperium.realms.colony.ImperialAuditEntry;
+import com.imperium.realms.colony.ImperialDefensiveOrder;
 import com.imperium.realms.colony.ImperialSupplyRoute;
 import com.imperium.realms.colony.EmpireState;
 import com.imperium.realms.colony.EmpireStateSavedData;
@@ -71,6 +72,13 @@ public final class ImperiumCommands {
                                 .executes(context -> showRegionalEvents(context.getSource())))
                         .then(Commands.literal("routes")
                                 .executes(context -> showSupplyRoutes(context.getSource())))
+                        .then(Commands.literal("defenses")
+                                .executes(context -> showDefensiveOrders(context.getSource())))
+                        .then(Commands.literal("defense")
+                                .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                        .executes(context -> issueDefensiveOrder(
+                                                context.getSource(),
+                                                IntegerArgumentType.getInteger(context, "colonyId")))))
                         .then(Commands.literal("route")
                                 .then(Commands.literal("build")
                                         .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
@@ -673,6 +681,84 @@ public final class ImperiumCommands {
             case CAPITAL_PROVINCE -> source.sendFailure(Component.translatable("imperium_realms.message.governor_capital"));
             case NOT_MEMBER -> source.sendFailure(Component.translatable("imperium_realms.message.governor_not_member"));
             case REALM_NOT_FOUND -> source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+        }
+        return 0;
+    }
+
+    private static int showDefensiveOrders(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            return 0;
+        }
+        final long day = currentDay(source);
+        final List<ImperialDefensiveOrder> orders = realm.defensiveOrders().values().stream()
+                .filter(order -> order.isActive(day)).toList();
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.defensive_orders_header",
+                realm.name(), orders.size(), realm.imperialTreasuryCrowns()), false);
+        if (orders.isEmpty()) {
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.defensive_orders_empty"), false);
+        } else {
+            for (final ImperialDefensiveOrder order : orders) {
+                final EmpireState provinceState = context.data().get(order.province()).orElse(null);
+                final String provinceName = provinceState == null
+                        ? order.province().storageKey() : provinceState.colonyName();
+                source.sendSuccess(() -> Component.translatable(
+                        "imperium_realms.message.defensive_order_entry",
+                        provinceName, order.province().colonyId(), order.issuer(),
+                        order.issuedDay(), order.expiresDay(),
+                        ImperialDefensiveOrder.READINESS_BONUS), false);
+            }
+        }
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.defensive_orders_help",
+                ImperialDefensiveOrder.COST_CROWNS,
+                ImperialDefensiveOrder.DURATION_DAYS,
+                ImperialDefensiveOrder.READINESS_BONUS), false);
+        return 1;
+    }
+
+    private static int issueDefensiveOrder(final CommandSourceStack source, final int targetColonyId) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            return 0;
+        }
+        if (!mayManageRealm(context, realm)) {
+            source.sendFailure(Component.translatable("imperium_realms.message.defensive_orders_emperor_only"));
+            return 0;
+        }
+        final IColony target = MineColoniesIntegration
+                .colonyById(context.player().serverLevel(), targetColonyId).orElse(null);
+        if (target == null) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.empire_target_not_found", targetColonyId));
+            return 0;
+        }
+        final ColonyIdentity targetIdentity = ColonyIdentity.from(target);
+        final EmpireStateSavedData.DefensiveOrderIssueResult result = context.data().issueDefensiveOrder(
+                realm.id(), targetIdentity, context.player().getGameProfile().getName(), currentDay(source));
+        switch (result) {
+            case ISSUED -> {
+                source.sendSuccess(() -> Component.translatable(
+                        "imperium_realms.message.defensive_order_issued",
+                        target.getName(), ImperialDefensiveOrder.COST_CROWNS,
+                        ImperialDefensiveOrder.DURATION_DAYS, ImperialDefensiveOrder.READINESS_BONUS,
+                        realm.imperialTreasuryCrowns()), true);
+                return 1;
+            }
+            case REALM_NOT_FOUND -> source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            case NOT_MEMBER -> source.sendFailure(Component.translatable("imperium_realms.message.supply_route_not_member"));
+            case ALREADY_ACTIVE -> source.sendFailure(Component.translatable("imperium_realms.message.defensive_order_active"));
+            case INSUFFICIENT_TREASURY -> source.sendFailure(Component.translatable(
+                    "imperium_realms.message.defensive_order_funds", ImperialDefensiveOrder.COST_CROWNS));
+            case INVALID_DAY -> source.sendFailure(Component.translatable("imperium_realms.message.defensive_order_failed"));
         }
         return 0;
     }

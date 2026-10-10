@@ -31,6 +31,7 @@ Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38062626
 - Persistent audit history (max 100 entries per realm), visible via `/imperium empire audit` and the BlockUI ledger.
 - Persistent governor appointments for non-capital provinces; Emperor/server operator control, daily stability/legitimacy bonus and unrest reduction.
 - Up to three concurrent operations against distinct targets with persisted balanced/offensive/defensive doctrine.
+- Temporary seven-day defensive orders, costing 50 central crowns and adding +20 defensive readiness at resolution.
 - Emperor-managed supply routes connect the capital to member provinces, persist condition/upkeep history and add military logistics readiness while operational.
 - English and Dutch translations.
 - CI for build/tests, dedicated server/schematic validation and client startup.
@@ -39,13 +40,13 @@ Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38062626
 - Real survival test: place both buildings, hire workers, upgrade levels 1–5, and save/reload an existing and a new colony.
 - Multiplayer playtest with at least two players for permissions, realm membership, governor appointments and concurrent treasury actions.
 - More mechanical/visual differentiation between building levels.
-- Strategic logistics: implemented direct supply routes and up to three fronts; theatre map and explicit defensive orders remain open.
+- Strategic logistics: direct supply routes, up to three fronts and temporary defensive orders are implemented; a theatre map and in-world strategic planning remain open.
 - Regional events and broader realm cohesion systems.
 - Release notes and a clear distribution/license arrangement.
 
 ## Next actions
-1. Verify supply-route persistence/upkeep and logistics bonuses with build/tests/client/server smoke runs.
-2. Add a strategic theatre map and explicit defensive orders.
+1. Verify route/order persistence and campaign bonuses with build/tests/client/server smoke runs.
+2. Add a strategic theatre map and in-world strategic planning controls.
 3. Continue save/reload and multiplayer acceptance checks before preparing a release candidate.
 
 - The first supply-route CI attempt identified a missing `ImperialSupplyRoute` import in the command handler before tests executed; the follow-up commit fixes it and corrects the route-construction treasury assertion.

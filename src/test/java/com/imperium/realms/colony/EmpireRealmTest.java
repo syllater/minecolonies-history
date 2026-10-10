@@ -223,4 +223,20 @@ final class EmpireRealmTest {
         assertTrue(realm.supplyRoutes().isEmpty());
     }
 
+
+    @Test
+    void defensiveOrdersCostCentralFundsAndExpireAfterSevenDays() {
+        final EmpireRealm realm = EmpireRealm.found(
+                1L, "North Sea Union", capital, "uuid-emperor", "Ada", 0L);
+        assertFalse(realm.issueDefensiveOrder(capital, "Ada", 1L));
+        assertTrue(realm.depositImperialTreasury(ImperialDefensiveOrder.COST_CROWNS));
+        assertTrue(realm.issueDefensiveOrder(capital, "Ada", 1L));
+        assertFalse(realm.issueDefensiveOrder(capital, "Ada", 2L));
+        assertEquals(0L, realm.imperialTreasuryCrowns());
+        assertEquals(ImperialDefensiveOrder.READINESS_BONUS, realm.defensiveOrderBonus(capital, 6L));
+        assertEquals(0, realm.defensiveOrderBonus(capital, 8L));
+        assertEquals(1, realm.processDefensiveOrders(8L));
+        assertTrue(realm.defensiveOrders().isEmpty());
+    }
+
 }

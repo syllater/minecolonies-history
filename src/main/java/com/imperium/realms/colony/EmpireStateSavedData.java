@@ -18,7 +18,7 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 20;
+    private static final int SCHEMA_VERSION = 21;
 
     public enum PetitionResolutionResult {
         RESOLVED, REALM_NOT_FOUND, NOT_MEMBER, CAPITAL_PROVINCE, NO_PETITION, INSUFFICIENT_TREASURY
@@ -26,6 +26,10 @@ public final class EmpireStateSavedData extends SavedData {
 
     public enum SupplyRouteBuildResult {
         BUILT, REALM_NOT_FOUND, NOT_MEMBER, CAPITAL_PROVINCE, ALREADY_EXISTS, INSUFFICIENT_TREASURY, INVALID_DAY
+    }
+
+    public enum DefensiveOrderIssueResult {
+        ISSUED, REALM_NOT_FOUND, NOT_MEMBER, ALREADY_ACTIVE, INSUFFICIENT_TREASURY, INVALID_DAY
     }
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
@@ -405,6 +409,25 @@ public final class EmpireStateSavedData extends SavedData {
                         }
                     }
 
+                    final Map<ColonyIdentity, ImperialDefensiveOrder> defensiveOrders = new LinkedHashMap<>();
+                    if (realmTag.contains("defensive_orders", Tag.TAG_LIST)) {
+                        final ListTag savedOrders = realmTag.getList("defensive_orders", Tag.TAG_COMPOUND);
+                        for (int orderIndex = 0; orderIndex < savedOrders.size(); orderIndex++) {
+                            final CompoundTag orderTag = savedOrders.getCompound(orderIndex);
+                            try {
+                                final ColonyIdentity province = new ColonyIdentity(
+                                        orderTag.getString("province_dimension"),
+                                        orderTag.getInt("province_colony_id"));
+                                final long issuedDay = Math.max(0L, orderTag.getLong("issued_day"));
+                                defensiveOrders.put(province, ImperialDefensiveOrder.restore(
+                                        province, orderTag.getString("issuer"), issuedDay,
+                                        Math.max(issuedDay, orderTag.getLong("expires_day"))));
+                            } catch (IllegalArgumentException ignored) {
+                                // Ignore invalid order records without losing the realm.
+                            }
+                        }
+                    }
+
                     final EmpireRealm realm = EmpireRealm.restore(
                             realmId,
                             realmTag.getString("name"),
@@ -424,6 +447,7 @@ public final class EmpireStateSavedData extends SavedData {
                     realm.restoreCohesionState(loyalty, pressureDays, petitions,
                             Math.max(0L, realmTag.getLong("last_cohesion_day")));
                     realm.restoreSupplyRoutes(supplyRoutes);
+                    realm.restoreDefensiveOrders(defensiveOrders);
                     data.realms.put(realmId, realm);
                     if (realmId < Long.MAX_VALUE) {
                         data.nextRealmId = Math.max(data.nextRealmId, realmId + 1L);
@@ -570,6 +594,48 @@ public final class EmpireStateSavedData extends SavedData {
         return SupplyRouteBuildResult.BUILT;
     }
 
+    public DefensiveOrderIssueResult issueDefensiveOrder(
+            final long realmId,
+            final ColonyIdentity province,
+            final String actor,
+            final long dayIndex) {
+        final EmpireRealm realm = realms.get(realmId);
+        if (realm == null) return DefensiveOrderIssueResult.REALM_NOT_FOUND;
+        if (dayIndex < 0L) return DefensiveOrderIssueResult.INVALID_DAY;
+        if (province == null || !colonies.containsKey(province) || !realm.containsProvince(province)) {
+            return DefensiveOrderIssueResult.NOT_MEMBER;
+        }
+        final ImperialDefensiveOrder existing = realm.defensiveOrders().get(province);
+        if (existing != null && existing.isActive(dayIndex)) return DefensiveOrderIssueResult.ALREADY_ACTIVE;
+        if (realm.imperialTreasuryCrowns() < ImperialDefensiveOrder.COST_CROWNS) {
+            return DefensiveOrderIssueResult.INSUFFICIENT_TREASURY;
+        }
+        if (!realm.issueDefensiveOrder(province, actor, dayIndex)) {
+            return DefensiveOrderIssueResult.ALREADY_ACTIVE;
+        }
+        setDirty();
+        return DefensiveOrderIssueResult.ISSUED;
+    }
+
+    /** Prunes expired orders on the authoritative daily turn. */
+    public int processDefensiveOrders(final long dayIndex) {
+        if (dayIndex < 0L) return 0;
+        int expired = 0;
+        for (final EmpireRealm realm : new ArrayList<>(realms.values())) {
+            expired += realm.processDefensiveOrders(dayIndex);
+        }
+        if (expired > 0) setDirty();
+        return expired;
+    }
+
+    /** Current logistics plus temporary-order bonus for a targeted province. */
+    public int militaryDefenseReadinessBonus(final ColonyIdentity province, final long dayIndex) {
+        final EmpireRealm realm = realmForProvince(province).orElse(null);
+        if (realm == null) return 0;
+        return (realm.hasActiveSupplyRoute(province) ? EmpireRealm.SUPPLY_ROUTE_DEFENSE_READINESS_BONUS : 0)
+                + realm.defensiveOrderBonus(province, dayIndex);
+    }
+
     /** Advances every due route once; unpaid routes wear down and lose logistics bonuses. */
     public int processSupplyRoutes(final long dayIndex) {
         if (dayIndex < 0L) return 0;
@@ -602,7 +668,7 @@ public final class EmpireStateSavedData extends SavedData {
                     continue;
                 }
                 if (source.resolveMilitaryCampaign(campaign.id(), target, dayIndex,
-                        militaryDefenseLogisticsBonus(target.identity())).isPresent()) {
+                        militaryDefenseReadinessBonus(target.identity(), dayIndex)).isPresent()) {
                     resolved++;
                 }
             }
@@ -1044,6 +1110,18 @@ public final class EmpireStateSavedData extends SavedData {
                 supplyRoutes.add(routeTag);
             }
             realmTag.put("supply_routes", supplyRoutes);
+
+            final ListTag defensiveOrders = new ListTag();
+            for (final ImperialDefensiveOrder order : realm.defensiveOrders().values()) {
+                final CompoundTag orderTag = new CompoundTag();
+                orderTag.putString("province_dimension", order.province().dimensionId());
+                orderTag.putInt("province_colony_id", order.province().colonyId());
+                orderTag.putString("issuer", order.issuer());
+                orderTag.putLong("issued_day", order.issuedDay());
+                orderTag.putLong("expires_day", order.expiresDay());
+                defensiveOrders.add(orderTag);
+            }
+            realmTag.put("defensive_orders", defensiveOrders);
             savedRealms.add(realmTag);
         }
         root.put("realms", savedRealms);
