@@ -478,9 +478,9 @@ final class EmpireStateTest {
         final EmpireState scholarlyProvince = EmpireState.create(
                 new ColonyIdentity("minecraft:overworld", 43), "University", 0L);
         assertTrue(scholarlyProvince.setProvinceFocus(ProvinceFocus.SCHOLARSHIP));
-        assertEquals(0L, scholarlyProvince.collectDailyTaxes(1L, 100L));
-        assertEquals(1L, scholarlyProvince.knowledgePoints());
         assertEquals(100L, scholarlyProvince.collectDailyTaxes(1L, 100L));
+        assertEquals(1L, scholarlyProvince.knowledgePoints());
+        assertEquals(0L, scholarlyProvince.collectDailyTaxes(1L, 100L));
         assertEquals(1L, scholarlyProvince.knowledgePoints());
     }
 
