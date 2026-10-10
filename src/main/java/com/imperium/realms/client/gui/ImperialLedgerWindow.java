@@ -27,7 +27,6 @@ public final class ImperialLedgerWindow extends BOWindow implements ButtonHandle
             Map.entry("tax_10", "imperium taxes rate 10"),
             Map.entry("tax_20", "imperium taxes rate 20"),
             Map.entry("tax_30", "imperium taxes rate 30"),
-            Map.entry("collect_taxes", "imperium taxes collect"),
             Map.entry("policy_balanced", "imperium policy balanced"),
             Map.entry("policy_works", "imperium policy public_works"),
             Map.entry("policy_scholarship", "imperium policy scholarship"),
@@ -57,8 +56,16 @@ public final class ImperialLedgerWindow extends BOWindow implements ButtonHandle
             return;
         }
 
-        final String command = COMMANDS.get(button.getID());
         final Minecraft minecraft = Minecraft.getInstance();
+        if ("collect_taxes".equals(button.getID())) {
+            if (minecraft.player != null) {
+                minecraft.player.displayClientMessage(
+                        Component.translatable("gui.imperium.ledger.taxes_automatic"), false);
+            }
+            return;
+        }
+
+        final String command = COMMANDS.get(button.getID());
         if (command == null) {
             LOGGER.warn("Unknown Imperial Ledger button id: {}", button.getID());
             return;
