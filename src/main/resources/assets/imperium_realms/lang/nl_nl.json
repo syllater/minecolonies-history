@@ -272,5 +272,15 @@
   "imperium_realms.message.theatre_defense_none": "Geen actief bevel",
   "imperium_realms.message.theatre_campaign": "  Operatie #%1$d: %2$s tegen %3$s — wordt afgehandeld op dag %4$d",
   "imperium_realms.message.theatre_footer": "Totaal aantal lopende operaties: %1$d",
-  "imperium_realms.message.theatre_help": "Dit overzicht is alleen-lezen. Gebruik /imperium empire routes, /imperium empire defenses en /imperium empire defense <colonyId> om bevoorrading en verdedigingsbevelen te beheren."
+  "imperium_realms.message.theatre_help": "Dit overzicht is alleen-lezen. Gebruik /imperium empire routes, /imperium empire defenses en /imperium empire defense <colonyId> om bevoorrading en verdedigingsbevelen te beheren.",
+  "imperium_realms.gui.strategy_heading": "Strategische prioriteitsacties",
+  "imperium_realms.gui.strategy_posture_balanced": "Gebalanceerd",
+  "imperium_realms.gui.strategy_posture_defensive": "Defensief",
+  "imperium_realms.gui.strategy_posture_offensive": "Offensief",
+  "imperium_realms.gui.strategy_route_priority": "Prioriteitsroute bouwen",
+  "imperium_realms.gui.strategy_defense_priority": "Kwetsbaarste provincie verdedigen",
+  "imperium_realms.message.supply_route_priority_no_target": "Er is geen aangesloten provincie zonder bevoorradingsroute waarvoor een nieuwe route nodig is, of de rijkgegevens ontbreken.",
+  "imperium_realms.message.supply_route_priority_built": "Prioriteitsroute gebouwd naar %1$s (kolonie %2$d) voor %3$d kronen. Resterende centrale reserve: %4$d kronen.",
+  "imperium_realms.message.defense_priority_no_target": "Er is geen geschikte provincie gevonden voor een tijdelijk verdedigingsbevel.",
+  "imperium_realms.message.defense_priority_issued": "Noodverdediging toegewezen aan %1$s (kolonie %2$d). Kosten: %3$d kronen; duur: %4$d dagen; verdedigingsbonus: +%5$d. Resterende centrale reserve: %6$d kronen."
 }
