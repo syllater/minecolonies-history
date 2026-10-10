@@ -136,6 +136,22 @@ final class EmpireRealmTest {
     }
 
     @Test
+    void lowLoyaltyRaisesPetitionAfterFiveConsecutiveDaysAndResponseResetsIt() {
+        final EmpireRealm realm = EmpireRealm.found(1L, "North Sea Union", capital, "uuid-emperor", "Ada", 0L);
+        assertTrue(realm.inviteProvince(province, 0L));
+        assertTrue(realm.acceptInvitation(province, 0L));
+        for (long day = 1L; day <= 8L; day++) {
+            assertTrue(realm.beginCohesionTurn(day));
+            assertEquals(day == 8L, realm.updateProvinceLoyalty(province, day <= 4L ? -15 : 0, day));
+        }
+        assertTrue(realm.hasSeparatistPetition(province));
+        assertEquals(8L, realm.separatistPetitionDay(province));
+        assertTrue(realm.resolveSeparatistPetition(province, 25));
+        assertFalse(realm.hasSeparatistPetition(province));
+        assertEquals(40, realm.provincialLoyalty(province));
+    }
+
+    @Test
     void imperialTreasurySupportsBoundedDepositsAndWithdrawals() {
         final EmpireRealm realm = EmpireRealm.found(
                 1L, "North Sea Union", capital, "uuid-emperor", "Ada", 0L);
