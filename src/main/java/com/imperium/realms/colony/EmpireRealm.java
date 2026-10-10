@@ -17,6 +17,7 @@ import java.util.Set;
 public final class EmpireRealm {
     public static final long INVITATION_VALIDITY_DAYS = 7L;
     public static final int MAX_PROVINCES = 64;
+    public static final int MAX_AUDIT_ENTRIES = 100;
     public static final long MAX_INVITATIONS = 128L;
     public static final long MAX_IMPERIAL_TREASURY = 10_000_000_000L;
     public static final int IMPERIAL_TAX_REMITTANCE_PERCENT = 10;
@@ -34,6 +35,7 @@ public final class EmpireRealm {
     private String imperialEconomicPolicyId = "";
     private final Set<ColonyIdentity> provinces = new LinkedHashSet<>();
     private final Map<ColonyIdentity, Long> invitations = new LinkedHashMap<>();
+    private final List<ImperialAuditEntry> auditEntries = new ArrayList<>();
 
     private EmpireRealm(
             final long id,
@@ -77,7 +79,8 @@ public final class EmpireRealm {
             final List<ColonyIdentity> savedProvinces,
             final Map<ColonyIdentity, Long> savedInvitations,
             final int savedImperialTaxRatePercent,
-            final String savedImperialEconomicPolicyId) {
+            final String savedImperialEconomicPolicyId,
+            final List<ImperialAuditEntry> savedAuditEntries) {
         final EmpireRealm realm = new EmpireRealm(
                 id, name, capital, emperorUuid, emperorName, Math.max(0L, foundedDay),
                 clampTreasury(savedImperialTreasury));
@@ -101,6 +104,7 @@ public final class EmpireRealm {
                 }
             }
         }
+        realm.restoreAuditEntries(savedAuditEntries);
         return realm;
     }
 
@@ -209,6 +213,34 @@ public final class EmpireRealm {
 
     public Map<ColonyIdentity, Long> invitations() {
         return Collections.unmodifiableMap(new LinkedHashMap<>(invitations));
+    }
+
+    /** Recent audit entries in newest-first order. */
+    public List<ImperialAuditEntry> recentAuditEntries() {
+        final List<ImperialAuditEntry> recent = new ArrayList<>(auditEntries);
+        Collections.reverse(recent);
+        return Collections.unmodifiableList(recent);
+    }
+
+    List<ImperialAuditEntry> storedAuditEntries() {
+        return Collections.unmodifiableList(new ArrayList<>(auditEntries));
+    }
+
+    void recordAudit(final long dayIndex, final String actor, final String actionId,
+            final String subject, final long amount) {
+        auditEntries.add(new ImperialAuditEntry(Math.max(0L, dayIndex), actor,
+                actionId, subject, Math.max(0L, amount)));
+        while (auditEntries.size() > MAX_AUDIT_ENTRIES) auditEntries.remove(0);
+    }
+
+    void restoreAuditEntries(final List<ImperialAuditEntry> savedEntries) {
+        auditEntries.clear();
+        if (savedEntries == null) return;
+        final int start = Math.max(0, savedEntries.size() - MAX_AUDIT_ENTRIES);
+        for (int index = start; index < savedEntries.size(); index++) {
+            final ImperialAuditEntry entry = savedEntries.get(index);
+            if (entry != null) auditEntries.add(entry);
+        }
     }
 
     public boolean isEmperor(final String playerUuid) {
