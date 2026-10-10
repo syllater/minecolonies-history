@@ -1,5 +1,10 @@
 {
   "modmenu.descriptionTranslation.imperium_realms": "Europese rijkssimulatie-uitbreiding voor MineColonies.",
+  "com.imperium_realms.job.tax_collector": "Belastinginner",
+  "com.imperium_realms.building.tax_collector_hut": "Keizerlijk Belastingkantoor",
+  "com.imperium_realms.building.tax_collector_hut.desc": "Een bestuursgebouw waar een inwoner belastingen int. Elke actieve belastinginner verhoogt de dagelijkse inkomsten.",
+  "block.imperium_realms.tax_collector_hut": "Hut van de Belastinginner",
+  "block.imperium_realms.blockhut_tax_collector": "Hut van de Belastinginner",
   "policy.imperium.balanced": "Evenwichtig bestuur",
   "policy.imperium.public_works": "Openbare werken",
   "policy.imperium.scholarship": "Wetenschap en onderwijs",
