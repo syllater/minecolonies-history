@@ -18,7 +18,7 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 14;
+    private static final int SCHEMA_VERSION = 15;
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -312,6 +312,24 @@ public final class EmpireStateSavedData extends SavedData {
                         }
                     }
 
+                    final List<ImperialAuditEntry> auditEntries = new ArrayList<>();
+                    if (realmTag.contains("audit_entries", Tag.TAG_LIST)) {
+                        final ListTag savedAudit = realmTag.getList("audit_entries", Tag.TAG_COMPOUND);
+                        for (int auditIndex = 0; auditIndex < savedAudit.size(); auditIndex++) {
+                            final CompoundTag auditTag = savedAudit.getCompound(auditIndex);
+                            try {
+                                auditEntries.add(new ImperialAuditEntry(
+                                        Math.max(0L, auditTag.getLong("day")),
+                                        auditTag.getString("actor"),
+                                        auditTag.getString("action"),
+                                        auditTag.getString("subject"),
+                                        Math.max(0L, auditTag.getLong("amount"))));
+                            } catch (IllegalArgumentException ignored) {
+                                // Skip malformed audit entries without losing realm membership.
+                            }
+                        }
+                    }
+
                     final EmpireRealm realm = EmpireRealm.restore(
                             realmId,
                             realmTag.getString("name"),
@@ -324,7 +342,8 @@ public final class EmpireStateSavedData extends SavedData {
                             invitations,
                             realmTag.contains("imperial_tax_rate", Tag.TAG_INT)
                                     ? realmTag.getInt("imperial_tax_rate") : -1,
-                            realmTag.getString("imperial_policy"));
+                            realmTag.getString("imperial_policy"),
+                            auditEntries);
                     data.realms.put(realmId, realm);
                     if (realmId < Long.MAX_VALUE) {
                         data.nextRealmId = Math.max(data.nextRealmId, realmId + 1L);
@@ -544,7 +563,8 @@ public final class EmpireStateSavedData extends SavedData {
      */
     public long remitImperialTaxReceipts(
             final ColonyIdentity province,
-            final long collectedTaxReceipts) {
+            final long collectedTaxReceipts,
+            final long dayIndex) {
         if (province == null || collectedTaxReceipts <= 0L) {
             return 0L;
         }
@@ -563,8 +583,24 @@ public final class EmpireStateSavedData extends SavedData {
             state.creditTreasury(remittance);
             return 0L;
         }
+        realm.recordAudit(dayIndex, "System", "tax-remittance", province.storageKey(), remittance);
         setDirty();
         return remittance;
+    }
+
+    /** Adds a bounded audit entry to a realm and persists the change. */
+    public boolean recordImperialAudit(
+            final long realmId,
+            final long dayIndex,
+            final String actor,
+            final String actionId,
+            final String subject,
+            final long amount) {
+        final EmpireRealm realm = realms.get(realmId);
+        if (realm == null) return false;
+        realm.recordAudit(dayIndex, actor, actionId, subject, amount);
+        setDirty();
+        return true;
     }
 
     public boolean leaveRealm(final ColonyIdentity province) {
@@ -719,6 +755,18 @@ public final class EmpireStateSavedData extends SavedData {
                 invitations.add(invitation);
             });
             realmTag.put("invitations", invitations);
+
+            final ListTag auditEntries = new ListTag();
+            for (final ImperialAuditEntry audit : realm.storedAuditEntries()) {
+                final CompoundTag auditTag = new CompoundTag();
+                auditTag.putLong("day", audit.dayIndex());
+                auditTag.putString("actor", audit.actor());
+                auditTag.putString("action", audit.actionId());
+                auditTag.putString("subject", audit.subject());
+                auditTag.putLong("amount", audit.amount());
+                auditEntries.add(auditTag);
+            }
+            realmTag.put("audit_entries", auditEntries);
             savedRealms.add(realmTag);
         }
         root.put("realms", savedRealms);
