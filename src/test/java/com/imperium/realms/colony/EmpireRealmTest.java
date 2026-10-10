@@ -45,7 +45,7 @@ final class EmpireRealmTest {
     void realmRestoreKeepsCapitalAndMembership() {
         final EmpireRealm realm = EmpireRealm.restore(
                 2L, "Realm", capital, "uuid", "Emperor", 4L,
-                0L, java.util.List.of(province), java.util.Map.of(), 15, "welfare");
+                0L, java.util.List.of(province), java.util.Map.of(), 15, "welfare", java.util.List.of());
         assertEquals(2, realm.provinceCount());
         assertTrue(realm.containsProvince(capital));
         assertTrue(realm.containsProvince(province));
@@ -83,6 +83,20 @@ final class EmpireRealmTest {
         assertEquals(0L, realm.calculateImperialTaxRemittance(9L));
         assertEquals(0L, realm.calculateImperialTaxRemittance(0L));
         assertEquals(0L, realm.calculateImperialTaxRemittance(-100L));
+    }
+
+    @Test
+    void realmAuditIsBoundedAndReturnsNewestEntriesFirst() {
+        final EmpireRealm realm = EmpireRealm.found(
+                1L, "North Sea Union", capital, "uuid-emperor", "Ada", 0L);
+        for (int index = 0; index < EmpireRealm.MAX_AUDIT_ENTRIES + 5; index++) {
+            realm.recordAudit(index, "Inspector", "deposit", "province-" + index, index);
+        }
+        final java.util.List<ImperialAuditEntry> recent = realm.recentAuditEntries();
+        assertEquals(EmpireRealm.MAX_AUDIT_ENTRIES, recent.size());
+        assertEquals("province-104", recent.get(0).subject());
+        assertEquals("province-5", recent.get(recent.size() - 1).subject());
+        assertEquals(104L, recent.get(0).dayIndex());
     }
 
     @Test
