@@ -77,6 +77,10 @@ public final class EmpireState {
     private ProvinceFocus provinceFocus = ProvinceFocus.AGRICULTURE;
     private int provinceDevelopmentPoints;
 
+    private long nextCampaignId = 1L;
+    private final List<MilitaryCampaign> militaryCampaigns = new ArrayList<>();
+    private static final int MAX_STORED_CAMPAIGNS = 12;
+
     private long nextProposalId = 1L;
     private final List<ParliamentProposal> parliamentProposals = new ArrayList<>();
 
@@ -516,6 +520,214 @@ public final class EmpireState {
         diplomaticInfluence -= 10L;
         diplomaticRelations.put(target, Math.min(100, score + 5));
         return true;
+    }
+
+    public long nextCampaignId() {
+        return nextCampaignId;
+    }
+
+    /** Recent campaigns in newest-first order, returned as an immutable snapshot. */
+    public List<MilitaryCampaign> recentMilitaryCampaigns() {
+        final List<MilitaryCampaign> recent = new ArrayList<>(militaryCampaigns);
+        Collections.reverse(recent);
+        return Collections.unmodifiableList(recent);
+    }
+
+    /** Pending campaigns in insertion order. */
+    public List<MilitaryCampaign> pendingMilitaryCampaigns() {
+        return militaryCampaigns.stream()
+                .filter(MilitaryCampaign::isPending)
+                .toList();
+    }
+
+    List<MilitaryCampaign> storedMilitaryCampaigns() {
+        return Collections.unmodifiableList(new ArrayList<>(militaryCampaigns));
+    }
+
+    void restoreMilitaryCampaigns(
+            final List<MilitaryCampaign> loadedCampaigns,
+            final long loadedNextCampaignId) {
+        militaryCampaigns.clear();
+        nextCampaignId = Math.max(1L, loadedNextCampaignId);
+        if (loadedCampaigns != null) {
+            for (final MilitaryCampaign campaign : loadedCampaigns) {
+                if (campaign == null || militaryCampaigns.size() >= MAX_STORED_CAMPAIGNS) {
+                    continue;
+                }
+                militaryCampaigns.add(campaign);
+                if (campaign.id() < Long.MAX_VALUE && campaign.id() >= nextCampaignId) {
+                    nextCampaignId = campaign.id() + 1L;
+                }
+            }
+        }
+    }
+
+    public long totalMilitaryTrainingPoints() {
+        return siegeEngineeringPoints + fieldMedicinePoints + cavalryDrillPoints;
+    }
+
+    /** A bounded strategic readiness score based on training, development and stability. */
+    public int militaryReadinessScore() {
+        long score = 10L
+                + totalMilitaryTrainingPoints() / 10L
+                + provinceDevelopmentPoints / 50L
+                + stability / 10L;
+        if (provinceFocus == ProvinceFocus.MILITARY) {
+            score += 10L;
+        }
+        return (int) Math.max(0L, Math.min(1_000L, score));
+    }
+
+    /**
+     * Launch an operation against an existing colony. One operation may be
+     * active at a time, and all costs are charged immediately on the server.
+     */
+    public Optional<MilitaryCampaign> launchMilitaryCampaign(
+            final String commander,
+            final ColonyIdentity target,
+            final String targetName,
+            final MilitaryCampaign.Type type,
+            final long currentDay) {
+        Objects.requireNonNull(target, "target");
+        Objects.requireNonNull(type, "type");
+        if (identity.equals(target)
+                || nextCampaignId <= 0L
+                || nextCampaignId == Long.MAX_VALUE
+                || !pendingMilitaryCampaigns().isEmpty()
+                || totalMilitaryTrainingPoints() < type.minimumTrainingPoints()
+                || treasuryCrowns < type.crownCost()
+                || diplomaticInfluence < type.influenceCost()) {
+            return Optional.empty();
+        }
+        if (type == MilitaryCampaign.Type.WAR_CAMPAIGN && relationScore(target) >= 75) {
+            return Optional.empty();
+        }
+
+        treasuryCrowns -= type.crownCost();
+        diplomaticInfluence -= type.influenceCost();
+        final MilitaryCampaign campaign = MilitaryCampaign.start(
+                nextCampaignId++, type, target, targetName, commander,
+                Math.max(0L, currentDay), militaryReadinessScore());
+        militaryCampaigns.add(campaign);
+        trimMilitaryCampaigns();
+        return Optional.of(campaign);
+    }
+
+    /**
+     * Resolves one due operation and applies its political/economic consequences
+     * to the real source and target colony records. No territory is transferred.
+     */
+    public Optional<MilitaryCampaign.Outcome> resolveMilitaryCampaign(
+            final long campaignId,
+            final EmpireState targetState,
+            final long currentDay) {
+        Objects.requireNonNull(targetState, "targetState");
+        if (identity.equals(targetState.identity())) {
+            return Optional.empty();
+        }
+        final MilitaryCampaign campaign = militaryCampaigns.stream()
+                .filter(value -> value.id() == campaignId)
+                .findFirst()
+                .orElse(null);
+        if (campaign == null || !campaign.isDue(currentDay)
+                || !campaign.targetIdentity().equals(targetState.identity())) {
+            return Optional.empty();
+        }
+
+        final int relation = relationScore(targetState.identity());
+        final MilitaryCampaign.Outcome outcome = campaign.resolveIfDue(
+                currentDay, targetState.militaryReadinessScore(), relation);
+        if (outcome == MilitaryCampaign.Outcome.PENDING) {
+            return Optional.empty();
+        }
+
+        switch (campaign.type()) {
+            case BORDER_PATROL -> {
+                if (outcome == MilitaryCampaign.Outcome.SUCCESS) {
+                    adjustStability(2);
+                    adjustDiplomaticRelation(targetState.identity(), 2);
+                    targetState.adjustDiplomaticRelation(identity, 2);
+                } else if (outcome == MilitaryCampaign.Outcome.DEFEAT) {
+                    adjustStability(-1);
+                }
+            }
+            case RELIEF_EXPEDITION -> {
+                if (outcome == MilitaryCampaign.Outcome.SUCCESS) {
+                    targetState.creditTreasury(25L);
+                    targetState.adjustStability(4);
+                    targetState.adjustLegitimacy(2);
+                    adjustDiplomaticRelation(targetState.identity(), 10);
+                    targetState.adjustDiplomaticRelation(identity, 10);
+                } else if (outcome == MilitaryCampaign.Outcome.STALEMATE) {
+                    targetState.adjustStability(1);
+                    adjustDiplomaticRelation(targetState.identity(), 4);
+                    targetState.adjustDiplomaticRelation(identity, 4);
+                } else {
+                    adjustStability(-2);
+                }
+            }
+            case WAR_CAMPAIGN -> {
+                if (outcome == MilitaryCampaign.Outcome.SUCCESS) {
+                    creditTreasury(75L);
+                    adjustStability(1);
+                    targetState.adjustStability(-4);
+                    targetState.adjustLegitimacy(-3);
+                    adjustDiplomaticRelation(targetState.identity(), -15);
+                    targetState.adjustDiplomaticRelation(identity, -15);
+                    recordMilitaryTraining(MilitaryDiscipline.SIEGE_ENGINEERING);
+                    recordMilitaryTraining(MilitaryDiscipline.FIELD_MEDICINE);
+                    recordMilitaryTraining(MilitaryDiscipline.CAVALRY_DRILL);
+                } else if (outcome == MilitaryCampaign.Outcome.STALEMATE) {
+                    adjustStability(-1);
+                    targetState.adjustStability(-1);
+                    adjustDiplomaticRelation(targetState.identity(), -3);
+                    targetState.adjustDiplomaticRelation(identity, -3);
+                } else {
+                    adjustStability(-3);
+                    targetState.adjustDiplomaticRelation(identity, -5);
+                    adjustDiplomaticRelation(targetState.identity(), -5);
+                }
+            }
+        }
+        return Optional.of(outcome);
+    }
+
+    public boolean adjustDiplomaticRelation(final ColonyIdentity target, final int delta) {
+        Objects.requireNonNull(target, "target");
+        if (identity.equals(target) || delta == 0) {
+            return false;
+        }
+        final Integer current = diplomaticRelations.get(target);
+        if (current == null && diplomaticRelations.size() >= MAX_DIPLOMATIC_RELATIONS) {
+            return false;
+        }
+        final int before = current == null ? 0 : current;
+        final int after = clamp(before + delta, -100, 100);
+        if (before == after) {
+            return false;
+        }
+        diplomaticRelations.put(target, after);
+        return true;
+    }
+
+    private void adjustStability(final int change) {
+        stability = clamp(stability + change, 0, 100);
+    }
+
+    private void adjustLegitimacy(final int change) {
+        legitimacy = clamp(legitimacy + change, 0, 100);
+    }
+
+    private void trimMilitaryCampaigns() {
+        while (militaryCampaigns.size() > MAX_STORED_CAMPAIGNS) {
+            final int index = java.util.stream.IntStream.range(0, militaryCampaigns.size())
+                    .filter(i -> !militaryCampaigns.get(i).isPending())
+                    .findFirst().orElse(-1);
+            if (index < 0) {
+                break;
+            }
+            militaryCampaigns.remove(index);
+        }
     }
 
     public long nextProposalId() {
