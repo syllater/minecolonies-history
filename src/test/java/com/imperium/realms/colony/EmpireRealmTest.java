@@ -182,8 +182,7 @@ final class EmpireRealmTest {
         assertTrue(realm.buildSupplyRoute(province, 1L, "Ada"));
         assertFalse(realm.buildSupplyRoute(province, 1L, "Ada"),
                 "A route to a province must not be duplicated");
-        assertEquals(EmpireRealm.MAX_IMPERIAL_TREASURY - EmpireRealm.SUPPLY_ROUTE_BUILD_COST,
-                realm.imperialTreasuryCrowns());
+        assertEquals(0L, realm.imperialTreasuryCrowns());
         assertTrue(realm.supplyRouteTo(province).orElseThrow().isActive());
     }
 

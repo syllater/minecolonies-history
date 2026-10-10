@@ -47,3 +47,5 @@ Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38062626
 1. Verify supply-route persistence/upkeep and logistics bonuses with build/tests/client/server smoke runs.
 2. Add a strategic theatre map and explicit defensive orders.
 3. Continue save/reload and multiplayer acceptance checks before preparing a release candidate.
+
+- The first supply-route CI attempt identified a missing `ImperialSupplyRoute` import in the command handler before tests executed; the follow-up commit fixes it and corrects the route-construction treasury assertion.

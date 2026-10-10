@@ -49,3 +49,8 @@ Verify the current full workflow, then implement regional events and repeat the 
 - Connected route upkeep to the once-per-day authoritative economic turn.
 - SavedData schema increased to 20, with existing saves defaulting to no routes.
 - Added upkeep/build/maintenance tests, BlockUI access and English/Dutch translations. CI for this commit is pending.
+
+## 2026-10-10 — First supply-route CI failure
+
+- The Gradle compile failed because `ImperiumCommands` referenced `ImperialSupplyRoute` without importing the class. A unit-test assertion also expected a full treasury balance after depositing only the construction cost; the correct remaining amount is zero.
+- Follow-up fixes are committed; retest with the new CI run.

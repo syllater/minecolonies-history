@@ -6,10 +6,9 @@ import java.util.Optional;
 /**
  * Standing military doctrine for a colony's strategic operations.
  *
- * <p>Offensive posture improves the readiness captured when an operation is
- * launched. Defensive posture improves the province's readiness when it is the
- * target of an operation. Changing posture never retroactively changes an
- * operation that is already in progress.</p>
+ * <p>Offensive posture changes the readiness snapshot when an operation is
+ * launched. Defensive posture is evaluated when the operation resolves, along
+ * with the target province's current supply-route condition.</p>
  */
 public enum MilitaryPosture {
     BALANCED("balanced", 0, 0),

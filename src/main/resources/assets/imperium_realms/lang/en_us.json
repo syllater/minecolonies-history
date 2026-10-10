@@ -234,7 +234,7 @@
   "imperium_realms.military_posture.offensive": "Offensive",
   "imperium_realms.message.campaign_limit_reached": "This province already has the maximum of %1$d simultaneous strategic operations.",
   "imperium_realms.message.campaign_posture_status": "Military posture: %1$s | Launch readiness bonus: +%2$d | Defensive readiness bonus: +%3$d",
-  "imperium_realms.message.campaign_posture_changed": "%1$s now uses %2$s posture. Launch bonus: +%3$d; defence bonus: +%4$d. Ongoing operations keep their original launch readiness.",
+  "imperium_realms.message.campaign_posture_changed": "%1$s now uses %2$s posture. Launch bonus: +%3$d; defence bonus: +%4$d. Ongoing operations keep their launch-readiness snapshot; the defending province's posture and supply are checked when they resolve.",
   "imperium_realms.message.campaign_posture_unchanged": "The province already uses %1$s posture.",
   "imperium_realms.message.campaign_posture_unknown": "Unknown military posture. Choose balanced, defensive or offensive.",
   "imperium_realms.gui.empire_routes": "Supply routes",

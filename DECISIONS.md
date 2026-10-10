@@ -47,3 +47,8 @@ Rationale:
 - Active routes (condition >= 40/100) add +8 launch readiness from the routed province and +12 defensive readiness when that province is targeted. The capital is intrinsically supplied.
 - A route starts at 100 condition, repairs +5 per paid daily upkeep and wears -10 on unpaid upkeep.
 - Routes are stored in Imperium SavedData and removed if the province leaves the realm.
+
+## 2026-10-10 — Military readiness and supply-route review
+
+- Defensive doctrine and current supply-route condition are evaluated when an operation resolves; launch readiness and source logistics are saved with the operation.
+- Supply-route CI initially caught a missing command-layer import and an incorrect unit-test treasury expectation. Both are corrected in the follow-up commit.

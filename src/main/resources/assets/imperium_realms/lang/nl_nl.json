@@ -234,7 +234,7 @@
   "imperium_realms.military_posture.offensive": "Offensief",
   "imperium_realms.message.campaign_limit_reached": "Deze provincie heeft al het maximum van %1$d gelijktijdige strategische operaties bereikt.",
   "imperium_realms.message.campaign_posture_status": "Militaire doctrine: %1$s | Bonus bij lancering: +%2$d | Verdedigingsbonus: +%3$d",
-  "imperium_realms.message.campaign_posture_changed": "%1$s gebruikt nu de doctrine %2$s. Bonus bij lancering: +%3$d; verdedigingsbonus: +%4$d. Lopende operaties behouden hun oorspronkelijke lanceerkracht.",
+  "imperium_realms.message.campaign_posture_changed": "%1$s gebruikt nu de doctrine %2$s. Bonus bij lancering: +%3$d; verdedigingsbonus: +%4$d. Lopende operaties behouden hun lanceerkracht; doctrine en bevoorrading van de verdediger worden bij afhandeling beoordeeld.",
   "imperium_realms.message.campaign_posture_unchanged": "De provincie gebruikt de doctrine %1$s al.",
   "imperium_realms.message.campaign_posture_unknown": "Onbekende militaire doctrine. Kies balanced, defensive of offensive.",
   "imperium_realms.gui.empire_routes": "Bevoorradingsroutes",
