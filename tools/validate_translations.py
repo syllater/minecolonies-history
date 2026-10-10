@@ -13,7 +13,7 @@ JAVA_DIR = ROOT / "src" / "main" / "java"
 RESOURCE_DIR = ROOT / "src" / "main" / "resources" / "assets" / "imperium_realms"
 LOCALES = ("en_us", "nl_nl")
 TRANSLATION_KEY = re.compile(
-    r'Component\s*\.\s*translatable\s*\(\s*"((?:imperium_realms)\.[A-Za-z0-9_.-]+)"'
+    r'Component\s*\.\s*translatable\s*\(\s*"((?:imperium_realms)\.[A-Za-z0-9_.-]*[A-Za-z0-9_-])"'
 )
 GUI_KEY = re.compile(r"\$\((imperium_realms\.[A-Za-z0-9_.-]+)\)")
 PLACEHOLDER = re.compile(r"%(?:[0-9]+\$)?([dsf])")
