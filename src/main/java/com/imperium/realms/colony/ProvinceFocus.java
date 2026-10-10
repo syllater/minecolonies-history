@@ -9,7 +9,7 @@ import java.util.Optional;
  * daily turn or by the corresponding worker progression hook.
  */
 public enum ProvinceFocus {
-    AGRICULTURE("agriculture", 5, 0, 0, -1, 25),
+    AGRICULTURE("agriculture", 0, 0, 0, -1, 25),
     TRADE("trade", 15, 0, 0, 0, 25),
     SCHOLARSHIP("scholarship", 0, 1, 0, 0, 30),
     MILITARY("military", 0, 0, 0, 0, 25),
