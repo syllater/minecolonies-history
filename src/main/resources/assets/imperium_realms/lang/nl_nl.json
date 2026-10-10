@@ -201,5 +201,16 @@
   "imperium_realms.message.governor_entry": "%1$s bestuurt %2$s; aangesteld op dag %3$d.",
   "imperium_realms.message.governor_help": "De keizer kan een online speler aanstellen voor een niet-hoofdstedelijke provincie: /imperium governor appoint <colonyId> <player>. Ontsla via /imperium governor dismiss <colonyId>. Bestuurde provincies krijgen dagelijks +1 stabiliteit, +1 legitimiteit en 1 minder onrust.",
   "imperium_realms.audit.action.governor-appointed": "Provinciale gouverneur aangesteld",
-  "imperium_realms.audit.action.governor-dismissed": "Provinciale gouverneur ontslagen"
+  "imperium_realms.audit.action.governor-dismissed": "Provinciale gouverneur ontslagen",
+  "imperium_realms.gui.empire_events": "Regionale gebeurtenissen",
+  "imperium_realms.message.empire_events_header": "Recente regionale gebeurtenissen in %1$s (maximaal 5).",
+  "imperium_realms.message.empire_events_empty": "Er zijn nog geen regionale gebeurtenissen vastgelegd. De volgende gebeurtenis wordt na zeven speldagen ingepland.",
+  "imperium_realms.message.empire_event_entry": "Dag %1$d — %2$s trof %3$d provincie(s).",
+  "imperium_realms.regional_event.harvest-surplus": "Oogstoverschot: provinciale inkomsten en de centrale reserve stijgen.",
+  "imperium_realms.regional_event.merchants-fair": "Koopliedenbeurs: handel levert extra kronen en wat meer vertrouwen op.",
+  "imperium_realms.regional_event.scholarly-exchange": "Wetenschappelijke uitwisseling: kennis groeit, betaald uit provinciale middelen.",
+  "imperium_realms.regional_event.civic-reconciliation": "Burgerlijke verzoening: stabiliteit en legitimiteit herstellen terwijl onrust afneemt.",
+  "imperium_realms.regional_event.border-tensions": "Grensspanningen: de provincies worden minder stabiel en het rijk moet extra middelen besteden.",
+  "imperium_realms.regional_event.winter-shortages": "Wintertekorten: minder voorraden en kennis zetten stabiliteit en het humeur van burgers onder druk.",
+  "imperium_realms.regional_event.royal-progress": "Koninklijke rondreis: een bezoek versterkt het vertrouwen, maar kost lokaal en centraal geld."
 }

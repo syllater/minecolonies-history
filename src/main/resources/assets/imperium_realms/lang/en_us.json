@@ -201,5 +201,16 @@
   "imperium_realms.message.governor_entry": "%1$s governs %2$s; appointed on day %3$d.",
   "imperium_realms.message.governor_help": "The Emperor can appoint an online player to a non-capital province: /imperium governor appoint <colonyId> <player>. Dismiss with /imperium governor dismiss <colonyId>. Governed provinces gain +1 daily stability, +1 legitimacy and reduce unrest by 1.",
   "imperium_realms.audit.action.governor-appointed": "Provincial governor appointed",
-  "imperium_realms.audit.action.governor-dismissed": "Provincial governor dismissed"
+  "imperium_realms.audit.action.governor-dismissed": "Provincial governor dismissed",
+  "imperium_realms.gui.empire_events": "Regional events",
+  "imperium_realms.message.empire_events_header": "Recent regional events in %1$s (showing up to 5).",
+  "imperium_realms.message.empire_events_empty": "No regional events have been recorded yet. The next event is scheduled after seven in-game days.",
+  "imperium_realms.message.empire_event_entry": "Day %1$d — %2$s affected %3$d province(s).",
+  "imperium_realms.regional_event.harvest-surplus": "Harvest surplus: provincial income and central reserves improve.",
+  "imperium_realms.regional_event.merchants-fair": "Merchants' fair: trade brings extra crowns and modest public confidence.",
+  "imperium_realms.regional_event.scholarly-exchange": "Scholarly exchange: knowledge grows, funded by provincial resources.",
+  "imperium_realms.regional_event.civic-reconciliation": "Civic reconciliation: stability and legitimacy recover while unrest falls.",
+  "imperium_realms.regional_event.border-tensions": "Border tensions: the provinces become less stable and maintaining the realm costs crowns.",
+  "imperium_realms.regional_event.winter-shortages": "Winter shortages: reduced stores and knowledge strain stability and the public mood.",
+  "imperium_realms.regional_event.royal-progress": "Royal progress: an imperial tour boosts confidence but requires local and central expenditure."
 }

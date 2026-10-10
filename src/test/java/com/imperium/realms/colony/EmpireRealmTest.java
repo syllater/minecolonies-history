@@ -126,6 +126,16 @@ final class EmpireRealmTest {
     }
 
     @Test
+    void weeklyRegionalEventSelectionIsDeterministicAndBounded() {
+        for (long realmId = 1L; realmId < 20L; realmId++) {
+            final ImperialRegionalEvent first = ImperialRegionalEvent.forTurn(realmId, 35L);
+            assertEquals(first, ImperialRegionalEvent.forTurn(realmId, 35L));
+            assertTrue(ImperialRegionalEvent.fromId(first.id()).isPresent());
+        }
+        assertEquals(7, ImperialRegionalEvent.values().length);
+    }
+
+    @Test
     void imperialTreasurySupportsBoundedDepositsAndWithdrawals() {
         final EmpireRealm realm = EmpireRealm.found(
                 1L, "North Sea Union", capital, "uuid-emperor", "Ada", 0L);

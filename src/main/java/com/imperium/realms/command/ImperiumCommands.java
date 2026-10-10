@@ -65,6 +65,8 @@ public final class ImperiumCommands {
                                 .executes(context -> showEmpire(context.getSource())))
                         .then(Commands.literal("audit")
                                 .executes(context -> showEmpireAudit(context.getSource())))
+                        .then(Commands.literal("events")
+                                .executes(context -> showRegionalEvents(context.getSource())))
                         .then(Commands.literal("found")
                                 .then(Commands.argument("name", StringArgumentType.greedyString())
                                         .executes(context -> foundEmpire(
@@ -560,6 +562,35 @@ public final class ImperiumCommands {
                     province.dimensionId(), province.colonyId(), province.equals(realm.capital())), false);
         }
         source.sendSuccess(() -> Component.translatable("imperium_realms.message.empire_help"), false);
+        return 1;
+    }
+
+    private static int showRegionalEvents(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            return 0;
+        }
+        final List<ImperialAuditEntry> events = realm.recentAuditEntries().stream()
+                .filter(entry -> "regional-event".equals(entry.actionId()))
+                .limit(5)
+                .toList();
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.empire_events_header", realm.name(), events.size()), false);
+        if (events.isEmpty()) {
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.empire_events_empty"), false);
+            return 1;
+        }
+        for (final ImperialAuditEntry entry : events) {
+            final Component event = Component.translatable(
+                    "imperium_realms.regional_event." + entry.subject());
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.empire_event_entry",
+                    entry.dayIndex(), event, entry.amount()), false);
+        }
         return 1;
     }
 
