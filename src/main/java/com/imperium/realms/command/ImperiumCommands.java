@@ -527,7 +527,7 @@ public final class ImperiumCommands {
                 : Component.translatable("imperium_realms.message.empire_law_unset");
         source.sendSuccess(() -> Component.translatable(
                 "imperium_realms.message.empire_law_status", imperialTaxLaw, imperialPolicyLaw), false);
-        for (final ColonyIdentity province of realm.provinces()) {
+        for (final ColonyIdentity province : realm.provinces()) {
             final EmpireState provinceState = context.data().get(province).orElse(null);
             source.sendSuccess(() -> Component.translatable(
                     "imperium_realms.message.empire_province",
