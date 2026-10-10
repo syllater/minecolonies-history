@@ -1,38 +1,34 @@
 # Checkpoints
 
-## 2026-10-10 — Strategic map verified; persistence test coverage expanding
+## 2026-10-10 — Strategic map and persistence round-trip checks verified
 
 ### Repository
 - Repository: https://github.com/syllater/minecolonies-history
 - Branch: `milestone-2/colony-integration`
 
-### Verified strategic map baseline
-Commit `f804506970104b9c0a48f64a04e92e8665e1581e` passed the complete GitHub Actions workflow:
+### Verified commit
+Commit `052f3d624b7fd6e379acd3eaf55fa4b298a49fdc` passed the complete GitHub Actions workflow:
 - Build, unit tests and JAR upload: success.
 - Headless client startup smoke test: success.
 - Dedicated-server startup and all 10 Structurize schematic checks: success.
-- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38074390495
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38074800321
 
-### Verified strategic features
-- `ImperialStrategyPlanner` deterministically ranks provinces by stability, unrest, disorder and loyalty.
-- `/imperium empire route build-priority` builds a route to the most vulnerable unsupplied member province.
-- `/imperium empire defense priority` issues an emergency order to the most at-risk eligible province.
-- The BlockUI ledger exposes balanced/defensive/offensive doctrine and priority route/defence actions.
-- `/imperium empire map` plots colony centers for the capital dimension and reports other-dimension and unresolved colonies explicitly.
+### Implemented and covered by tests
+- `ImperialStrategyPlanner` deterministically prioritizes unsupplied/vulnerable provinces.
+- `StrategicMapGrid` isolates coordinate projection; tests cover empty map, orientation, coincident centers and a single point.
+- `/imperium empire map` plots loaded colony centers in the capital's dimension; other-dimension and unresolved colonies are reported separately.
+- `EmpireStateSavedDataTest` exercises actual Minecraft NBT save/load for economy/profession progress and a multi-colony realm's membership, laws, route, defensive order, governor and audit entries.
+- ModDevGradle's generated Minecraft classpaths are added to JUnit test compile/runtime so these persistence tests can use real Minecraft tag classes.
 
-### Pending next verification
-The next prepared commit adds:
-- `StrategicMapGrid`, a pure deterministic coordinate-grid renderer with unit tests for orientation, collisions, empty maps and one-point maps.
-- `EmpireStateSavedDataTest`, NBT round-trip coverage for economic/profession progression, cross-dimension realm membership, laws, routes, defence orders, governors and audit entries.
-- Package-private SavedData constructor/loader visibility for same-package tests.
-The commit must run the complete workflow before these changes can be considered verified.
+### Next prepared improvement
+A Python localization validator and CI step have been prepared. It checks JSON validity, literal `Component.translatable` / BlockUI GUI keys in both English and Dutch, and placeholder-type consistency. That will run in the next full workflow; any output will be reviewed and fixed.
 
-### Remaining acceptance gaps
-- No actual two-player Minecraft session was performed via the GitHub file API environment.
-- No in-world placement/hiring/upgrade/save-reload survival test has been performed.
-- The coordinate map is a chat text-grid view, not a fully interactive graphical theatre map.
+### Still pending
+- Real in-world building placement, worker hiring, tier 1–5 construction and save/reload testing.
+- Real two-player multiplayer permissions, realm management and concurrent treasury tests.
+- The map remains a compact chat grid rather than a full-screen interactive theatre map.
 
 ### Next
-1. Apply the prepared grid/refactor/persistence-test commit only after confirming the branch head is still `f804506970104b9c0a48f64a04e92e8665e1581e`.
-2. Fix blocking CI failures, but defer cosmetic/non-blocking issues.
-3. Continue with survival, progression and multiplayer acceptance work while keeping unperformed tests marked pending.
+1. Commit the translation validator and CI step together.
+2. Use the resulting workflow to resolve actual missing strings/placeholders, if reported.
+3. Continue through remaining runtime acceptance and release documentation without claiming unperformed survival/multiplayer tests.

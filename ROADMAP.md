@@ -4,7 +4,7 @@
 Status: dependency baseline and MineColonies 1.21.1 public API inspection are in place.
 
 ## Milestone 1 — Technical foundation
-Status: complete as a development foundation: NeoForge 1.21.1, Java 21, Gradle wrapper, localization, JUnit test setup and CI.
+Status: complete as a development foundation: NeoForge 1.21.1, Java 21, Gradle wrapper, localization, JUnit setup and CI.
 
 ## Milestone 2 — MineColonies integration
 Status: implementation and CI compile/test verified. Real colony lookup, identity keyed by dimension + colony ID, idempotent initialization and Imperium-owned SavedData.
@@ -14,8 +14,8 @@ Status: substantial gameplay slice implemented:
 - Five-tier Imperial Archive and Imperial Guard Tower with ten generated Structurize blueprints.
 - Philosopher, Tax Collector and Diplomat professions; specialist guard roles.
 - Treasury, tax collection, investment, policies, province focus and BlockUI ledger.
-- Persistence for politics, diplomacy, training, campaigns, realm membership, audits and governors.
-- Automated save/load round-trip coverage is now being added.
+- Persistent politics, diplomacy, training, campaigns, realm membership, audit history and governors.
+- JUnit NBT round-trip tests verify economic/profession progress and realm membership/laws/routes/defence/governors/audit persistence.
 - Still requires in-world placement/hiring/upgrade/save-reload playtesting.
 
 ## Milestone 4 — Parliament and politics
@@ -31,16 +31,16 @@ Status: specialist roles/training, persistent delayed operations, three-front ca
 Remaining: verify long-running strategic balances in a survival world.
 
 ## Milestone 7 — Buildings and progression
-Status: two registered MineColonies huts with levels 1–5 and ten generated Structurize blueprints.
+Status: two registered MineColonies huts with levels 1–5 and ten generated Structurize blueprints; dedicated-server schematic validation passes.
 Remaining: richer level silhouettes/modules and actual construction/upgrade playtesting.
 
 ## Milestone 8 — Empire and provincial simulation
-Status: realm/capital, invitations, shared treasury, common laws, audited flows, governors, weekly regional events, cohesion and separatist pressure implemented. A coordinate-based chat map resolves actual colony centers, including separate reporting for other dimensions.
+Status: realm/capital, invitations, shared treasury, common laws, audited flows, governors, weekly regional events, cohesion and separatist pressure implemented. A coordinate-based chat map resolves actual colony centers, with other dimensions/unloaded colonies reported separately.
 Remaining: verify map behavior and improve event balancing in longer sessions.
 
 ## Milestone 9 — Multiplayer and compatibility hardening
-Status: server-authoritative commands, permission checks and CI build/server/client checks exist.
-Remaining: actual two-player permission/economy session and survival save/reload playtest.
+Status: server-authoritative commands, permission checks and complete CI build/server/client smoke checks exist. NBT round-trip coverage is automated.
+Remaining: actual two-player permission/economy session and real survival save/reload playtest.
 
 ## Milestone 10 — Release
 Not complete. Requires current-commit CI, in-world acceptance, release notes, an explicit distribution/license decision and final artifact/package review.
