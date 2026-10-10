@@ -171,5 +171,19 @@
   "imperium_realms.message.empire_law_unset": "niet ingevoerd",
   "imperium_realms.message.empire_law_status": "Keizerlijke wetten — gezamenlijk belastingtarief: %1$s | gezamenlijk economisch beleid: %2$s. Bij een actieve keizerlijke belastingwet wordt 10% van de geïnde provinciale belastingen naar de centrale reserve overgemaakt.",
   "imperium_realms.message.empire_law_applied": "Keizerlijke wet aangenomen: %1$s (%2$s) geldt nu voor alle %3$d provincies van %4$s.",
-  "imperium_realms.message.empire_law_apply_failed": "Het voorstel is aangenomen, maar de keizerlijke wet kon niet worden gesynchroniseerd. Meld deze situatie; dien geen nieuw voorstel in totdat dit is onderzocht."
+  "imperium_realms.message.empire_law_apply_failed": "Het voorstel is aangenomen, maar de keizerlijke wet kon niet worden gesynchroniseerd. Meld deze situatie; dien geen nieuw voorstel in totdat dit is onderzocht.",
+  "imperium_realms.gui.empire_audit": "Keizerlijke audit",
+  "imperium_realms.message.empire_audit_header": "Recente auditregels voor %1$s (maximaal 10).",
+  "imperium_realms.message.empire_audit_empty": "Er zijn nog geen keizerlijke transacties geaudit.",
+  "imperium_realms.message.empire_audit_entry": "Dag %1$d — %2$s | Actor: %3$s | Onderwerp: %4$s | Bedrag: %5$d",
+  "imperium_realms.audit.action.found": "Rijk gesticht",
+  "imperium_realms.audit.action.province-invited": "Provincie-uitnodiging",
+  "imperium_realms.audit.action.province-joined": "Provincie toegetreden",
+  "imperium_realms.audit.action.province-left": "Provincie vertrokken",
+  "imperium_realms.audit.action.tax-law": "Keizerlijke belastingwet",
+  "imperium_realms.audit.action.policy-law": "Keizerlijk economisch beleid",
+  "imperium_realms.audit.action.deposit": "Storting in schatkist",
+  "imperium_realms.audit.action.withdraw": "Opname uit schatkist",
+  "imperium_realms.audit.action.tax-remittance": "Provinciale belastingafdracht",
+  "imperium_realms.audit.action.unknown": "Overige actie"
 }
