@@ -193,13 +193,27 @@ public final class EmpireState {
      * @return an empty result if today's collection already happened.
      */
     Optional<TaxCollectionResult> collectTaxes(final int population, final long gameTime) {
+        return collectTaxes(population, 0, gameTime);
+    }
+
+    /**
+     * Collect taxes once per in-game day. Each staffed Tax Collector adds five
+     * percentage points to effective collection efficiency, up to a 75% total
+     * cap. The configured tax rate itself remains bounded at 50%.
+     */
+    Optional<TaxCollectionResult> collectTaxes(
+            final int population,
+            final int taxCollectorCount,
+            final long gameTime) {
         final long day = Math.floorDiv(Math.max(0L, gameTime), 24_000L);
         if (day <= lastTaxCollectionDay) {
             return Optional.empty();
         }
 
         final long safePopulation = Math.max(0, population);
-        final long grossRevenue = safeMultiply(safePopulation, taxRatePercent);
+        final long staffingBonus = Math.min(25L, Math.max(0L, (long) taxCollectorCount * 5L));
+        final long effectiveTaxRate = Math.min(75L, (long) taxRatePercent + staffingBonus);
+        final long grossRevenue = safeMultiply(safePopulation, effectiveTaxRate);
         final long upkeepDue = safeMultiply(safePopulation, policy.dailyUpkeepPerCitizen());
         treasury = saturatingAdd(treasury, grossRevenue);
         final long upkeepPaid = Math.min(treasury, upkeepDue);
