@@ -762,24 +762,6 @@ public final class ImperiumCommands {
                 source.sendSuccess(() -> Component.literal(line), false);
             }
             for (final ProvinceMapPoint point : mapped) {
-                final int column = maxX == minX ? width / 2
-                        : (int) Math.round((point.x() - minX) * (width - 1.0) / (maxX - minX));
-                final int row = maxZ == minZ ? height / 2
-                        : (int) Math.round((point.z() - minZ) * (height - 1.0) / (maxZ - minZ));
-                if (grid[row][column] == '.') {
-                    grid[row][column] = point.marker();
-                } else {
-                    grid[row][column] = '*';
-                }
-            }
-
-            source.sendSuccess(() -> Component.translatable(
-                    "imperium_realms.message.empire_map_orientation"), false);
-            for (final char[] row : grid) {
-                final String line = new String(row);
-                source.sendSuccess(() -> Component.literal(line), false);
-            }
-            for (final ProvinceMapPoint point : mapped) {
                 source.sendSuccess(() -> Component.translatable(
                         "imperium_realms.message.empire_map_legend_entry",
                         Character.toString(point.marker()), point.name(),
