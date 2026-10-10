@@ -5,21 +5,24 @@ Last updated: 2026-10-10 Europe/Amsterdam.
 ## Repository
 - Repository: https://github.com/syllater/minecolonies-history
 - Active branch: `milestone-2/colony-integration`
-- This connected environment edits through GitHub APIs and uses Actions for build/runtime checks; it cannot execute a local shell. Build/runtime claims below refer to actual Actions results.
+- This connected environment edits through GitHub APIs and uses Actions for build/runtime checks; it cannot execute a local shell. Build/runtime claims refer to actual Actions results.
 
 ## Latest fully verified commit
-Commit `66465929e935ac1bff8fe846c8ee31f284dad3b6` passed the complete workflow:
-- Literal English/Dutch localization validation: success.
+Commit `d2cbad845583688e935153dae55ebb48e2169c5a` passed the complete workflow:
+- English/Dutch validation: 265 literal and dynamic localization keys checked, with matching placeholder types.
 - Gradle compilation, unit tests and mod JAR packaging: success.
 - Headless Minecraft client startup smoke test: success.
 - Dedicated server startup and validation of all 10 Structurize schematics: success.
 
-Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38075075711
+Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38075373770
 
-Earlier verified test coverage includes strategic map grid cases and NBT round-trip tests for provincial economy/profession progress and empire membership/laws/routes/defence/governors/audit state.
+The verified automated suite includes strategic map grid behavior and NBT round-trip tests for province economy/profession progress and realm membership/laws/routes/defence/governors/audit state.
 
 ## Next prepared change
-The next bundled commit expands the translation validator to cover all known dynamic suffix families and adds the missing `imperium_realms.audit.action.regional-event` string in English and Dutch. That expanded validator has not yet had its own CI run.
+- Scale the three Imperial Archive worker module limits with building level. Level 1 permits one Philosopher, Tax Collector and Diplomat each; Level 5 permits up to five of each. The Guard Tower's specialist guard limits already scale with its level.
+- Make the localization validator compare placeholder indices and format types, not just the types.
+- Extend the in-game acceptance checklist to confirm these level-dependent worker limits.
+These changes have been prepared but still need CI validation on the next commit.
 
 ## Major systems implemented
 - MineColonies API integration with stable identity (dimension + colony ID) and Imperium-owned versioned SavedData.
@@ -37,7 +40,7 @@ The next bundled commit expands the translation validator to cover all known dyn
 - Up to three concurrent operations against distinct targets, persisted doctrine, direct supply routes and temporary emergency defence orders.
 - Strategic priority planner and BlockUI controls for doctrine, priority route construction and priority defence.
 - `/imperium empire map` renders a coordinate grid from loaded MineColonies colony centers, listing other-dimension/unresolved colonies separately.
-- English and Dutch translations, literal-key validation in CI, plus expanded dynamic-key validation being added.
+- English and Dutch translations plus automated localization coverage validation.
 - CI for build/tests, dedicated-server schematic validation and client startup.
 
 ## Remaining acceptance gaps
@@ -48,6 +51,6 @@ The next bundled commit expands the translation validator to cover all known dyn
 - Release notes, final artifact/package review and an explicit distribution/license decision.
 
 ## Next actions
-1. Run CI for the dynamic translation-key family validator and fix genuine missing keys/placeholders.
+1. Verify the level-dependent Archive hiring limits and placeholder-index validator with a full CI run.
 2. Continue improving high-value runtime/persistence features; defer non-blocking cosmetic warnings.
 3. Keep survival and multiplayer tests marked pending until actually performed in Minecraft.

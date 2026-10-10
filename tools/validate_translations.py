@@ -20,7 +20,7 @@ TRANSLATION_KEY = re.compile(
 )
 DYNAMIC_PREFIX = re.compile(r'"(imperium_realms\.[A-Za-z0-9_.-]+\.)"\s*\+')
 GUI_KEY = re.compile(r"\$\((imperium_realms\.[A-Za-z0-9_.-]+)\)")
-PLACEHOLDER = re.compile(r"%(?:[0-9]+\$)?([dsf])")
+PLACEHOLDER = re.compile(r"%(?:(\d+)\$)?([dsf])")
 
 # Every value generated from an enum or persisted action ID needs a resource
 # key in both locales. Add suffixes here whenever a dynamic key family grows.
@@ -114,8 +114,13 @@ def main() -> int:
                 values[locale] = value
 
         if len(values) == len(LOCALES):
+            # Keep both argument index and conversion type. Comparing only the
+            # types would miss a translation that accidentally swaps %1$s/%2$s.
             signatures = {
-                locale: sorted(PLACEHOLDER.findall(value))
+                locale: sorted(
+                    (int(index) if index else 0, conversion)
+                    for index, conversion in PLACEHOLDER.findall(value)
+                )
                 for locale, value in values.items()
             }
             if len(set(tuple(signature) for signature in signatures.values())) > 1:

@@ -13,10 +13,11 @@ Use a disposable Minecraft 1.21.1 world with the exact tested NeoForge and MineC
 - [ ] Build the Imperial Archive level 1 hut through the MineColonies builder.
 - [ ] Confirm the building is recognized as an Imperial Archive and its hut GUI opens.
 - [ ] Hire one Philosopher, one Tax Collector and one Diplomat; confirm each is assigned the expected job.
+- [ ] Verify the Archive hires at most one worker per profession at level 1 and that the limit scales with building level up to five per profession at level 5.
 - [ ] Observe the worker progression counters, knowledge points, taxation and diplomatic influence.
 - [ ] Upgrade the Archive from levels 1 to 5 and check each Structurize blueprint loads and places without missing blocks.
 - [ ] Build the Imperial Guard Tower, hire all three specialist guards and verify the native guard controls remain available.
-- [ ] Upgrade the Guard Tower from levels 1 to 5.
+- [ ] Upgrade the Guard Tower from levels 1 to 5; verify each specialist guard hiring limit follows the building level.
 - [ ] Save, exit and reload; confirm building levels, workers and Imperium progress persist.
 
 ## Economy and politics

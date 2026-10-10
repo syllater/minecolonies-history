@@ -36,7 +36,7 @@ public final class ModImperiumBuildings {
                                     Skill.Knowledge,
                                     Skill.Stamina,
                                     true,
-                                    building -> 1),
+                                    building -> building.getBuildingLevel()),
                             () -> WorkerBuildingModuleView::new))
                     .addBuildingModuleProducer(new BuildingEntry.ModuleProducer<>(
                             "imperium_tax_collector_worker",
@@ -45,7 +45,7 @@ public final class ModImperiumBuildings {
                                     Skill.Knowledge,
                                     Skill.Stamina,
                                     true,
-                                    building -> 1),
+                                    building -> building.getBuildingLevel()),
                             () -> WorkerBuildingModuleView::new))
                     .addBuildingModuleProducer(new BuildingEntry.ModuleProducer<>(
                             "imperium_diplomat_worker",
@@ -54,7 +54,7 @@ public final class ModImperiumBuildings {
                                     Skill.Knowledge,
                                     Skill.Stamina,
                                     true,
-                                    building -> 1),
+                                    building -> building.getBuildingLevel()),
                             () -> WorkerBuildingModuleView::new))
                     .createBuildingEntry());
 

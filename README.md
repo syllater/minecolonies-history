@@ -35,6 +35,7 @@ GitHub Actions builds/tests the mod, launches a dedicated server to validate the
 
 - MineColonies-aware colony identities and Imperium-owned persistent world state.
 - Five-tier Imperial Archive and Imperial Guard Tower with ten generated Structurize schematics.
+- Archive and guard-tower worker/guard hiring limits scale with building level, from one role slot at tier 1 up to five at tier 5.
 - Philosopher, Tax Collector and Diplomat professions; Imperial Siege Engineer, Field Medic and Cavalier specialist training.
 - Treasury, daily taxation, investment in knowledge, economic policies, province focus and development.
 - Parliament bills with faction votes, imperial assent/veto and expiry.
