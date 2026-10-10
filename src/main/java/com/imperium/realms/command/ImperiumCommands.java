@@ -7,6 +7,7 @@ import com.imperium.realms.colony.EmpireState;
 import com.imperium.realms.colony.EmpireStateSavedData;
 import com.imperium.realms.colony.MineColoniesIntegration;
 import com.imperium.realms.colony.ParliamentProposal;
+import com.imperium.realms.colony.ProvinceFocus;
 import com.minecolonies.api.colony.IColony;
 import com.minecolonies.api.colony.permissions.Action;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -64,6 +65,18 @@ public final class ImperiumCommands {
                                         .executes(context -> improveDiplomacy(
                                                 context.getSource(),
                                                 IntegerArgumentType.getInteger(context, "colonyId"))))))
+                .then(Commands.literal("province")
+                        .then(Commands.literal("status")
+                                .executes(context -> showProvince(context.getSource())))
+                        .then(Commands.literal("focus")
+                                .then(Commands.argument("focus", StringArgumentType.word())
+                                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(
+                                                new String[]{"agriculture", "trade", "scholarship", "military", "civic"}, builder))
+                                        .executes(context -> setProvinceFocus(
+                                                context.getSource(),
+                                                StringArgumentType.getString(context, "focus")))))
+                        .then(Commands.literal("develop")
+                                .executes(context -> developProvince(context.getSource()))))
                 .then(Commands.literal("parliament")
                         .then(Commands.literal("status")
                                 .executes(context -> showParliament(context.getSource())))
@@ -312,6 +325,87 @@ public final class ImperiumCommands {
                 crowns,
                 points,
                 context.state().treasuryCrowns()), true);
+        return 1;
+    }
+
+    private static int showProvince(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) {
+            return 0;
+        }
+
+        final EmpireState state = context.state();
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.province_status",
+                state.colonyName(),
+                Component.translatable("imperium_realms.province_tier." + state.provinceTierId()),
+                state.provinceDevelopmentPoints(),
+                Component.translatable("imperium_realms.province_focus." + state.provinceFocus().id()),
+                state.knowledgePoints()), false);
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.province_help"), false);
+        return 1;
+    }
+
+    private static int setProvinceFocus(
+            final CommandSourceStack source,
+            final String requestedFocus) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) {
+            return 0;
+        }
+        if (!mayManageEconomy(context)) {
+            return denyPermission(source);
+        }
+
+        final ProvinceFocus focus = ProvinceFocus.fromId(requestedFocus).orElse(null);
+        if (focus == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.province_focus_unknown"));
+            return 0;
+        }
+        if (!context.state().setProvinceFocus(focus)) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.province_focus_unchanged",
+                    Component.translatable("imperium_realms.province_focus." + focus.id())));
+            return 0;
+        }
+
+        context.data().markChanged();
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.province_focus_set",
+                Component.translatable("imperium_realms.province_focus." + focus.id())), true);
+        return 1;
+    }
+
+    private static int developProvince(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) {
+            return 0;
+        }
+        if (!mayManageEconomy(context)) {
+            return denyPermission(source);
+        }
+
+        if (context.state().provinceDevelopmentPoints() >= 1_000) {
+            source.sendFailure(Component.translatable("imperium_realms.message.province_fully_developed"));
+            return 0;
+        }
+        if (context.state().knowledgePoints() < 10L) {
+            source.sendFailure(Component.translatable("imperium_realms.message.province_knowledge_required"));
+            return 0;
+        }
+        if (!context.state().developProvince()) {
+            source.sendFailure(Component.translatable("imperium_realms.message.province_development_failed"));
+            return 0;
+        }
+
+        context.data().markChanged();
+        final EmpireState state = context.state();
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.province_developed",
+                Component.translatable("imperium_realms.province_tier." + state.provinceTierId()),
+                state.provinceDevelopmentPoints(),
+                state.knowledgePoints()), true);
         return 1;
     }
 
