@@ -112,6 +112,20 @@ dependencies {
     testImplementation "org.junit.jupiter:junit-jupiter:${junit_version}"
 }
 
+/*
+ * ModDevGradle injects the remapped Minecraft classes directly into the main
+ * source set classpaths. Those classes are not ordinary Maven transitive
+ * dependencies, so wire the main classpaths into test compile/runtime too.
+ * This lets focused NBT/SavedData round-trip tests exercise the real Minecraft
+ * tag classes without bootstrapping a whole client for every unit test.
+ */
+sourceSets {
+    test {
+        compileClasspath += sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+    }
+}
+
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
