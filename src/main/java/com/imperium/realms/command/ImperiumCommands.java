@@ -222,6 +222,17 @@ public final class ImperiumCommands {
                 "imperium_realms.message.parliament_header",
                 context.state().colonyName(),
                 context.state().taxRatePercent()), false);
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm != null && realm.capital().equals(context.state().identity())) {
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.parliament_scope_imperial", realm.name(), realm.provinceCount()), false);
+        } else if (realm != null) {
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.parliament_scope_provincial", realm.name()), false);
+        } else {
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.parliament_scope_local"), false);
+        }
 
         final List<ParliamentProposal> proposals = context.state().recentParliamentProposals();
         if (proposals.isEmpty()) {
@@ -262,6 +273,12 @@ public final class ImperiumCommands {
         if (!mayManageEconomy(context)) {
             return denyPermission(source);
         }
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        final boolean imperialCapital = realm != null
+                && realm.capital().equals(context.state().identity());
+        if (imperialCapital && !mayManageRealm(context, realm)) {
+            return denyPermission(source);
+        }
 
         final ParliamentProposal proposal = context.state().findProposal(proposalId).orElse(null);
         final EmpireState.ProposalResolution result = context.state().resolveProposal(
@@ -275,6 +292,15 @@ public final class ImperiumCommands {
             source.sendFailure(Component.translatable(
                     "imperium_realms.message.parliament_proposal_closed", proposalId));
             return 0;
+        }
+        if (result == EmpireState.ProposalResolution.PASSED && imperialCapital && proposal != null) {
+            final boolean lawApplied = proposal.type() == ParliamentProposal.Type.TAX_RATE
+                    ? context.data().applyImperialTaxLaw(realm.id(), context.state().taxRatePercent())
+                    : context.data().applyImperialPolicyLaw(realm.id(), context.state().economicPolicy());
+            if (!lawApplied) {
+                source.sendFailure(Component.translatable("imperium_realms.message.empire_law_apply_failed"));
+                return 0;
+            }
         }
 
         context.data().markChanged();
@@ -290,6 +316,13 @@ public final class ImperiumCommands {
                             "imperium_realms.message.parliament_proposal_passed",
                             proposalId,
                             context.state().taxRatePercent()), true);
+                }
+                if (imperialCapital && proposal != null) {
+                    final Component lawType = Component.translatable(
+                            "imperium_realms.parliament.type." + proposal.typeId());
+                    source.sendSuccess(() -> Component.translatable(
+                            "imperium_realms.message.empire_law_applied",
+                            lawType, proposal.valueId(), realm.provinceCount(), realm.name()), true);
                 }
             }
             case EXPIRED -> source.sendFailure(Component.translatable(
@@ -486,7 +519,15 @@ public final class ImperiumCommands {
                 realm.name(), realm.id(), realm.emperorName(),
                 capitalState == null ? realm.capital().storageKey() : capitalState.colonyName(),
                 realm.provinceCount(), imperialTreasury, realmTreasury, realmKnowledge, realmAverageStability), false);
-        for (final ColonyIdentity province : realm.provinces()) {
+        final Component imperialTaxLaw = realm.hasImperialTaxLaw()
+                ? Component.literal(realm.imperialTaxRatePercent() + "%")
+                : Component.translatable("imperium_realms.message.empire_law_unset");
+        final Component imperialPolicyLaw = realm.hasImperialPolicyLaw()
+                ? Component.literal(realm.imperialEconomicPolicyId())
+                : Component.translatable("imperium_realms.message.empire_law_unset");
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.empire_law_status", imperialTaxLaw, imperialPolicyLaw), false);
+        for (final ColonyIdentity province of realm.provinces()) {
             final EmpireState provinceState = context.data().get(province).orElse(null);
             source.sendSuccess(() -> Component.translatable(
                     "imperium_realms.message.empire_province",

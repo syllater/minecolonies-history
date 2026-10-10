@@ -45,11 +45,32 @@ final class EmpireRealmTest {
     void realmRestoreKeepsCapitalAndMembership() {
         final EmpireRealm realm = EmpireRealm.restore(
                 2L, "Realm", capital, "uuid", "Emperor", 4L,
-                0L, java.util.List.of(province), java.util.Map.of());
+                0L, java.util.List.of(province), java.util.Map.of(), 15, "welfare");
         assertEquals(2, realm.provinceCount());
         assertTrue(realm.containsProvince(capital));
         assertTrue(realm.containsProvince(province));
+        assertEquals(15, realm.imperialTaxRatePercent());
+        assertEquals("welfare", realm.imperialEconomicPolicyId());
     }
+    @Test
+    void imperialLawsAreBoundedAndHaveExplicitUnsetDefaults() {
+        final EmpireRealm realm = EmpireRealm.found(
+                1L, "North Sea Union", capital, "uuid-emperor", "Ada", 0L);
+
+        assertFalse(realm.hasImperialTaxLaw());
+        assertFalse(realm.hasImperialPolicyLaw());
+        assertFalse(realm.setImperialTaxRatePercent(-1));
+        assertFalse(realm.setImperialTaxRatePercent(26));
+        assertTrue(realm.setImperialTaxRatePercent(10));
+        assertEquals(10, realm.imperialTaxRatePercent());
+        assertFalse(realm.setImperialTaxRatePercent(10));
+
+        assertTrue(realm.setImperialEconomicPolicy(EconomicPolicy.WELFARE));
+        assertEquals("welfare", realm.imperialEconomicPolicyId());
+        assertTrue(realm.hasImperialPolicyLaw());
+        assertFalse(realm.setImperialEconomicPolicy(EconomicPolicy.WELFARE));
+    }
+
     @Test
     void imperialTreasurySupportsBoundedDepositsAndWithdrawals() {
         final EmpireRealm realm = EmpireRealm.found(

@@ -18,7 +18,7 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 13;
+    private static final int SCHEMA_VERSION = 14;
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -321,7 +321,10 @@ public final class EmpireStateSavedData extends SavedData {
                             Math.max(0L, realmTag.getLong("founded_day")),
                             Math.max(0L, realmTag.getLong("imperial_treasury")),
                             memberProvinces,
-                            invitations);
+                            invitations,
+                            realmTag.contains("imperial_tax_rate", Tag.TAG_INT)
+                                    ? realmTag.getInt("imperial_tax_rate") : -1,
+                            realmTag.getString("imperial_policy"));
                     data.realms.put(realmId, realm);
                     if (realmId < Long.MAX_VALUE) {
                         data.nextRealmId = Math.max(data.nextRealmId, realmId + 1L);
@@ -478,8 +481,59 @@ public final class EmpireStateSavedData extends SavedData {
             }
             return Optional.empty();
         }
+        final EmpireState joiningState = colonies.get(province);
+        if (joiningState != null) {
+            if (selected.hasImperialTaxLaw()) {
+                joiningState.setTaxRatePercent(selected.imperialTaxRatePercent());
+            }
+            if (selected.hasImperialPolicyLaw()) {
+                EconomicPolicy.fromId(selected.imperialEconomicPolicyId())
+                        .ifPresent(joiningState::setEconomicPolicy);
+            }
+        }
         setDirty();
         return Optional.of(selected);
+    }
+
+    /**
+     * Applies an enacted imperial tax law to every current province. The capital's
+     * Parliament calls this only after a bill passes its council and imperial assent.
+     */
+    public boolean applyImperialTaxLaw(final long realmId, final int taxRatePercent) {
+        final EmpireRealm realm = realms.get(realmId);
+        if (realm == null || taxRatePercent < 0 || taxRatePercent > 25) {
+            return false;
+        }
+        boolean changed = realm.setImperialTaxRatePercent(taxRatePercent);
+        for (final ColonyIdentity province : realm.provinces()) {
+            final EmpireState state = colonies.get(province);
+            if (state != null) {
+                changed |= state.setTaxRatePercent(taxRatePercent);
+            }
+        }
+        if (changed) {
+            setDirty();
+        }
+        return true;
+    }
+
+    /** Applies an enacted imperial economic policy to every current province. */
+    public boolean applyImperialPolicyLaw(final long realmId, final EconomicPolicy policy) {
+        final EmpireRealm realm = realms.get(realmId);
+        if (realm == null || policy == null) {
+            return false;
+        }
+        boolean changed = realm.setImperialEconomicPolicy(policy);
+        for (final ColonyIdentity province : realm.provinces()) {
+            final EmpireState state = colonies.get(province);
+            if (state != null) {
+                changed |= state.setEconomicPolicy(policy);
+            }
+        }
+        if (changed) {
+            setDirty();
+        }
+        return true;
     }
 
     public boolean leaveRealm(final ColonyIdentity province) {
@@ -613,6 +667,8 @@ public final class EmpireStateSavedData extends SavedData {
             realmTag.putString("emperor_name", realm.emperorName());
             realmTag.putLong("founded_day", realm.foundedDay());
             realmTag.putLong("imperial_treasury", realm.imperialTreasuryCrowns());
+            realmTag.putInt("imperial_tax_rate", realm.imperialTaxRatePercent());
+            realmTag.putString("imperial_policy", realm.imperialEconomicPolicyId());
 
             final ListTag members = new ListTag();
             for (final ColonyIdentity province : realm.provinces()) {

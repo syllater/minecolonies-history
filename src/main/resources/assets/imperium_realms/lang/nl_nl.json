@@ -164,5 +164,12 @@
   "imperium_realms.message.empire_province_treasury_full": "De provinciale schatkist is vol (%1$d kronen); het geld is teruggezet in de keizerlijke reserve.",
   "imperium_realms.message.empire_withdrawn": "%1$d kronen naar deze provincie opgenomen. Resterende keizerlijke reserve: %2$d.",
   "imperium_realms.gui.empire_deposit50": "Stort 50",
-  "imperium_realms.gui.empire_withdraw50": "Neem 50 op"
+  "imperium_realms.gui.empire_withdraw50": "Neem 50 op",
+  "imperium_realms.message.parliament_scope_imperial": "Dit is het keizerlijke Parlement. Aangenomen voorstellen worden wet in alle huidige provincies; nieuwe provincies erven deze wetten.",
+  "imperium_realms.message.parliament_scope_provincial": "Dit is het provinciale Parlement van %1$s. Voorstellen hier gelden alleen voor deze provincie.",
+  "imperium_realms.message.parliament_scope_local": "Dit is een lokaal Parlement. Sticht een rijk om via de hoofdstad rijkswetten in te voeren.",
+  "imperium_realms.message.empire_law_unset": "niet ingevoerd",
+  "imperium_realms.message.empire_law_status": "Keizerlijke wetten — gezamenlijk belastingtarief: %1$s | gezamenlijk economisch beleid: %2$s. Gebruik het Parlement in de hoofdstad om een rijksbreed belasting- of beleidsvoorstel aan te nemen.",
+  "imperium_realms.message.empire_law_applied": "Keizerlijke wet aangenomen: %1$s (%2$s) geldt nu voor alle %3$d provincies van %4$s.",
+  "imperium_realms.message.empire_law_apply_failed": "Het voorstel is aangenomen, maar de keizerlijke wet kon niet worden gesynchroniseerd. Meld deze situatie; dien geen nieuw voorstel in totdat dit is onderzocht."
 }

@@ -27,6 +27,10 @@ public final class EmpireRealm {
     private String emperorName;
     private final long foundedDay;
     private long imperialTreasuryCrowns;
+    // -1 means no empire-wide tax law has been enacted yet.
+    private int imperialTaxRatePercent = -1;
+    // Empty means province-level policies remain independent.
+    private String imperialEconomicPolicyId = "";
     private final Set<ColonyIdentity> provinces = new LinkedHashSet<>();
     private final Map<ColonyIdentity, Long> invitations = new LinkedHashMap<>();
 
@@ -70,10 +74,17 @@ public final class EmpireRealm {
             final long foundedDay,
             final long savedImperialTreasury,
             final List<ColonyIdentity> savedProvinces,
-            final Map<ColonyIdentity, Long> savedInvitations) {
+            final Map<ColonyIdentity, Long> savedInvitations,
+            final int savedImperialTaxRatePercent,
+            final String savedImperialEconomicPolicyId) {
         final EmpireRealm realm = new EmpireRealm(
                 id, name, capital, emperorUuid, emperorName, Math.max(0L, foundedDay),
                 clampTreasury(savedImperialTreasury));
+        if (savedImperialTaxRatePercent >= 0 && savedImperialTaxRatePercent <= 25) {
+            realm.imperialTaxRatePercent = savedImperialTaxRatePercent;
+        }
+        realm.imperialEconomicPolicyId = EconomicPolicy.fromId(savedImperialEconomicPolicyId)
+                .map(EconomicPolicy::id).orElse("");
         if (savedProvinces != null) {
             for (final ColonyIdentity province : savedProvinces) {
                 if (province != null && realm.provinces.size() < MAX_PROVINCES) {
@@ -118,6 +129,41 @@ public final class EmpireRealm {
 
     public long imperialTreasuryCrowns() {
         return imperialTreasuryCrowns;
+    }
+
+    public int imperialTaxRatePercent() {
+        return imperialTaxRatePercent;
+    }
+
+    public boolean hasImperialTaxLaw() {
+        return imperialTaxRatePercent >= 0;
+    }
+
+    /** Records an enacted realm-wide tax law; returns false for an invalid or unchanged value. */
+    public boolean setImperialTaxRatePercent(final int rate) {
+        if (rate < 0 || rate > 25 || imperialTaxRatePercent == rate) {
+            return false;
+        }
+        imperialTaxRatePercent = rate;
+        return true;
+    }
+
+    public String imperialEconomicPolicyId() {
+        return imperialEconomicPolicyId;
+    }
+
+    public boolean hasImperialPolicyLaw() {
+        return !imperialEconomicPolicyId.isBlank();
+    }
+
+    /** Records an enacted realm-wide economic policy. */
+    public boolean setImperialEconomicPolicy(final EconomicPolicy policy) {
+        Objects.requireNonNull(policy, "policy");
+        if (imperialEconomicPolicyId.equals(policy.id())) {
+            return false;
+        }
+        imperialEconomicPolicyId = policy.id();
+        return true;
     }
 
     public boolean depositImperialTreasury(final long amount) {
