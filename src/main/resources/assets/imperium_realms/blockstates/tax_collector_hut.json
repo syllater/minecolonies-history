@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "imperium_realms:block/tax_collector_hut" },
+    "facing=east": { "model": "imperium_realms:block/tax_collector_hut", "y": 90 },
+    "facing=south": { "model": "imperium_realms:block/tax_collector_hut", "y": 180 },
+    "facing=west": { "model": "imperium_realms:block/tax_collector_hut", "y": 270 }
+  }
+}
