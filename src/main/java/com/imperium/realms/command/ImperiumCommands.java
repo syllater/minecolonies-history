@@ -464,12 +464,15 @@ public final class ImperiumCommands {
             included++;
         }
         final int averageStability = included == 0 ? 0 : (int) (stabilityTotal / included);
+        final long realmTreasury = treasury;
+        final long realmKnowledge = knowledge;
+        final int realmAverageStability = averageStability;
         final EmpireState capitalState = context.data().get(realm.capital()).orElse(null);
         source.sendSuccess(() -> Component.translatable(
                 "imperium_realms.message.empire_status",
                 realm.name(), realm.id(), realm.emperorName(),
                 capitalState == null ? realm.capital().storageKey() : capitalState.colonyName(),
-                realm.provinceCount(), treasury, knowledge, averageStability), false);
+                realm.provinceCount(), realmTreasury, realmKnowledge, realmAverageStability), false);
         for (final ColonyIdentity province : realm.provinces()) {
             final EmpireState provinceState = context.data().get(province).orElse(null);
             source.sendSuccess(() -> Component.translatable(
