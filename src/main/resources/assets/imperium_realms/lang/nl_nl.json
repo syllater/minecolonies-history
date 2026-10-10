@@ -289,5 +289,6 @@
   "imperium_realms.message.empire_map_legend_entry": "%1$s — %2$s (kolonie %3$d) op X %4$d, Z %5$d.",
   "imperium_realms.message.empire_map_cross_dimension": "%1$s (kolonie %2$d) staat buiten deze kaart in dimensie %3$s op X %4$d, Z %5$d.",
   "imperium_realms.message.empire_map_unresolved": "%1$s (kolonie %2$d, %3$s) kan momenteel niet aan een geladen MineColonies-kolonie worden gekoppeld; de opgeslagen rijkgegevens blijven beschikbaar.",
-  "imperium_realms.message.empire_map_no_centers": "Er zijn geen geladen MineColonies-koloniecentra om op de kaart te plaatsen. De kaart wordt gevuld zodra er minstens één rijkkolonie beschikbaar is."
+  "imperium_realms.message.empire_map_no_centers": "Er zijn geen geladen MineColonies-koloniecentra om op de kaart te plaatsen. De kaart wordt gevuld zodra er minstens één rijkkolonie beschikbaar is.",
+  "imperium_realms.audit.action.regional-event": "Regionale gebeurtenis afgehandeld"
 }

@@ -5,19 +5,21 @@ Last updated: 2026-10-10 Europe/Amsterdam.
 ## Repository
 - Repository: https://github.com/syllater/minecolonies-history
 - Active branch: `milestone-2/colony-integration`
-- Repository changes are made through the GitHub connection; the local shell is unavailable here. Build/runtime claims below refer to actual GitHub Actions runs.
+- This connected environment edits through GitHub APIs and uses Actions for build/runtime checks; it cannot execute a local shell. Build/runtime claims below refer to actual Actions results.
 
 ## Latest fully verified commit
-Commit `052f3d624b7fd6e379acd3eaf55fa4b298a49fdc` passed the full GitHub Actions workflow:
+Commit `66465929e935ac1bff8fe846c8ee31f284dad3b6` passed the complete workflow:
+- Literal English/Dutch localization validation: success.
 - Gradle compilation, unit tests and mod JAR packaging: success.
 - Headless Minecraft client startup smoke test: success.
 - Dedicated server startup and validation of all 10 Structurize schematics: success.
 
-Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38074800321
+Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38075075711
 
-The verified test suite includes deterministic strategic map grid tests and NBT round-trip tests for provincial economy/profession progress and empire membership/laws/routes/defence/governors/audit state.
+Earlier verified test coverage includes strategic map grid cases and NBT round-trip tests for provincial economy/profession progress and empire membership/laws/routes/defence/governors/audit state.
 
-A static English/Dutch translation validator and CI step are prepared in the next commit; that tool has not yet had its own workflow result.
+## Next prepared change
+The next bundled commit expands the translation validator to cover all known dynamic suffix families and adds the missing `imperium_realms.audit.action.regional-event` string in English and Dutch. That expanded validator has not yet had its own CI run.
 
 ## Major systems implemented
 - MineColonies API integration with stable identity (dimension + colony ID) and Imperium-owned versioned SavedData.
@@ -35,7 +37,7 @@ A static English/Dutch translation validator and CI step are prepared in the nex
 - Up to three concurrent operations against distinct targets, persisted doctrine, direct supply routes and temporary emergency defence orders.
 - Strategic priority planner and BlockUI controls for doctrine, priority route construction and priority defence.
 - `/imperium empire map` renders a coordinate grid from loaded MineColonies colony centers, listing other-dimension/unresolved colonies separately.
-- English and Dutch translations; static translation validation is being wired into CI.
+- English and Dutch translations, literal-key validation in CI, plus expanded dynamic-key validation being added.
 - CI for build/tests, dedicated-server schematic validation and client startup.
 
 ## Remaining acceptance gaps
@@ -46,6 +48,6 @@ A static English/Dutch translation validator and CI step are prepared in the nex
 - Release notes, final artifact/package review and an explicit distribution/license decision.
 
 ## Next actions
-1. Verify the new localization CI step and fix genuine missing keys or placeholder mismatches.
+1. Run CI for the dynamic translation-key family validator and fix genuine missing keys/placeholders.
 2. Continue improving high-value runtime/persistence features; defer non-blocking cosmetic warnings.
 3. Keep survival and multiplayer tests marked pending until actually performed in Minecraft.

@@ -289,5 +289,6 @@
   "imperium_realms.message.empire_map_legend_entry": "%1$s — %2$s (colony %3$d) at X %4$d, Z %5$d.",
   "imperium_realms.message.empire_map_cross_dimension": "%1$s (colony %2$d) is outside this map in dimension %3$s at X %4$d, Z %5$d.",
   "imperium_realms.message.empire_map_unresolved": "%1$s (colony %2$d, %3$s) is not currently resolvable to a loaded MineColonies colony; its saved realm record remains available.",
-  "imperium_realms.message.empire_map_no_centers": "No loaded MineColonies colony centers could be plotted. The map will populate when at least one realm colony is available."
+  "imperium_realms.message.empire_map_no_centers": "No loaded MineColonies colony centers could be plotted. The map will populate when at least one realm colony is available.",
+  "imperium_realms.audit.action.regional-event": "Regional event resolved"
 }

@@ -1,34 +1,37 @@
 # Checkpoints
 
-## 2026-10-10 — Strategic map and persistence round-trip checks verified
+## 2026-10-10 — Literal localization CI verified; dynamic key coverage being expanded
 
 ### Repository
 - Repository: https://github.com/syllater/minecolonies-history
 - Branch: `milestone-2/colony-integration`
 
-### Verified commit
-Commit `052f3d624b7fd6e379acd3eaf55fa4b298a49fdc` passed the complete GitHub Actions workflow:
-- Build, unit tests and JAR upload: success.
+### Latest verified commit
+Commit `66465929e935ac1bff8fe846c8ee31f284dad3b6` passed the complete GitHub Actions workflow:
+- Literal English/Dutch localization validation: success.
+- Gradle build, unit tests and JAR upload: success.
 - Headless client startup smoke test: success.
-- Dedicated-server startup and all 10 Structurize schematic checks: success.
-- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38074800321
+- Dedicated server startup and all 10 Structurize schematic checks: success.
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38075075711
 
-### Implemented and covered by tests
+### Existing automated checks
 - `ImperialStrategyPlanner` deterministically prioritizes unsupplied/vulnerable provinces.
-- `StrategicMapGrid` isolates coordinate projection; tests cover empty map, orientation, coincident centers and a single point.
-- `/imperium empire map` plots loaded colony centers in the capital's dimension; other-dimension and unresolved colonies are reported separately.
+- `StrategicMapGrid` tests empty map, north/east orientation, coincident centers and single-point maps.
 - `EmpireStateSavedDataTest` exercises actual Minecraft NBT save/load for economy/profession progress and a multi-colony realm's membership, laws, route, defensive order, governor and audit entries.
-- ModDevGradle's generated Minecraft classpaths are added to JUnit test compile/runtime so these persistence tests can use real Minecraft tag classes.
+- Gradle's remapped Minecraft classpaths are included in JUnit test compile/runtime.
+- `tools/validate_translations.py` verifies locale JSON, literal Java/BlockUI keys, and placeholder consistency.
 
 ### Next prepared improvement
-A Python localization validator and CI step have been prepared. It checks JSON validity, literal `Component.translatable` / BlockUI GUI keys in both English and Dutch, and placeholder-type consistency. That will run in the next full workflow; any output will be reviewed and fixed.
+- Explicitly validate all known dynamic localization suffix families: audit actions, factions, diplomatic relations, civic disorder, campaign types/outcomes, postures, parliament types, province ranks/focuses and regional events.
+- Add the missing `imperium_realms.audit.action.regional-event` translation in English and Dutch. Regional events were previously visible in the event list but could show an untranslated raw audit action in the audit report.
+- Add an in-game acceptance checklist for survival and multiplayer tests. These tests cannot be performed by GitHub CI alone.
 
 ### Still pending
 - Real in-world building placement, worker hiring, tier 1–5 construction and save/reload testing.
 - Real two-player multiplayer permissions, realm management and concurrent treasury tests.
-- The map remains a compact chat grid rather than a full-screen interactive theatre map.
+- The map remains a chat grid, not a full-screen interactive theatre map.
 
 ### Next
-1. Commit the translation validator and CI step together.
-2. Use the resulting workflow to resolve actual missing strings/placeholders, if reported.
-3. Continue through remaining runtime acceptance and release documentation without claiming unperformed survival/multiplayer tests.
+1. Commit the expanded validator, the missing translations and docs together.
+2. Run the full workflow and fix any real localization gaps it identifies.
+3. Continue to improve persistence, progression, and actual playtest readiness.

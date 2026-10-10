@@ -15,7 +15,7 @@ Status: substantial gameplay slice implemented:
 - Philosopher, Tax Collector and Diplomat professions; specialist guard roles.
 - Treasury, tax collection, investment, policies, province focus and BlockUI ledger.
 - Persistent politics, diplomacy, training, campaigns, realm membership, audit history and governors.
-- JUnit NBT round-trip tests verify economic/profession progress and realm membership/laws/routes/defence/governors/audit persistence.
+- JUnit NBT round-trip tests verify economic/profession progress and realm membership/laws/routes/defence/governor/audit persistence.
 - Still requires in-world placement/hiring/upgrade/save-reload playtesting.
 
 ## Milestone 4 — Parliament and politics
@@ -39,7 +39,7 @@ Status: realm/capital, invitations, shared treasury, common laws, audited flows,
 Remaining: verify map behavior and improve event balancing in longer sessions.
 
 ## Milestone 9 — Multiplayer and compatibility hardening
-Status: server-authoritative commands, permission checks and complete CI build/server/client smoke checks exist. NBT round-trip coverage is automated.
+Status: server-authoritative commands, permission checks, literal EN/NL key validation and full CI build/server/client smoke checks exist. NBT round-trip coverage is automated. Dynamic translation-key family validation is being expanded.
 Remaining: actual two-player permission/economy session and real survival save/reload playtest.
 
 ## Milestone 10 — Release
