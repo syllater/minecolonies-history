@@ -18,7 +18,7 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 11;
+    private static final int SCHEMA_VERSION = 12;
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -28,6 +28,8 @@ public final class EmpireStateSavedData extends SavedData {
             DataFixTypes.LEVEL);
 
     private final Map<ColonyIdentity, EmpireState> colonies = new LinkedHashMap<>();
+    private final Map<Long, EmpireRealm> realms = new LinkedHashMap<>();
+    private long nextRealmId = 1L;
 
     public static EmpireStateSavedData get(final ServerLevel level) {
         return level.getServer().overworld().getDataStorage().computeIfAbsent(FACTORY, DATA_NAME);
@@ -48,11 +50,8 @@ public final class EmpireStateSavedData extends SavedData {
             data.setDirty();
         }
 
-        if (!root.contains(TAG_COLONIES, Tag.TAG_LIST)) {
-            return data;
-        }
-
-        final ListTag entries = root.getList(TAG_COLONIES, Tag.TAG_COMPOUND);
+        final ListTag entries = root.contains(TAG_COLONIES, Tag.TAG_LIST)
+                ? root.getList(TAG_COLONIES, Tag.TAG_COMPOUND) : new ListTag();
         for (int index = 0; index < entries.size(); index++) {
             final CompoundTag entry = entries.getCompound(index);
             try {
@@ -262,6 +261,75 @@ public final class EmpireStateSavedData extends SavedData {
                 // Skip malformed records instead of failing the whole world load.
             }
         }
+
+        data.nextRealmId = root.contains("next_realm_id", Tag.TAG_LONG)
+                ? Math.max(1L, root.getLong("next_realm_id")) : 1L;
+        if (root.contains("realms", Tag.TAG_LIST)) {
+            final ListTag savedRealms = root.getList("realms", Tag.TAG_COMPOUND);
+            for (int realmIndex = 0; realmIndex < savedRealms.size(); realmIndex++) {
+                final CompoundTag realmTag = savedRealms.getCompound(realmIndex);
+                try {
+                    final long realmId = realmTag.getLong("id");
+                    final ColonyIdentity capital = new ColonyIdentity(
+                            realmTag.getString("capital_dimension"),
+                            realmTag.getInt("capital_colony_id"));
+                    if (realmId < 1L || data.realms.containsKey(realmId)
+                            || data.realmForProvince(capital).isPresent()) {
+                        continue;
+                    }
+
+                    final List<ColonyIdentity> memberProvinces = new ArrayList<>();
+                    if (realmTag.contains("provinces", Tag.TAG_LIST)) {
+                        final ListTag members = realmTag.getList("provinces", Tag.TAG_COMPOUND);
+                        for (int memberIndex = 0; memberIndex < members.size(); memberIndex++) {
+                            final CompoundTag member = members.getCompound(memberIndex);
+                            try {
+                                final ColonyIdentity identity = new ColonyIdentity(
+                                        member.getString("dimension"), member.getInt("colony_id"));
+                                if (!data.realmForProvince(identity).isPresent()) {
+                                    memberProvinces.add(identity);
+                                }
+                            } catch (IllegalArgumentException ignored) {
+                                // Ignore a malformed member; preserve the rest of the realm.
+                            }
+                        }
+                    }
+
+                    final Map<ColonyIdentity, Long> invitations = new LinkedHashMap<>();
+                    if (realmTag.contains("invitations", Tag.TAG_LIST)) {
+                        final ListTag savedInvitations = realmTag.getList("invitations", Tag.TAG_COMPOUND);
+                        for (int invitationIndex = 0; invitationIndex < savedInvitations.size(); invitationIndex++) {
+                            final CompoundTag invitation = savedInvitations.getCompound(invitationIndex);
+                            try {
+                                final ColonyIdentity identity = new ColonyIdentity(
+                                        invitation.getString("dimension"), invitation.getInt("colony_id"));
+                                if (!memberProvinces.contains(identity) && !capital.equals(identity)) {
+                                    invitations.put(identity, Math.max(0L, invitation.getLong("expires_day")));
+                                }
+                            } catch (IllegalArgumentException ignored) {
+                                // Ignore malformed invitations individually.
+                            }
+                        }
+                    }
+
+                    final EmpireRealm realm = EmpireRealm.restore(
+                            realmId,
+                            realmTag.getString("name"),
+                            capital,
+                            realmTag.getString("emperor_uuid"),
+                            realmTag.getString("emperor_name"),
+                            Math.max(0L, realmTag.getLong("founded_day")),
+                            memberProvinces,
+                            invitations);
+                    data.realms.put(realmId, realm);
+                    if (realmId < Long.MAX_VALUE) {
+                        data.nextRealmId = Math.max(data.nextRealmId, realmId + 1L);
+                    }
+                } catch (IllegalArgumentException exception) {
+                    // An invalid realm must not prevent the world and its colonies from loading.
+                }
+            }
+        }
         return data;
     }
 
@@ -315,6 +383,111 @@ public final class EmpireStateSavedData extends SavedData {
             setDirty();
         }
         return resolved;
+    }
+
+    public List<EmpireRealm> allRealms() {
+        return List.copyOf(realms.values());
+    }
+
+    public Optional<EmpireRealm> realmById(final long realmId) {
+        return Optional.ofNullable(realms.get(realmId));
+    }
+
+    public Optional<EmpireRealm> realmForProvince(final ColonyIdentity identity) {
+        if (identity == null) {
+            return Optional.empty();
+        }
+        return realms.values().stream().filter(realm -> realm.containsProvince(identity)).findFirst();
+    }
+
+    public Optional<EmpireRealm> createRealm(
+            final String name,
+            final ColonyIdentity capital,
+            final String emperorUuid,
+            final String emperorName,
+            final long foundedDay) {
+        if (capital == null || emperorUuid == null || emperorUuid.isBlank()
+                || nextRealmId <= 0L || nextRealmId == Long.MAX_VALUE
+                || realmForProvince(capital).isPresent()
+                || realms.values().stream().anyMatch(
+                        realm -> realm.name().equalsIgnoreCase(name == null ? "" : name.trim()))) {
+            return Optional.empty();
+        }
+        if (!colonies.containsKey(capital)) {
+            return Optional.empty();
+        }
+
+        final EmpireRealm realm;
+        try {
+            realm = EmpireRealm.found(
+                    nextRealmId, name, capital, emperorUuid, emperorName, Math.max(0L, foundedDay));
+        } catch (IllegalArgumentException exception) {
+            return Optional.empty();
+        }
+        nextRealmId++;
+        realms.put(realm.id(), realm);
+        setDirty();
+        return Optional.of(realm);
+    }
+
+    public boolean inviteProvince(
+            final long realmId,
+            final ColonyIdentity province,
+            final long currentDay) {
+        final EmpireRealm realm = realms.get(realmId);
+        if (realm == null || province == null || !colonies.containsKey(province)
+                || realmForProvince(province).isPresent()) {
+            return false;
+        }
+        boolean changed = false;
+        for (final EmpireRealm other : realms.values()) {
+            if (other.expireInvitations(currentDay)) {
+                changed = true;
+            }
+            if (other.invitationExpiry(province) >= 0L && other.id() != realmId) {
+                if (changed) setDirty();
+                return false;
+            }
+        }
+        if (!realm.inviteProvince(province, currentDay)) {
+            if (changed) setDirty();
+            return false;
+        }
+        setDirty();
+        return true;
+    }
+
+    public Optional<EmpireRealm> acceptRealmInvitation(
+            final ColonyIdentity province,
+            final long currentDay) {
+        if (province == null || !colonies.containsKey(province) || realmForProvince(province).isPresent()) {
+            return Optional.empty();
+        }
+        EmpireRealm selected = null;
+        boolean invitationsExpired = false;
+        for (final EmpireRealm realm : realms.values()) {
+            invitationsExpired |= realm.expireInvitations(currentDay);
+            if (selected == null && realm.hasValidInvitation(province, currentDay)) {
+                selected = realm;
+            }
+        }
+        if (selected == null || !selected.acceptInvitation(province, currentDay)) {
+            if (invitationsExpired) {
+                setDirty();
+            }
+            return Optional.empty();
+        }
+        setDirty();
+        return Optional.of(selected);
+    }
+
+    public boolean leaveRealm(final ColonyIdentity province) {
+        final EmpireRealm realm = realmForProvince(province).orElse(null);
+        if (realm == null || !realm.removeProvince(province)) {
+            return false;
+        }
+        setDirty();
+        return true;
     }
 
     public void markChanged() {
@@ -426,6 +599,40 @@ public final class EmpireStateSavedData extends SavedData {
             entries.add(entry);
         }
         root.put(TAG_COLONIES, entries);
+
+        root.putLong("next_realm_id", nextRealmId);
+        final ListTag savedRealms = new ListTag();
+        for (final EmpireRealm realm : realms.values()) {
+            final CompoundTag realmTag = new CompoundTag();
+            realmTag.putLong("id", realm.id());
+            realmTag.putString("name", realm.name());
+            realmTag.putString("capital_dimension", realm.capital().dimensionId());
+            realmTag.putInt("capital_colony_id", realm.capital().colonyId());
+            realmTag.putString("emperor_uuid", realm.emperorUuid());
+            realmTag.putString("emperor_name", realm.emperorName());
+            realmTag.putLong("founded_day", realm.foundedDay());
+
+            final ListTag members = new ListTag();
+            for (final ColonyIdentity province : realm.provinces()) {
+                final CompoundTag member = new CompoundTag();
+                member.putString("dimension", province.dimensionId());
+                member.putInt("colony_id", province.colonyId());
+                members.add(member);
+            }
+            realmTag.put("provinces", members);
+
+            final ListTag invitations = new ListTag();
+            realm.invitations().forEach((province, expiresDay) -> {
+                final CompoundTag invitation = new CompoundTag();
+                invitation.putString("dimension", province.dimensionId());
+                invitation.putInt("colony_id", province.colonyId());
+                invitation.putLong("expires_day", expiresDay);
+                invitations.add(invitation);
+            });
+            realmTag.put("invitations", invitations);
+            savedRealms.add(realmTag);
+        }
+        root.put("realms", savedRealms);
         return root;
     }
 }

@@ -5,6 +5,7 @@ import com.imperium.realms.colony.ColonyIdentity;
 import com.imperium.realms.colony.EconomicPolicy;
 import com.imperium.realms.colony.EmpireState;
 import com.imperium.realms.colony.EmpireStateSavedData;
+import com.imperium.realms.colony.EmpireRealm;
 import com.imperium.realms.colony.MineColoniesIntegration;
 import com.imperium.realms.colony.MilitaryCampaign;
 import com.imperium.realms.colony.ParliamentProposal;
@@ -56,6 +57,23 @@ public final class ImperiumCommands {
                                         IntegerArgumentType.getInteger(context, "crowns")))))
                 .then(Commands.literal("army")
                         .executes(context -> showArmy(context.getSource())))
+                .then(Commands.literal("empire")
+                        .then(Commands.literal("status")
+                                .executes(context -> showEmpire(context.getSource())))
+                        .then(Commands.literal("found")
+                                .then(Commands.argument("name", StringArgumentType.greedyString())
+                                        .executes(context -> foundEmpire(
+                                                context.getSource(),
+                                                StringArgumentType.getString(context, "name")))))
+                        .then(Commands.literal("invite")
+                                .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                        .executes(context -> inviteEmpireProvince(
+                                                context.getSource(),
+                                                IntegerArgumentType.getInteger(context, "colonyId")))))
+                        .then(Commands.literal("join")
+                                .executes(context -> joinEmpire(context.getSource())))
+                        .then(Commands.literal("leave")
+                                .executes(context -> leaveEmpire(context.getSource()))))
                 .then(Commands.literal("campaign")
                         .then(Commands.literal("status")
                                 .executes(context -> showCampaigns(context.getSource())))
@@ -420,6 +438,154 @@ public final class ImperiumCommands {
                 state.provinceDevelopmentPoints(),
                 state.knowledgePoints()), true);
         return 1;
+    }
+
+    private static int showEmpire(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendSuccess(() -> Component.translatable("imperium_realms.message.empire_none"), false);
+            source.sendSuccess(() -> Component.translatable("imperium_realms.message.empire_found_help"), false);
+            return 1;
+        }
+
+        long treasury = 0L;
+        long knowledge = 0L;
+        long stabilityTotal = 0L;
+        int included = 0;
+        for (final ColonyIdentity province : realm.provinces()) {
+            final EmpireState provinceState = context.data().get(province).orElse(null);
+            if (provinceState == null) continue;
+            treasury = safeAdd(treasury, provinceState.treasuryCrowns());
+            knowledge = safeAdd(knowledge, provinceState.knowledgePoints());
+            stabilityTotal += provinceState.stability();
+            included++;
+        }
+        final int averageStability = included == 0 ? 0 : (int) (stabilityTotal / included);
+        final EmpireState capitalState = context.data().get(realm.capital()).orElse(null);
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.empire_status",
+                realm.name(), realm.id(), realm.emperorName(),
+                capitalState == null ? realm.capital().storageKey() : capitalState.colonyName(),
+                realm.provinceCount(), treasury, knowledge, averageStability), false);
+        for (final ColonyIdentity province : realm.provinces()) {
+            final EmpireState provinceState = context.data().get(province).orElse(null);
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.empire_province",
+                    provinceState == null ? province.storageKey() : provinceState.colonyName(),
+                    province.dimensionId(), province.colonyId(), province.equals(realm.capital())), false);
+        }
+        source.sendSuccess(() -> Component.translatable("imperium_realms.message.empire_help"), false);
+        return 1;
+    }
+
+    private static int foundEmpire(final CommandSourceStack source, final String name) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        if (!mayManageEconomy(context)) return denyPermission(source);
+
+        final ColonyIdentity identity = context.state().identity();
+        if (context.data().realmForProvince(identity).isPresent()) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_already_member"));
+            return 0;
+        }
+        final EmpireRealm realm = context.data().createRealm(
+                name, identity, context.player().getUUID().toString(),
+                context.player().getGameProfile().getName(), currentDay(source)).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_found_failed"));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.empire_founded", realm.name(), realm.id()), true);
+        return 1;
+    }
+
+    private static int inviteEmpireProvince(final CommandSourceStack source, final int targetColonyId) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            return 0;
+        }
+        if (!mayManageRealm(context, realm)) return denyPermission(source);
+
+        final IColony target = MineColoniesIntegration
+                .colonyById(context.player().serverLevel(), targetColonyId).orElse(null);
+        if (target == null) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.empire_target_not_found", targetColonyId));
+            return 0;
+        }
+        final ColonyIdentity targetIdentity = ColonyIdentity.from(target);
+        if (context.data().realmForProvince(targetIdentity).isPresent()) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_target_member"));
+            return 0;
+        }
+        MineColoniesIntegration.getOrCreateState(context.player().serverLevel(), target);
+        if (!context.data().inviteProvince(realm.id(), targetIdentity, currentDay(source))) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_invite_failed"));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.empire_invited",
+                target.getName(), target.getID(), realm.name(),
+                currentDay(source) + EmpireRealm.INVITATION_VALIDITY_DAYS), true);
+        return 1;
+    }
+
+    private static int joinEmpire(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        if (!mayManageEconomy(context)) return denyPermission(source);
+        if (context.data().realmForProvince(context.state().identity()).isPresent()) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_already_member"));
+            return 0;
+        }
+        final EmpireRealm realm = context.data()
+                .acceptRealmInvitation(context.state().identity(), currentDay(source)).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_invitation_missing"));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.empire_joined", realm.name(), realm.id()), true);
+        return 1;
+    }
+
+    private static int leaveEmpire(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        if (!mayManageEconomy(context)) return denyPermission(source);
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            return 0;
+        }
+        if (realm.capital().equals(context.state().identity())) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_capital_cannot_leave"));
+            return 0;
+        }
+        if (!context.data().leaveRealm(context.state().identity())) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_leave_failed"));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.empire_left", realm.name()), true);
+        return 1;
+    }
+
+    private static boolean mayManageRealm(final ColonyContext context, final EmpireRealm realm) {
+        return context.player().hasPermissions(2)
+                || realm.isEmperor(context.player().getUUID().toString());
+    }
+
+    private static long safeAdd(final long left, final long right) {
+        if (right > 0L && left > Long.MAX_VALUE - right) return Long.MAX_VALUE;
+        return left + right;
     }
 
     private static int showCampaigns(final CommandSourceStack source) {
