@@ -607,4 +607,52 @@ final class EmpireStateTest {
         assertEquals(2, target.relationScore(origin.identity()));
         assertEquals(75L, origin.treasuryCrowns());
     }
+
+    @Test
+    void offensiveAndDefensivePosturesModifyOnlyTheRelevantReadiness() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 71), "Citadel", 0L);
+        final int balanced = state.militaryReadinessScore();
+
+        assertEquals(MilitaryPosture.BALANCED, state.militaryPosture());
+        assertEquals(balanced, state.militaryLaunchReadinessScore());
+        assertEquals(balanced, state.militaryDefensiveReadinessScore());
+
+        assertTrue(state.setMilitaryPosture(MilitaryPosture.OFFENSIVE));
+        assertEquals(balanced + 12, state.militaryLaunchReadinessScore());
+        assertEquals(balanced, state.militaryDefensiveReadinessScore());
+        assertFalse(state.setMilitaryPosture(MilitaryPosture.OFFENSIVE));
+
+        assertTrue(state.setMilitaryPosture(MilitaryPosture.DEFENSIVE));
+        assertEquals(balanced, state.militaryLaunchReadinessScore());
+        assertEquals(balanced + 20, state.militaryDefensiveReadinessScore());
+        assertFalse(state.setMilitaryPosture(MilitaryPosture.DEFENSIVE));
+    }
+
+    @Test
+    void supportsThreeDistinctConcurrentMilitaryFrontsAndRejectsDuplicates() {
+        final EmpireState origin = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 80), "Imperial Capital", 0L);
+        assertTrue(origin.creditTreasury(500L));
+
+        final ColonyIdentity firstTarget = new ColonyIdentity("minecraft:overworld", 81);
+        final ColonyIdentity secondTarget = new ColonyIdentity("minecraft:overworld", 82);
+        final ColonyIdentity thirdTarget = new ColonyIdentity("minecraft:overworld", 83);
+        final ColonyIdentity fourthTarget = new ColonyIdentity("minecraft:overworld", 84);
+
+        assertTrue(origin.launchMilitaryCampaign("Marshal", firstTarget, "North",
+                MilitaryCampaign.Type.BORDER_PATROL, 1L).isPresent());
+        assertTrue(origin.launchMilitaryCampaign("Marshal", firstTarget, "North",
+                MilitaryCampaign.Type.BORDER_PATROL, 1L).isEmpty(),
+                "A province must not queue duplicate operations against the same target");
+        assertTrue(origin.launchMilitaryCampaign("Marshal", secondTarget, "East",
+                MilitaryCampaign.Type.BORDER_PATROL, 1L).isPresent());
+        assertTrue(origin.launchMilitaryCampaign("Marshal", thirdTarget, "West",
+                MilitaryCampaign.Type.BORDER_PATROL, 1L).isPresent());
+        assertEquals(EmpireState.MAX_CONCURRENT_CAMPAIGNS, origin.pendingMilitaryCampaigns().size());
+        assertTrue(origin.launchMilitaryCampaign("Marshal", fourthTarget, "South",
+                MilitaryCampaign.Type.BORDER_PATROL, 1L).isEmpty());
+        assertEquals(425L, origin.treasuryCrowns());
+    }
+
 }

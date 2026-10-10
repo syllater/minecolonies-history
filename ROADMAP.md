@@ -27,7 +27,7 @@ Remaining: more industries/resources and deeper policy/resource coupling.
 
 ## Milestone 6 — Military systems
 Status: specialist roles/training and persistent delayed strategic operations (border patrol, relief expedition, war campaign) against real MineColonies colonies.
-Remaining: theatre map, supply routes, multi-front operations and defensive orders.
+Added up to three concurrent operations against distinct targets plus persistent balanced, offensive and defensive postures. Remaining: theatre map, supply routes and explicit defensive orders.
 
 ## Milestone 7 — Buildings and progression
 Status: two registered MineColonies huts with levels 1–5 and ten generated Structurize blueprints. More distinct visuals/modules remain future work.

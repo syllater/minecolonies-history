@@ -9,6 +9,7 @@ import com.imperium.realms.colony.EmpireStateSavedData;
 import com.imperium.realms.colony.EmpireRealm;
 import com.imperium.realms.colony.MineColoniesIntegration;
 import com.imperium.realms.colony.MilitaryCampaign;
+import com.imperium.realms.colony.MilitaryPosture;
 import com.imperium.realms.colony.ParliamentProposal;
 import com.imperium.realms.colony.ProvinceGovernor;
 import com.imperium.realms.colony.ProvinceFocus;
@@ -122,6 +123,13 @@ public final class ImperiumCommands {
                 .then(Commands.literal("campaign")
                         .then(Commands.literal("status")
                                 .executes(context -> showCampaigns(context.getSource())))
+                        .then(Commands.literal("posture")
+                                .then(Commands.argument("posture", StringArgumentType.word())
+                                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(
+                                                new String[]{"balanced", "defensive", "offensive"}, builder))
+                                        .executes(context -> setCampaignPosture(
+                                                context.getSource(),
+                                                StringArgumentType.getString(context, "posture")))))
                         .then(Commands.literal("launch")
                                 .then(Commands.argument("type", StringArgumentType.word())
                                         .suggests((context, builder) -> SharedSuggestionProvider.suggest(
@@ -1003,6 +1011,34 @@ public final class ImperiumCommands {
         return 1;
     }
 
+    private static int setCampaignPosture(
+            final CommandSourceStack source, final String requestedPosture) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        if (!mayManageEconomy(context)) return denyPermission(source);
+
+        final MilitaryPosture posture = MilitaryPosture.fromId(requestedPosture).orElse(null);
+        if (posture == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.campaign_posture_unknown"));
+            return 0;
+        }
+        if (!context.state().setMilitaryPosture(posture)) {
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.campaign_posture_unchanged",
+                    Component.translatable("imperium_realms.military_posture." + posture.id())), false);
+            return 1;
+        }
+
+        context.data().markChanged();
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.campaign_posture_changed",
+                context.state().colonyName(),
+                Component.translatable("imperium_realms.military_posture." + posture.id()),
+                posture.launchReadinessBonus(),
+                posture.defensiveReadinessBonus()), true);
+        return 1;
+    }
+
     private static int showCampaigns(final CommandSourceStack source) {
         final ColonyContext context = resolveColony(source);
         if (context == null) return 0;
@@ -1012,6 +1048,12 @@ public final class ImperiumCommands {
                 "imperium_realms.message.campaign_header",
                 state.colonyName(), state.treasuryCrowns(), state.diplomaticInfluence(),
                 state.pendingMilitaryCampaigns().size()), false);
+        final MilitaryPosture posture = state.militaryPosture();
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.campaign_posture_status",
+                Component.translatable("imperium_realms.military_posture." + posture.id()),
+                posture.launchReadinessBonus(),
+                posture.defensiveReadinessBonus()), false);
 
         final List<MilitaryCampaign> campaigns = state.recentMilitaryCampaigns();
         if (campaigns.isEmpty()) {
@@ -1058,8 +1100,14 @@ public final class ImperiumCommands {
         }
         MineColoniesIntegration.getOrCreateState(context.player().serverLevel(), target);
         final EmpireState state = context.state();
-        if (!state.pendingMilitaryCampaigns().isEmpty()) {
+        final List<MilitaryCampaign> activeCampaigns = state.pendingMilitaryCampaigns();
+        if (activeCampaigns.stream().anyMatch(campaign -> campaign.targetIdentity().equals(targetIdentity))) {
             source.sendFailure(Component.translatable("imperium_realms.message.campaign_already_active"));
+            return 0;
+        }
+        if (activeCampaigns.size() >= EmpireState.MAX_CONCURRENT_CAMPAIGNS) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.campaign_limit_reached", EmpireState.MAX_CONCURRENT_CAMPAIGNS));
             return 0;
         }
         if (state.treasuryCrowns() < type.crownCost()) {

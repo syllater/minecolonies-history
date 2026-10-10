@@ -29,3 +29,13 @@
 
 ### Next
 Verify the current full workflow, then implement regional events and repeat the same test gates.
+
+## 2026-10-10 — Multi-front military doctrine
+
+- Added three concurrent strategic-operation slots per colony, with duplicate-target protection.
+- Added persistent balanced, offensive and defensive posture.
+- Offensive posture contributes +12 readiness when an operation launches; defensive posture contributes +20 when defending against an operation.
+- Posture changes affect future operations; ongoing operations keep their stored launch readiness.
+- Incremented SavedData schema to 19; older records migrate to balanced posture by default.
+- Added command support and English/Dutch translations.
+- Verification is pending for this new commit; do not treat it as green until CI finishes.

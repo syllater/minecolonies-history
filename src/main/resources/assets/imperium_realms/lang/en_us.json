@@ -128,11 +128,11 @@
   "imperium_realms.message.campaign_header": "Strategic operations for %1$s — Treasury: %2$d crowns | Influence: %3$d | Active: %4$d",
   "imperium_realms.message.campaign_empty": "No strategic operations have been recorded.",
   "imperium_realms.message.campaign_entry": "#%1$d — %2$s against %3$s | Result: %4$s | Started day %5$d | Due day %6$d | Resolved day %7$s",
-  "imperium_realms.message.campaign_help": "Use /imperium campaign launch <border_patrol|relief_expedition|war_campaign> <colonyId>. One operation can be active at a time. Operations resolve on the daily server turn; territory is never automatically transferred.",
+  "imperium_realms.message.campaign_help": "Use /imperium campaign launch <border_patrol|relief_expedition|war_campaign> <colonyId>. Up to three operations may run concurrently against distinct targets. Use /imperium campaign posture <balanced|defensive|offensive> to set doctrine. Operations resolve on the daily server turn; territory is never automatically transferred.",
   "imperium_realms.message.campaign_type_unknown": "Unknown operation. Choose border_patrol, relief_expedition or war_campaign.",
   "imperium_realms.message.campaign_target_not_found": "No MineColonies colony with ID %1$d exists in this dimension.",
   "imperium_realms.message.campaign_self_target": "An operation must target another colony.",
-  "imperium_realms.message.campaign_already_active": "This realm already has a pending strategic operation.",
+  "imperium_realms.message.campaign_already_active": "An operation is already active against that target. Resolve it before launching another operation against the same colony.",
   "imperium_realms.message.campaign_crowns_required": "This operation costs %1$d crowns; the treasury cannot cover it.",
   "imperium_realms.message.campaign_influence_required": "This operation needs %1$d diplomatic influence.",
   "imperium_realms.message.campaign_training_required": "This operation needs at least %1$d specialist military training points.",
@@ -228,5 +228,13 @@
   "imperium_realms.message.empire_petition_crackdown": "The crown has imposed a crackdown in %1$s for %2$d crowns. Loyalty is now %3$d/100, but stability and legitimacy fall and unrest rises.",
   "imperium_realms.audit.action.separatist-petition": "Separatist petition opened",
   "imperium_realms.audit.action.petition-reassured": "Separatist petition answered with reassurance",
-  "imperium_realms.audit.action.petition-crackdown": "Separatist petition answered with crackdown"
+  "imperium_realms.audit.action.petition-crackdown": "Separatist petition answered with crackdown",
+  "imperium_realms.military_posture.balanced": "Balanced",
+  "imperium_realms.military_posture.defensive": "Defensive",
+  "imperium_realms.military_posture.offensive": "Offensive",
+  "imperium_realms.message.campaign_limit_reached": "This province already has the maximum of %1$d simultaneous strategic operations.",
+  "imperium_realms.message.campaign_posture_status": "Military posture: %1$s | Launch readiness bonus: +%2$d | Defensive readiness bonus: +%3$d",
+  "imperium_realms.message.campaign_posture_changed": "%1$s now uses %2$s posture. Launch bonus: +%3$d; defence bonus: +%4$d. Ongoing operations keep their original launch readiness.",
+  "imperium_realms.message.campaign_posture_unchanged": "The province already uses %1$s posture.",
+  "imperium_realms.message.campaign_posture_unknown": "Unknown military posture. Choose balanced, defensive or offensive."
 }

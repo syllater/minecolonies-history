@@ -45,6 +45,7 @@ public final class EmpireState {
     }
 
     public static final long MAX_MILITARY_TRAINING_POINTS = 1_000L;
+    public static final int MAX_CONCURRENT_CAMPAIGNS = 3;
 
     private static final String[] FACTION_IDS = {"merchants", "commons", "nobility", "scholars"};
 
@@ -73,6 +74,7 @@ public final class EmpireState {
     private long siegeEngineeringPoints;
     private long fieldMedicinePoints;
     private long cavalryDrillPoints;
+    private MilitaryPosture militaryPosture = MilitaryPosture.BALANCED;
 
     private ProvinceFocus provinceFocus = ProvinceFocus.AGRICULTURE;
     private int provinceDevelopmentPoints;
@@ -566,7 +568,25 @@ public final class EmpireState {
         return siegeEngineeringPoints + fieldMedicinePoints + cavalryDrillPoints;
     }
 
-    /** A bounded strategic readiness score based on training, development and stability. */
+    /** The active military doctrine, persisted with the province's empire data. */
+    public MilitaryPosture militaryPosture() {
+        return militaryPosture;
+    }
+
+    public boolean setMilitaryPosture(final MilitaryPosture posture) {
+        Objects.requireNonNull(posture, "posture");
+        if (militaryPosture == posture) {
+            return false;
+        }
+        militaryPosture = posture;
+        return true;
+    }
+
+    void restoreMilitaryPosture(final MilitaryPosture posture) {
+        militaryPosture = Objects.requireNonNullElse(posture, MilitaryPosture.BALANCED);
+    }
+
+    /** A bounded strategic readiness score before posture-specific modifiers. */
     public int militaryReadinessScore() {
         long score = 10L
                 + totalMilitaryTrainingPoints() / 10L
@@ -578,9 +598,20 @@ public final class EmpireState {
         return (int) Math.max(0L, Math.min(1_000L, score));
     }
 
+    int militaryLaunchReadinessScore() {
+        return (int) Math.max(0L, Math.min(1_000L,
+                (long) militaryReadinessScore() + militaryPosture.launchReadinessBonus()));
+    }
+
+    int militaryDefensiveReadinessScore() {
+        return (int) Math.max(0L, Math.min(1_000L,
+                (long) militaryReadinessScore() + militaryPosture.defensiveReadinessBonus()));
+    }
+
     /**
-     * Launch an operation against an existing colony. One operation may be
-     * active at a time, and all costs are charged immediately on the server.
+     * Launch operations against different colonies concurrently. A colony can
+     * support up to three active fronts, but duplicate operations against the
+     * same target are rejected and every operation pays its cost immediately.
      */
     public Optional<MilitaryCampaign> launchMilitaryCampaign(
             final String commander,
@@ -590,10 +621,12 @@ public final class EmpireState {
             final long currentDay) {
         Objects.requireNonNull(target, "target");
         Objects.requireNonNull(type, "type");
+        final List<MilitaryCampaign> pending = pendingMilitaryCampaigns();
         if (identity.equals(target)
                 || nextCampaignId <= 0L
                 || nextCampaignId == Long.MAX_VALUE
-                || !pendingMilitaryCampaigns().isEmpty()
+                || pending.size() >= MAX_CONCURRENT_CAMPAIGNS
+                || pending.stream().anyMatch(campaign -> campaign.targetIdentity().equals(target))
                 || totalMilitaryTrainingPoints() < type.minimumTrainingPoints()
                 || treasuryCrowns < type.crownCost()
                 || diplomaticInfluence < type.influenceCost()) {
@@ -607,7 +640,7 @@ public final class EmpireState {
         diplomaticInfluence -= type.influenceCost();
         final MilitaryCampaign campaign = MilitaryCampaign.start(
                 nextCampaignId++, type, target, targetName, commander,
-                Math.max(0L, currentDay), militaryReadinessScore());
+                Math.max(0L, currentDay), militaryLaunchReadinessScore());
         militaryCampaigns.add(campaign);
         trimMilitaryCampaigns();
         return Optional.of(campaign);
@@ -636,7 +669,7 @@ public final class EmpireState {
 
         final int relation = relationScore(targetState.identity());
         final MilitaryCampaign.Outcome outcome = campaign.resolveIfDue(
-                currentDay, targetState.militaryReadinessScore(), relation);
+                currentDay, targetState.militaryDefensiveReadinessScore(), relation);
         if (outcome == MilitaryCampaign.Outcome.PENDING) {
             return Optional.empty();
         }

@@ -18,7 +18,7 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 18;
+    private static final int SCHEMA_VERSION = 19;
 
     public enum PetitionResolutionResult {
         RESOLVED, REALM_NOT_FOUND, NOT_MEMBER, CAPITAL_PROVINCE, NO_PETITION, INSUFFICIENT_TREASURY
@@ -177,6 +177,8 @@ public final class EmpireStateSavedData extends SavedData {
                         entry.contains("last_diplomat_work_tick")
                                 ? entry.getLong("last_diplomat_work_tick") : -1L,
                         diplomaticRelations);
+                state.restoreMilitaryPosture(MilitaryPosture.fromId(entry.getString("military_posture"))
+                        .orElse(MilitaryPosture.BALANCED));
 
                 final Map<String, Integer> factionApproval = new LinkedHashMap<>();
                 if (entry.contains("faction_approval", Tag.TAG_LIST)) {
@@ -796,6 +798,7 @@ public final class EmpireStateSavedData extends SavedData {
             entry.putLong("siege_engineering_points", state.siegeEngineeringPoints());
             entry.putLong("field_medicine_points", state.fieldMedicinePoints());
             entry.putLong("cavalry_drill_points", state.cavalryDrillPoints());
+            entry.putString("military_posture", state.militaryPosture().id());
             entry.putLong("last_tax_day", state.lastTaxDay());
             entry.putString("province_focus", state.provinceFocus().id());
             entry.putInt("province_development", state.provinceDevelopmentPoints());

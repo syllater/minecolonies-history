@@ -42,6 +42,6 @@ Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38062626
 - Release notes and a clear distribution/license arrangement.
 
 ## Next actions
-1. Verify the follow-on governor-effect test and current full CI.
-2. Add regional events with deterministic server-side effects and persistent history.
+1. Verify multi-front operations and military posture with current build/tests/client/server smoke runs.
+2. Add supply routes and explicit defensive orders as the next military strategy slice.
 3. Continue save/reload and multiplayer acceptance checks before preparing a release candidate.
