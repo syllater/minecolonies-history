@@ -1,32 +1,31 @@
 # Checkpoints
 
-## 2026-10-09 — Milestone 3 first vertical slice (in progress)
+## 2026-10-10 — Provincial system added; CI verification pending
 
-### Branch and baseline
-
+### Branch
 - Repository: https://github.com/syllater/minecolonies-history
-- Branch: milestone-2/colony-integration
-- Last fully verified baseline before Milestone 3 source additions: CI run 37925143022; build/tests and client startup smoke passed on that earlier revision.
-- Current milestone-3 source revision is awaiting a new CI verdict.
+- Branch: `milestone-2/colony-integration`
 
-### Added in this slice
+### Added in the province slice
+- `ProvinceFocus` models agricultural, trade, scholarship, military and civic specializations.
+- `EmpireState` now persists abstract development progress and computes ranks: settlement, county, duchy, principality and kingdom.
+- Developing a province consumes 10 knowledge points and advances progress to a 1,000-point cap.
+- Province focuses influence daily taxes, daily knowledge, civic stability/legitimacy, unrest or specialist training.
+- `EmpireStateSavedData` schema advanced to version 10 and stores province focus/development, while old saves receive safe defaults.
+- Server-validated commands: `/imperium province status`, `focus`, and `develop`.
+- Unit tests cover province rank progression, knowledge costs, daily focus effects and military specialization.
+- Province options are available from the imperial ledger.
 
-- Treasury and knowledge points persisted in EmpireState.
-- Economic policy enum: balanced, mercantile, welfare, austerity.
-- Daily tax processing with one turn per overworld day, population-based income, and stability trade-offs.
-- Server-authoritative /imperium commands and permission checks.
-- English/Dutch command and building translations.
-- MineColonies registry entries for Philosopher and Imperial Archive, plus an AI work loop.
-- Crafting recipe and placeholder model assets.
-- Expanded unit tests for tax turns, policy multipliers, treasury safety, investment conversion and scholarship interval.
+### Test failures and correction
+The first CI run for this feature identified two test issues:
+- The default agricultural tax bonus unintentionally changed legacy tax-yield expectations; it was removed, while agricultural specialization still reduces unrest.
+- A test expected revenue on the second tax call of the same day; it was corrected to expect zero, preserving idempotent daily turns.
 
-### Build feedback and correction
+The current corrected revision is still awaiting a complete CI run. Do not claim this feature is verified until the workflow returns success.
 
-The first new compile attempt failed in EntityAIWorkPhilosopher because idleState(), markIdle() and markWorking() were mistakenly assumed to exist in the parent class, and decide() was incorrectly marked @Override. The latest implementation now defines those helpers locally and removes the invalid override; verify that fix using the next Actions run.
+### Existing verified baseline
+At commit `9653908cb359e426a50f7588662c45a1d0c4c184`, the build/tests, dedicated-server Structurize validation and headless client-start smoke passed:
+https://github.com/syllater/minecolonies-history/actions/runs/37975778358
 
-### Current limitations
-
-- No verified Structurize blueprint pack yet.
-- No full player-facing BlockUI GUI yet.
-- No real-world save/reload or worker-assignment test yet.
-- Do not mark Milestone 3 complete before the latest CI and actual schematic/runtime criteria pass.
+### Next
+After the current CI passes, continue with province GUI polish, strategic military operations and save/reload hardening; only fix bugs that block build/playable acceptance immediately.

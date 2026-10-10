@@ -46,3 +46,16 @@ Vanilla command entry points are available for the ledger, tax/policy bills, par
 - `./gradlew --no-daemon clean build` must generate/package the blueprint pack and pass unit tests.
 - Headless `./gradlew runClient` must reach its startup marker.
 - Runtime acceptance still requires launching an existing/new MineColonies colony, placing an Imperial Archive and Guard Tower, assigning the intended workers/guards, upgrading through levels, and saving/reloading the world.
+
+
+## Provincial administration (new work, verification pending)
+
+Each colony also has an abstract province progression track, persisted in Imperium SavedData:
+- Rank is derived from development progress: Settlement (0), County (100), Duchy (250), Principality (500), Kingdom (800).
+- Province development spends 10 knowledge points per action, progressing toward a 1,000-point cap.
+- Focuses are Agriculture, Trade, Scholarship, Military and Civic Administration.
+- Trade increases daily tax yield; Scholarship adds daily knowledge; Civic boosts stability/legitimacy; Military improves specialist training; Agriculture gradually reduces unrest.
+- Server-validated entry points: `/imperium province status`, `/imperium province focus <focus>` and `/imperium province develop`.
+- The SavedData schema is now version 10; legacy saves load with safe province defaults.
+
+The new province code is not marked verified until the current GitHub Actions run passes.

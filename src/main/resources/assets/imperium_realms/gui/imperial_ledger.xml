@@ -1,4 +1,4 @@
-<window size="420 258" lightbox="true" type="OVERSIZED_VANILLA">
+<window size="420 308" lightbox="true" type="OVERSIZED_VANILLA">
     <text id="title" pos="15 12" size="390 18" textalign="MIDDLE" color="white"
           label="$(imperium_realms.gui.title)"/>
     <text id="help" pos="18 32" size="384 20" textalign="MIDDLE" color="white"
@@ -30,4 +30,13 @@
     <button id="invest50" pos="106 201" size="80 20" label="$(imperium_realms.gui.invest50)"/>
     <button id="invest100" pos="190 201" size="80 20" label="$(imperium_realms.gui.invest100)"/>
     <button id="close" pos="298 201" size="88 20" label="$(imperium_realms.gui.close)"/>
+
+    <text id="provinceFocusHeading" pos="22 231" size="376 12" color="white"
+          label="$(imperium_realms.gui.province_focus_heading)"/>
+    <button id="focus_agriculture" pos="16 247" size="72 20" label="$(imperium_realms.province_focus.agriculture)"/>
+    <button id="focus_trade" pos="94 247" size="72 20" label="$(imperium_realms.province_focus.trade)"/>
+    <button id="focus_scholarship" pos="172 247" size="72 20" label="$(imperium_realms.province_focus.scholarship)"/>
+    <button id="focus_military" pos="250 247" size="72 20" label="$(imperium_realms.province_focus.military)"/>
+    <button id="focus_civic" pos="328 247" size="72 20" label="$(imperium_realms.province_focus.civic)"/>
+    <button id="develop_province" pos="22 275" size="170 20" label="$(imperium_realms.gui.province_develop)"/>
 </window>

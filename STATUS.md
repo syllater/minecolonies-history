@@ -1,50 +1,47 @@
 # Status
 
-Last updated: 2026-10-09 Europe/Amsterdam.
+Last updated: 2026-10-10 Europe/Amsterdam.
 
-## Repository state
+## Repository
 
 - Repository: https://github.com/syllater/minecolonies-history
-- Current branch: milestone-2/colony-integration
-- Main remains unmerged; do not merge without user approval.
-- Code edits are written through the connected GitHub repository API. Build/test/client execution is performed by GitHub Actions.
+- Working branch: `milestone-2/colony-integration`
+- Milestone-2 changes were merged to main earlier; the working branch continues with playable-systems development.
+- CI is the source of truth for build/tests/client startup because this connected environment only offers GitHub operations, not a local shell.
+
+## Implemented systems
+
+- MineColonies public API integration with stable identity keyed by dimension + colony ID.
+- Imperium-owned, versioned overworld SavedData with safe defaults for older records.
+- Five-tier Imperial Archive and Imperial Guard Tower; ten original Structurize blueprints are generated and validated during the build.
+- Philosopher, Tax Collector and Diplomat worker AI and registered MineColonies job/building entries.
+- Imperial Siege Engineer, Field Medic and Cavalier guard roles, plus specialist training records.
+- Treasury, daily taxation, investment in knowledge and economic policies.
+- Parliament proposals with four modeled faction votes and imperial assent/veto.
+- Faction approval, citizen-happiness feedback, legitimacy, stability, unrest, strikes and revolts.
+- Diplomatic influence and relations keyed to real MineColonies colony identities.
+- Abstract province ranks (settlement through kingdom), specialization focus, development paid with knowledge, and province commands.
+- BlockUI ledger buttons for status, parliament, taxes, policies, investment and province specialization/development.
+- English and Dutch translations.
+- GitHub Actions build/test, dedicated-server blueprint validation and headless client smoke workflows.
 
 ## Current work
 
-Milestone 3 — First playable vertical slice (in progress).
+Province administration and UI integration have been added to the previously verified playable systems. The most recent full green baseline before province changes was commit `9653908cb359e426a50f7588662c45a1d0c4c184`, where the build/test job, dedicated-server schematic validation and headless client startup all passed:
+https://github.com/syllater/minecolonies-history/actions/runs/37975778358
 
-## Implemented source
+The new province tests exposed two expectation regressions. One was fixed by removing an unintended default agriculture tax bonus; another was fixed by asserting that a repeated daily tax turn returns zero. The latest CI run for the corrected branch revision must still be checked before treating this addition as verified.
 
-- MineColonies public API colony lookup and idempotent colony discovery.
-- Versioned Imperium-owned SavedData keyed by dimension plus colony ID.
-- Treasury, tax rate (0–25%), economic policies, stability, knowledge points and last processed daily turn.
-- Daily tax processing from the loaded MineColonies population, once per overworld game day.
-- Server-side /imperium status, /imperium tax, /imperium policy and /imperium invest command handlers.
-- Operator/colony hut-management permission checks for money/policy modifications.
-- English and Dutch translation files for ledger commands and Archive/Philosopher labels.
-- MineColonies registry entries for the Philosopher profession and Imperial Archive building/hut anchor.
-- Philosopher AI that walks to the Archive and records scholarship at most once per 1,200 ticks during daytime.
-- Crafting recipe and placeholder vanilla block/item visuals for the Archive.
-- Tests for colony identity, initialization defaults, tax idempotence, policy effects, investment, scholarship interval and treasury bounds.
+## Known gaps
 
-## Verification
+- In-world survival testing of both buildings (placement, hiring, upgrades through all five levels, save/reload) has not yet been proven by CI.
+- Grand-strategy military campaigns/warfare are not implemented yet; the present military layer covers custom guard roles, training progression and readiness records.
+- The five building tiers currently have valid packaged schematics, but their visual differentiation and gameplay modules can be expanded.
+- The latest province implementation is awaiting a green CI run.
 
-- Verified base: CI run 37925143022 passed build/tests and headless client smoke on an earlier Milestone 2 baseline.
-- A later Milestone 3 revision failed compilation because the Philosopher AI referred to missing inherited helpers and incorrectly annotated decide() as an override.
-- The AI was updated to define those helpers locally and remove the invalid override.
-- That correction still needs fresh CI verification. Do not claim the current milestone-3 revision compiles or that the current JAR is deployable until the newest Actions result passes.
+## Next work
 
-## Known incomplete items
-
-- The Imperial Archive's Structurize blueprint pack is not included/verified, so the registered building is not yet a complete survival-buildable hut despite its block, building registry, AI and recipe.
-- Command UI currently uses vanilla commands; a dedicated BlockUI GUI has not been added.
-- No in-world test has verified a player building the Archive, assigning a Philosopher and saving/reloading a world.
-- Diplomat, Tax Collector, army units, parliament, province simulation and diplomacy remain later milestone work.
-
-## Next actions
-
-1. Inspect fresh Actions compile/test result and fix all real failures.
-2. Pass ./gradlew test build.
-3. Pass the headless ./gradlew runClient smoke test after a successful build.
-4. Add and verify the level-1 Structurize blueprint and actual worker assignment loop.
-5. Continue into parliament, economy, diplomacy and military features without misreporting incomplete milestones as finished.
+1. Confirm the corrected province build/tests pass.
+2. Finish GUI entry points and add tests for province progression/persistence.
+3. Build a non-conquest strategic military campaign layer using the real colony, diplomacy and training state.
+4. Improve in-world save/reload and multiplayer verification; then package a release candidate when core acceptance criteria are satisfied.

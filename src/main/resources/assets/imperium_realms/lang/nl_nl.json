@@ -114,5 +114,7 @@
   "imperium_realms.message.province_fully_developed": "Deze provincie heeft de hoogste bestuurshiërarchie bereikt.",
   "imperium_realms.message.province_knowledge_required": "Een provincie ontwikkelen kost 10 kennispunten.",
   "imperium_realms.message.province_development_failed": "De provincie kon niet verder worden ontwikkeld.",
-  "imperium_realms.message.province_developed": "Provincie ontwikkelt zich richting %1$s. Ontwikkeling: %2$d/1000. Resterende kennis: %3$d."
+  "imperium_realms.message.province_developed": "Provincie ontwikkelt zich richting %1$s. Ontwikkeling: %2$d/1000. Resterende kennis: %3$d.",
+  "imperium_realms.gui.province_focus_heading": "PROVINCIESPECIALISATIE",
+  "imperium_realms.gui.province_develop": "Ontwikkel provincie (10 kennis)"
 }
