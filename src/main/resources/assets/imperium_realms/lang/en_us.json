@@ -171,5 +171,19 @@
   "imperium_realms.message.empire_law_unset": "not enacted",
   "imperium_realms.message.empire_law_status": "Imperial laws — shared tax rate: %1$s | shared economic policy: %2$s. When an imperial tax law is active, 10% of each province's collected tax receipts are transferred to the central reserve.",
   "imperium_realms.message.empire_law_applied": "Imperial law enacted: %1$s (%2$s) now applies across all %3$d provinces of %4$s.",
-  "imperium_realms.message.empire_law_apply_failed": "The bill passed, but the imperial law could not be synchronized. Please report this state; no new bill should be submitted until it is inspected."
+  "imperium_realms.message.empire_law_apply_failed": "The bill passed, but the imperial law could not be synchronized. Please report this state; no new bill should be submitted until it is inspected.",
+  "imperium_realms.gui.empire_audit": "Imperial audit",
+  "imperium_realms.message.empire_audit_header": "Recent audit entries for %1$s (showing up to 10).",
+  "imperium_realms.message.empire_audit_empty": "No imperial transactions have been audited yet.",
+  "imperium_realms.message.empire_audit_entry": "Day %1$d — %2$s | Actor: %3$s | Subject: %4$s | Amount: %5$d",
+  "imperium_realms.audit.action.found": "Realm founded",
+  "imperium_realms.audit.action.province-invited": "Province invitation",
+  "imperium_realms.audit.action.province-joined": "Province joined",
+  "imperium_realms.audit.action.province-left": "Province left",
+  "imperium_realms.audit.action.tax-law": "Imperial tax law",
+  "imperium_realms.audit.action.policy-law": "Imperial economic policy",
+  "imperium_realms.audit.action.deposit": "Treasury deposit",
+  "imperium_realms.audit.action.withdraw": "Treasury withdrawal",
+  "imperium_realms.audit.action.tax-remittance": "Provincial tax remittance",
+  "imperium_realms.audit.action.unknown": "Other action"
 }
