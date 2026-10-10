@@ -1,4 +1,5 @@
 {
+  "itemGroup.imperium_realms": "Imperium: European Realms",
   "modmenu.descriptionTranslation.imperium_realms": "European empire simulation expansion for MineColonies.",
   "com.imperium_realms.job.tax_collector": "Tax Collector",
   "com.imperium_realms.building.tax_collector_hut": "Imperial Tax Office",
