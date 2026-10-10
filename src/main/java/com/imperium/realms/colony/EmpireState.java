@@ -74,6 +74,9 @@ public final class EmpireState {
     private long fieldMedicinePoints;
     private long cavalryDrillPoints;
 
+    private ProvinceFocus provinceFocus = ProvinceFocus.AGRICULTURE;
+    private int provinceDevelopmentPoints;
+
     private long nextProposalId = 1L;
     private final List<ParliamentProposal> parliamentProposals = new ArrayList<>();
 
@@ -237,6 +240,56 @@ public final class EmpireState {
         return colonyName;
     }
 
+    public ProvinceFocus provinceFocus() {
+        return provinceFocus;
+    }
+
+    public int provinceDevelopmentPoints() {
+        return provinceDevelopmentPoints;
+    }
+
+    /** Administrative tier derived from accumulated development investment. */
+    public String provinceTierId() {
+        if (provinceDevelopmentPoints >= 800) return "kingdom";
+        if (provinceDevelopmentPoints >= 500) return "principality";
+        if (provinceDevelopmentPoints >= 250) return "duchy";
+        if (provinceDevelopmentPoints >= 100) return "county";
+        return "settlement";
+    }
+
+    private int provinceTierTaxBonusPercent() {
+        if (provinceDevelopmentPoints >= 800) return 20;
+        if (provinceDevelopmentPoints >= 500) return 15;
+        if (provinceDevelopmentPoints >= 250) return 10;
+        if (provinceDevelopmentPoints >= 100) return 5;
+        return 0;
+    }
+
+    public boolean setProvinceFocus(final ProvinceFocus newFocus) {
+        Objects.requireNonNull(newFocus, "newFocus");
+        if (provinceFocus == newFocus) {
+            return false;
+        }
+        provinceFocus = newFocus;
+        return true;
+    }
+
+    /** Spend 10 knowledge points to develop the province; max progress is 1,000. */
+    public boolean developProvince() {
+        if (knowledgePoints < 10L || provinceDevelopmentPoints >= 1_000) {
+            return false;
+        }
+        knowledgePoints -= 10L;
+        provinceDevelopmentPoints = Math.min(1_000,
+                provinceDevelopmentPoints + provinceFocus.developmentPerInvestment());
+        return true;
+    }
+
+    void restoreProvinceState(final ProvinceFocus loadedFocus, final int loadedDevelopmentPoints) {
+        provinceFocus = Objects.requireNonNullElse(loadedFocus, ProvinceFocus.AGRICULTURE);
+        provinceDevelopmentPoints = clamp(loadedDevelopmentPoints, 0, 1_000);
+    }
+
     public long firstSeenGameTime() {
         return firstSeenGameTime;
     }
@@ -364,26 +417,30 @@ public final class EmpireState {
      */
     public boolean recordMilitaryTraining(final MilitaryDiscipline discipline) {
         Objects.requireNonNull(discipline, "discipline");
+        final long trainingGain = provinceFocus == ProvinceFocus.MILITARY ? 2L : 1L;
         return switch (discipline) {
             case SIEGE_ENGINEERING -> {
                 if (siegeEngineeringPoints >= MAX_MILITARY_TRAINING_POINTS) {
                     yield false;
                 }
-                siegeEngineeringPoints++;
+                siegeEngineeringPoints = Math.min(MAX_MILITARY_TRAINING_POINTS,
+                        siegeEngineeringPoints + trainingGain);
                 yield true;
             }
             case FIELD_MEDICINE -> {
                 if (fieldMedicinePoints >= MAX_MILITARY_TRAINING_POINTS) {
                     yield false;
                 }
-                fieldMedicinePoints++;
+                fieldMedicinePoints = Math.min(MAX_MILITARY_TRAINING_POINTS,
+                        fieldMedicinePoints + trainingGain);
                 yield true;
             }
             case CAVALRY_DRILL -> {
                 if (cavalryDrillPoints >= MAX_MILITARY_TRAINING_POINTS) {
                     yield false;
                 }
-                cavalryDrillPoints++;
+                cavalryDrillPoints = Math.min(MAX_MILITARY_TRAINING_POINTS,
+                        cavalryDrillPoints + trainingGain);
                 yield true;
             }
         };
@@ -601,14 +658,17 @@ public final class EmpireState {
         }
 
         lastTaxDay = dayIndex;
-        int stabilityChange = economicPolicy.dailyStabilityChange();
+        int stabilityChange = economicPolicy.dailyStabilityChange()
+                + provinceFocus.dailyStabilityBonus();
+        int legitimacyChange = provinceFocus.dailyStabilityBonus();
         if (Double.isFinite(overallHappiness)) {
             final int citizenApprovalChange = citizenApprovalChange(population, overallHappiness);
             final int taxBurdenChange = population <= 0L ? 0
                     : taxRatePercent >= 20 ? -1 : taxRatePercent <= 5 ? 1 : 0;
             stabilityChange += citizenApprovalChange + taxBurdenChange;
-            legitimacy = clamp(legitimacy + citizenApprovalChange + taxBurdenChange, 0, 100);
+            legitimacyChange += citizenApprovalChange + taxBurdenChange;
         }
+        legitimacy = clamp(legitimacy + legitimacyChange, 0, 100);
         stability = clamp(stability + stabilityChange, 0, 100);
         updateFactionApproval(population, overallHappiness);
         updateCivicDisorder(dayIndex, population, overallHappiness);
@@ -616,7 +676,10 @@ public final class EmpireState {
         final long safePopulation = Math.max(0L, Math.min(population, 1_000_000L));
         final long taxableBase = (safePopulation * taxRatePercent) / 5L;
         final long policyAdjusted = (taxableBase * economicPolicy.taxMultiplierPercent()) / 100L;
-        final long efficientRevenue = (policyAdjusted * (100L + taxCollectionEfficiencyPercent)) / 100L;
+        final long provincialTaxBonus = 100L + provinceTierTaxBonusPercent()
+                + provinceFocus.taxBonusPercent();
+        final long provinceAdjusted = (policyAdjusted * provincialTaxBonus) / 100L;
+        final long efficientRevenue = (provinceAdjusted * (100L + taxCollectionEfficiencyPercent)) / 100L;
         final long civicRevenue = switch (civicDisorder) {
             case CALM -> efficientRevenue;
             case STRIKE -> efficientRevenue / 2L;
@@ -624,6 +687,10 @@ public final class EmpireState {
         };
         final long deposited = Math.max(0L, Math.min(civicRevenue, MAX_TREASURY - treasuryCrowns));
         treasuryCrowns += deposited;
+        final int knowledgeBonus = provinceFocus.dailyKnowledgeBonus();
+        if (knowledgeBonus > 0) {
+            knowledgePoints = Math.min(Long.MAX_VALUE - knowledgeBonus, knowledgePoints) + knowledgeBonus;
+        }
         return deposited;
     }
 
@@ -774,6 +841,14 @@ public final class EmpireState {
         int nobility = taxRatePercent >= 20 ? -2 : taxRatePercent >= 15 ? -1 : 0;
         int scholars = 0;
 
+        switch (provinceFocus) {
+            case TRADE -> merchants += 1;
+            case SCHOLARSHIP -> scholars += 2;
+            case MILITARY -> nobility += 1;
+            case CIVIC -> commons += 1;
+            case AGRICULTURE -> commons += 1;
+        }
+
         switch (economicPolicy) {
             case BALANCED -> scholars += 1;
             case MERCANTILE -> {
@@ -851,6 +926,7 @@ public final class EmpireState {
         } else if (economicPolicy == EconomicPolicy.AUSTERITY) {
             unrestChange += 1;
         }
+        unrestChange += provinceFocus.dailyUnrestAdjustment();
         if (Double.isFinite(overallHappiness)) {
             if (population <= 0L || overallHappiness < 1.5) {
                 unrestChange += 3;
