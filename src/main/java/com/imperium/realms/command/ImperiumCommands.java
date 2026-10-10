@@ -6,6 +6,7 @@ import com.imperium.realms.colony.EconomicPolicy;
 import com.imperium.realms.colony.ImperialAuditEntry;
 import com.imperium.realms.colony.ImperialDefensiveOrder;
 import com.imperium.realms.colony.ImperialSupplyRoute;
+import com.imperium.realms.colony.ImperialStrategyPlanner;
 import com.imperium.realms.colony.EmpireState;
 import com.imperium.realms.colony.EmpireStateSavedData;
 import com.imperium.realms.colony.EmpireRealm;
@@ -80,13 +81,17 @@ public final class ImperiumCommands {
                                 .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                         .executes(context -> issueDefensiveOrder(
                                                 context.getSource(),
-                                                IntegerArgumentType.getInteger(context, "colonyId")))))
+                                                IntegerArgumentType.getInteger(context, "colonyId"))))
+                                .then(Commands.literal("priority")
+                                        .executes(context -> issuePriorityDefensiveOrder(context.getSource()))))
                         .then(Commands.literal("route")
                                 .then(Commands.literal("build")
                                         .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                                 .executes(context -> buildSupplyRoute(
                                                         context.getSource(),
-                                                        IntegerArgumentType.getInteger(context, "colonyId"))))))
+                                                        IntegerArgumentType.getInteger(context, "colonyId")))))
+                                .then(Commands.literal("build-priority")
+                                        .executes(context -> buildPrioritySupplyRoute(context.getSource())))
                         .then(Commands.literal("petitions")
                                 .executes(context -> showSeparatistPetitions(context.getSource())))
                         .then(Commands.literal("resolve")
@@ -919,6 +924,110 @@ public final class ImperiumCommands {
             case INSUFFICIENT_TREASURY -> source.sendFailure(Component.translatable(
                     "imperium_realms.message.supply_route_funds", EmpireRealm.SUPPLY_ROUTE_BUILD_COST));
             case INVALID_DAY -> source.sendFailure(Component.translatable("imperium_realms.message.supply_route_build_failed"));
+        }
+        return 0;
+    }
+
+    /**
+     * Fast strategic action for the ledger: add a route to the most vulnerable
+     * unsupplied province. Candidate selection is deterministic and the normal
+     * server-side emperor/treasury/member checks still decide whether it succeeds.
+     */
+    private static int buildPrioritySupplyRoute(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            return 0;
+        }
+        if (!mayManageRealm(context, realm)) {
+            source.sendFailure(Component.translatable("imperium_realms.message.supply_route_emperor_only"));
+            return 0;
+        }
+
+        final ColonyIdentity targetIdentity = ImperialStrategyPlanner.nextSupplyRouteTarget(
+                realm, context.data()::get).orElse(null);
+        if (targetIdentity == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.supply_route_priority_no_target"));
+            return 0;
+        }
+        final EmpireState targetState = context.data().get(targetIdentity).orElse(null);
+        if (targetState == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.supply_route_priority_no_target"));
+            return 0;
+        }
+
+        final EmpireStateSavedData.SupplyRouteBuildResult result = context.data().buildSupplyRoute(
+                realm.id(), targetIdentity, context.player().getGameProfile().getName(), currentDay(source));
+        switch (result) {
+            case BUILT -> {
+                source.sendSuccess(() -> Component.translatable(
+                        "imperium_realms.message.supply_route_priority_built",
+                        targetState.colonyName(), targetIdentity.colonyId(),
+                        EmpireRealm.SUPPLY_ROUTE_BUILD_COST, realm.imperialTreasuryCrowns()), true);
+                return 1;
+            }
+            case REALM_NOT_FOUND -> source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            case NOT_MEMBER -> source.sendFailure(Component.translatable("imperium_realms.message.supply_route_not_member"));
+            case CAPITAL_PROVINCE -> source.sendFailure(Component.translatable("imperium_realms.message.supply_route_capital"));
+            case ALREADY_EXISTS -> source.sendFailure(Component.translatable("imperium_realms.message.supply_route_exists"));
+            case INSUFFICIENT_TREASURY -> source.sendFailure(Component.translatable(
+                    "imperium_realms.message.supply_route_funds", EmpireRealm.SUPPLY_ROUTE_BUILD_COST));
+            case INVALID_DAY -> source.sendFailure(Component.translatable("imperium_realms.message.supply_route_build_failed"));
+        }
+        return 0;
+    }
+
+    /**
+     * Fast strategic action for the ledger: defend the province with the highest
+     * instability/unrest/low-loyalty score that has no active emergency order.
+     */
+    private static int issuePriorityDefensiveOrder(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            return 0;
+        }
+        if (!mayManageRealm(context, realm)) {
+            source.sendFailure(Component.translatable("imperium_realms.message.defensive_orders_emperor_only"));
+            return 0;
+        }
+
+        final long day = currentDay(source);
+        final ColonyIdentity targetIdentity = ImperialStrategyPlanner.mostAtRiskProvince(
+                realm, context.data()::get, day).orElse(null);
+        if (targetIdentity == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.defense_priority_no_target"));
+            return 0;
+        }
+        final EmpireState targetState = context.data().get(targetIdentity).orElse(null);
+        if (targetState == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.defense_priority_no_target"));
+            return 0;
+        }
+
+        final EmpireStateSavedData.DefensiveOrderIssueResult result = context.data().issueDefensiveOrder(
+                realm.id(), targetIdentity, context.player().getGameProfile().getName(), day);
+        switch (result) {
+            case ISSUED -> {
+                source.sendSuccess(() -> Component.translatable(
+                        "imperium_realms.message.defense_priority_issued",
+                        targetState.colonyName(), targetIdentity.colonyId(),
+                        ImperialDefensiveOrder.COST_CROWNS,
+                        ImperialDefensiveOrder.DURATION_DAYS,
+                        ImperialDefensiveOrder.READINESS_BONUS,
+                        realm.imperialTreasuryCrowns()), true);
+                return 1;
+            }
+            case REALM_NOT_FOUND -> source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            case NOT_MEMBER -> source.sendFailure(Component.translatable("imperium_realms.message.supply_route_not_member"));
+            case ALREADY_ACTIVE -> source.sendFailure(Component.translatable("imperium_realms.message.defensive_order_active"));
+            case INSUFFICIENT_TREASURY -> source.sendFailure(Component.translatable(
+                    "imperium_realms.message.defensive_order_funds", ImperialDefensiveOrder.COST_CROWNS));
+            case INVALID_DAY -> source.sendFailure(Component.translatable("imperium_realms.message.defensive_order_failed"));
         }
         return 0;
     }
