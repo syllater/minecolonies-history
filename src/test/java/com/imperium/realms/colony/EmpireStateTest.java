@@ -99,6 +99,25 @@ final class EmpireStateTest {
     }
 
     @Test
+    void regionalEventsApplyBoundedProvincialEffects() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 73), "Market Town", 0L);
+        assertTrue(state.creditTreasury(100L));
+        state.restorePoliticalSimulation(java.util.Map.of(), 40,
+                EmpireState.CivicDisorder.CALM, 0L);
+        state.applyRegionalEvent(ImperialRegionalEvent.CIVIC_RECONCILIATION);
+        assertEquals(52, state.stability());
+        assertEquals(53, state.legitimacy());
+        assertEquals(35, state.unrest());
+        assertEquals(100L, state.treasuryCrowns());
+        state.applyRegionalEvent(ImperialRegionalEvent.WINTER_SHORTAGES);
+        assertEquals(49, state.stability());
+        assertEquals(51, state.legitimacy());
+        assertEquals(41, state.unrest());
+        assertEquals(85L, state.treasuryCrowns());
+    }
+
+    @Test
     void taxRateRejectsValuesOutsideThePermittedRange() {
         final EmpireState state = EmpireState.create(
                 new ColonyIdentity("minecraft:overworld", 3), "Port", 0L);

@@ -45,7 +45,7 @@ final class EmpireRealmTest {
     void realmRestoreKeepsCapitalAndMembership() {
         final EmpireRealm realm = EmpireRealm.restore(
                 2L, "Realm", capital, "uuid", "Emperor", 4L,
-                0L, java.util.List.of(province), java.util.Map.of(), 15, "welfare", java.util.List.of(), java.util.Map.of());
+                0L, java.util.List.of(province), java.util.Map.of(), 15, "welfare", java.util.List.of(), java.util.Map.of(), 4L);
         assertEquals(2, realm.provinceCount());
         assertTrue(realm.containsProvince(capital));
         assertTrue(realm.containsProvince(province));
@@ -112,6 +112,17 @@ final class EmpireRealmTest {
         assertFalse(realm.appointGovernor(province, "uuid-governor", "Bram", 2L));
         assertTrue(realm.dismissGovernor(province));
         assertFalse(realm.hasGovernor(province));
+    }
+
+    @Test
+    void regionalEventsRunAtSevenDayIntervals() {
+        final EmpireRealm realm = EmpireRealm.found(
+                7L, "North Sea Union", capital, "uuid-emperor", "Ada", 3L);
+        assertFalse(realm.isRegionalEventDue(9L));
+        assertTrue(realm.isRegionalEventDue(10L));
+        assertTrue(realm.markRegionalEvent(10L));
+        assertFalse(realm.isRegionalEventDue(16L));
+        assertTrue(realm.isRegionalEventDue(17L));
     }
 
     @Test

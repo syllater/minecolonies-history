@@ -925,6 +925,27 @@ public final class EmpireState {
         return deposited;
     }
 
+    /** Apply a deterministic realm event to this province with bounded effects. */
+    public void applyRegionalEvent(final ImperialRegionalEvent event) {
+        Objects.requireNonNull(event, "event");
+        stability = clamp(stability + event.stabilityDelta(), 0, 100);
+        legitimacy = clamp(legitimacy + event.legitimacyDelta(), 0, 100);
+        unrest = clamp(unrest + event.unrestDelta(), 0, 100);
+        final long treasuryDelta = event.provincialTreasuryDelta();
+        if (treasuryDelta > 0L) {
+            creditTreasury(treasuryDelta);
+        } else if (treasuryDelta < 0L) {
+            debitTreasury(Math.min(-treasuryDelta, treasuryCrowns));
+        }
+        final long knowledgeDelta = event.knowledgeDelta();
+        if (knowledgeDelta > 0L) {
+            knowledgePoints = knowledgePoints > Long.MAX_VALUE - knowledgeDelta
+                    ? Long.MAX_VALUE : knowledgePoints + knowledgeDelta;
+        } else if (knowledgeDelta < 0L) {
+            knowledgePoints = Math.max(0L, knowledgePoints + knowledgeDelta);
+        }
+    }
+
     /**
      * Creates a tax bill for parliamentary review. The four faction votes are
      * calculated once at proposal time; the Emperor has a separate assent/veto.

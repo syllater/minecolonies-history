@@ -18,7 +18,7 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 16;
+    private static final int SCHEMA_VERSION = 17;
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -362,7 +362,8 @@ public final class EmpireStateSavedData extends SavedData {
                                     ? realmTag.getInt("imperial_tax_rate") : -1,
                             realmTag.getString("imperial_policy"),
                             auditEntries,
-                            governors);
+                            governors,
+                            Math.max(0L, realmTag.getLong("last_regional_event_day")));
                     data.realms.put(realmId, realm);
                     if (realmId < Long.MAX_VALUE) {
                         data.nextRealmId = Math.max(data.nextRealmId, realmId + 1L);
@@ -408,6 +409,32 @@ public final class EmpireStateSavedData extends SavedData {
      *
      * @return number of operations resolved during this daily turn.
      */
+    /** Resolves at most one deterministic realm event every seven in-game days. */
+    public int resolveDueRegionalEvents(final long dayIndex) {
+        if (dayIndex < 0L) return 0;
+        int resolved = 0;
+        for (final EmpireRealm realm : new ArrayList<>(realms.values())) {
+            if (!realm.isRegionalEventDue(dayIndex) || !realm.markRegionalEvent(dayIndex)) continue;
+            final ImperialRegionalEvent regionalEvent = ImperialRegionalEvent.forTurn(realm.id(), dayIndex);
+            int provincesAffected = 0;
+            for (final ColonyIdentity province : realm.provinces()) {
+                final EmpireState state = colonies.get(province);
+                if (state != null) { state.applyRegionalEvent(regionalEvent); provincesAffected++; }
+            }
+            final long centralDelta = regionalEvent.imperialTreasuryDelta();
+            if (centralDelta > 0L) {
+                final long room = EmpireRealm.MAX_IMPERIAL_TREASURY - realm.imperialTreasuryCrowns();
+                if (room > 0L) realm.depositImperialTreasury(Math.min(room, centralDelta));
+            } else if (centralDelta < 0L) {
+                realm.withdrawImperialTreasury(Math.min(realm.imperialTreasuryCrowns(), -centralDelta));
+            }
+            realm.recordAudit(dayIndex, "System", "regional-event", regionalEvent.id(), provincesAffected);
+            resolved++;
+        }
+        if (resolved > 0) setDirty();
+        return resolved;
+    }
+
     public int resolveDueMilitaryCampaigns(final long dayIndex) {
         int resolved = 0;
         for (final EmpireState source : new ArrayList<>(colonies.values())) {
@@ -775,6 +802,7 @@ public final class EmpireStateSavedData extends SavedData {
             realmTag.putString("emperor_uuid", realm.emperorUuid());
             realmTag.putString("emperor_name", realm.emperorName());
             realmTag.putLong("founded_day", realm.foundedDay());
+            realmTag.putLong("last_regional_event_day", realm.lastRegionalEventDay());
             realmTag.putLong("imperial_treasury", realm.imperialTreasuryCrowns());
             realmTag.putInt("imperial_tax_rate", realm.imperialTaxRatePercent());
             realmTag.putString("imperial_policy", realm.imperialEconomicPolicyId());

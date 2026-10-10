@@ -18,6 +18,7 @@ public final class EmpireRealm {
     public static final long INVITATION_VALIDITY_DAYS = 7L;
     public static final int MAX_PROVINCES = 64;
     public static final int MAX_AUDIT_ENTRIES = 100;
+    public static final long REGIONAL_EVENT_INTERVAL_DAYS = 7L;
     public static final long MAX_INVITATIONS = 128L;
     public static final long MAX_IMPERIAL_TREASURY = 10_000_000_000L;
     public static final int IMPERIAL_TAX_REMITTANCE_PERCENT = 10;
@@ -28,6 +29,7 @@ public final class EmpireRealm {
     private final String emperorUuid;
     private String emperorName;
     private final long foundedDay;
+    private long lastRegionalEventDay;
     private long imperialTreasuryCrowns;
     // -1 means no empire-wide tax law has been enacted yet.
     private int imperialTaxRatePercent = -1;
@@ -55,6 +57,7 @@ public final class EmpireRealm {
         this.emperorUuid = normalize(emperorUuid, "unknown");
         this.emperorName = normalize(emperorName, "Unknown Emperor");
         this.foundedDay = foundedDay;
+        this.lastRegionalEventDay = foundedDay;
         this.imperialTreasuryCrowns = clampTreasury(imperialTreasuryCrowns);
         this.provinces.add(capital);
     }
@@ -82,7 +85,8 @@ public final class EmpireRealm {
             final int savedImperialTaxRatePercent,
             final String savedImperialEconomicPolicyId,
             final List<ImperialAuditEntry> savedAuditEntries,
-            final Map<ColonyIdentity, ProvinceGovernor> savedGovernors) {
+            final Map<ColonyIdentity, ProvinceGovernor> savedGovernors,
+            final long savedLastRegionalEventDay) {
         final EmpireRealm realm = new EmpireRealm(
                 id, name, capital, emperorUuid, emperorName, Math.max(0L, foundedDay),
                 clampTreasury(savedImperialTreasury));
@@ -108,6 +112,7 @@ public final class EmpireRealm {
         }
         realm.restoreAuditEntries(savedAuditEntries);
         realm.restoreGovernors(savedGovernors);
+        realm.lastRegionalEventDay = Math.max(realm.foundedDay, savedLastRegionalEventDay);
         return realm;
     }
 
@@ -133,6 +138,21 @@ public final class EmpireRealm {
 
     public long foundedDay() {
         return foundedDay;
+    }
+
+    public long lastRegionalEventDay() {
+        return lastRegionalEventDay;
+    }
+
+    public boolean isRegionalEventDue(final long dayIndex) {
+        return dayIndex >= foundedDay && dayIndex >= lastRegionalEventDay
+                && dayIndex - lastRegionalEventDay >= REGIONAL_EVENT_INTERVAL_DAYS;
+    }
+
+    boolean markRegionalEvent(final long dayIndex) {
+        if (!isRegionalEventDue(dayIndex)) return false;
+        lastRegionalEventDay = dayIndex;
+        return true;
     }
 
     public long imperialTreasuryCrowns() {
