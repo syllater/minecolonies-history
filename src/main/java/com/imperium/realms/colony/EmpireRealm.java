@@ -19,6 +19,7 @@ public final class EmpireRealm {
     public static final int MAX_PROVINCES = 64;
     public static final long MAX_INVITATIONS = 128L;
     public static final long MAX_IMPERIAL_TREASURY = 10_000_000_000L;
+    public static final int IMPERIAL_TAX_REMITTANCE_PERCENT = 10;
 
     private final long id;
     private String name;
@@ -137,6 +138,18 @@ public final class EmpireRealm {
 
     public boolean hasImperialTaxLaw() {
         return imperialTaxRatePercent >= 0;
+    }
+
+    /**
+     * Calculates the central share of already-collected provincial tax receipts.
+     * The levy is a transfer of existing receipts, not an additional citizen tax.
+     */
+    public long calculateImperialTaxRemittance(final long provinceTaxReceipts) {
+        if (!hasImperialTaxLaw() || provinceTaxReceipts <= 0L) {
+            return 0L;
+        }
+        return (provinceTaxReceipts / 100L) * IMPERIAL_TAX_REMITTANCE_PERCENT
+                + ((provinceTaxReceipts % 100L) * IMPERIAL_TAX_REMITTANCE_PERCENT) / 100L;
     }
 
     /** Records an enacted realm-wide tax law; returns false for an invalid or unchanged value. */

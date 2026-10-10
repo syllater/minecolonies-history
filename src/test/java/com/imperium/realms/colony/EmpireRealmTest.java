@@ -72,6 +72,20 @@ final class EmpireRealmTest {
     }
 
     @Test
+    void imperialTaxRemittanceUsesOnlyExistingReceiptsAndRequiresAnEnactedLaw() {
+        final EmpireRealm realm = EmpireRealm.found(
+                1L, "North Sea Union", capital, "uuid-emperor", "Ada", 0L);
+        assertEquals(0L, realm.calculateImperialTaxRemittance(1_000L));
+
+        assertTrue(realm.setImperialTaxRatePercent(10));
+        assertEquals(100L, realm.calculateImperialTaxRemittance(1_000L));
+        assertEquals(2L, realm.calculateImperialTaxRemittance(29L));
+        assertEquals(0L, realm.calculateImperialTaxRemittance(9L));
+        assertEquals(0L, realm.calculateImperialTaxRemittance(0L));
+        assertEquals(0L, realm.calculateImperialTaxRemittance(-100L));
+    }
+
+    @Test
     void imperialTreasurySupportsBoundedDepositsAndWithdrawals() {
         final EmpireRealm realm = EmpireRealm.found(
                 1L, "North Sea Union", capital, "uuid-emperor", "Ada", 0L);

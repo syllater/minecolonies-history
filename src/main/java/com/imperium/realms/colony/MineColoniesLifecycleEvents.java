@@ -51,6 +51,7 @@ public final class MineColoniesLifecycleEvents {
     private static void collectDailyTaxes(final ServerLevel overworld, final long dayIndex) {
         final var data = EmpireStateSavedData.get(overworld);
         long totalRevenue = 0L;
+        long totalImperialRemittance = 0L;
         int coloniesAssessed = 0;
 
         for (final ServerLevel colonyLevel : overworld.getServer().getAllLevels()) {
@@ -63,7 +64,10 @@ public final class MineColoniesLifecycleEvents {
 
                 final EmpireState state = MineColoniesIntegration.getOrCreateState(overworld, colony);
                 final long population = colony.getCitizenManager().getCitizens().size();
-                totalRevenue += state.collectDailyTaxes(dayIndex, population, colony.getOverallHappiness());
+                final long provinceRevenue = state.collectDailyTaxes(
+                        dayIndex, population, colony.getOverallHappiness());
+                totalRevenue += provinceRevenue;
+                totalImperialRemittance += data.remitImperialTaxReceipts(state.identity(), provinceRevenue);
                 coloniesAssessed++;
             }
         }
@@ -82,6 +86,10 @@ public final class MineColoniesLifecycleEvents {
         if (totalRevenue > 0L) {
             LOGGER.info("Imperium collected {} crown(s) across {} loaded colony record(s) for day {}",
                     totalRevenue, coloniesAssessed, dayIndex);
+        }
+        if (totalImperialRemittance > 0L) {
+            LOGGER.info("Imperial realms remitted {} crown(s) from provincial taxes into their central reserves for day {}",
+                    totalImperialRemittance, dayIndex);
         }
     }
 }

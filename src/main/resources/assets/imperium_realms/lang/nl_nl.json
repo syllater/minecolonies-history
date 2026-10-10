@@ -169,7 +169,7 @@
   "imperium_realms.message.parliament_scope_provincial": "Dit is het provinciale Parlement van %1$s. Voorstellen hier gelden alleen voor deze provincie.",
   "imperium_realms.message.parliament_scope_local": "Dit is een lokaal Parlement. Sticht een rijk om via de hoofdstad rijkswetten in te voeren.",
   "imperium_realms.message.empire_law_unset": "niet ingevoerd",
-  "imperium_realms.message.empire_law_status": "Keizerlijke wetten — gezamenlijk belastingtarief: %1$s | gezamenlijk economisch beleid: %2$s. Gebruik het Parlement in de hoofdstad om een rijksbreed belasting- of beleidsvoorstel aan te nemen.",
+  "imperium_realms.message.empire_law_status": "Keizerlijke wetten — gezamenlijk belastingtarief: %1$s | gezamenlijk economisch beleid: %2$s. Bij een actieve keizerlijke belastingwet wordt 10% van de geïnde provinciale belastingen naar de centrale reserve overgemaakt.",
   "imperium_realms.message.empire_law_applied": "Keizerlijke wet aangenomen: %1$s (%2$s) geldt nu voor alle %3$d provincies van %4$s.",
   "imperium_realms.message.empire_law_apply_failed": "Het voorstel is aangenomen, maar de keizerlijke wet kon niet worden gesynchroniseerd. Meld deze situatie; dien geen nieuw voorstel in totdat dit is onderzocht."
 }

@@ -169,7 +169,7 @@
   "imperium_realms.message.parliament_scope_provincial": "This is the provincial Parliament for %1$s. Bills here affect only this province.",
   "imperium_realms.message.parliament_scope_local": "This is a local Parliament. Found an empire to establish empire-wide laws through its capital.",
   "imperium_realms.message.empire_law_unset": "not enacted",
-  "imperium_realms.message.empire_law_status": "Imperial laws — shared tax rate: %1$s | shared economic policy: %2$s. Use the capital's Parliament to pass a new empire-wide tax or policy bill.",
+  "imperium_realms.message.empire_law_status": "Imperial laws — shared tax rate: %1$s | shared economic policy: %2$s. When an imperial tax law is active, 10% of each province's collected tax receipts are transferred to the central reserve.",
   "imperium_realms.message.empire_law_applied": "Imperial law enacted: %1$s (%2$s) now applies across all %3$d provinces of %4$s.",
   "imperium_realms.message.empire_law_apply_failed": "The bill passed, but the imperial law could not be synchronized. Please report this state; no new bill should be submitted until it is inspected."
 }

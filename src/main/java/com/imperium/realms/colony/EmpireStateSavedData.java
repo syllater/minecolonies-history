@@ -536,6 +536,37 @@ public final class EmpireStateSavedData extends SavedData {
         return true;
     }
 
+    /**
+     * Transfers a bounded share of tax receipts already credited to a member province
+     * into its realm reserve. If the reserve is full or a debit fails, no money is lost.
+     *
+     * @return crowns transferred into the imperial treasury.
+     */
+    public long remitImperialTaxReceipts(
+            final ColonyIdentity province,
+            final long collectedTaxReceipts) {
+        if (province == null || collectedTaxReceipts <= 0L) {
+            return 0L;
+        }
+        final EmpireState state = colonies.get(province);
+        final EmpireRealm realm = realmForProvince(province).orElse(null);
+        if (state == null || realm == null) {
+            return 0L;
+        }
+        final long remittance = realm.calculateImperialTaxRemittance(collectedTaxReceipts);
+        if (remittance <= 0L || !state.debitTreasury(remittance)) {
+            return 0L;
+        }
+        if (!realm.depositImperialTreasury(remittance)) {
+            // The provincial debit guarantees at least this much treasury capacity
+            // is available for rollback unless an implementation invariant is broken.
+            state.creditTreasury(remittance);
+            return 0L;
+        }
+        setDirty();
+        return remittance;
+    }
+
     public boolean leaveRealm(final ColonyIdentity province) {
         final EmpireRealm realm = realmForProvince(province).orElse(null);
         if (realm == null || !realm.removeProvince(province)) {
