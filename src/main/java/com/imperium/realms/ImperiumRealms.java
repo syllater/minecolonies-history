@@ -1,5 +1,6 @@
 package com.imperium.realms;
 
+import com.imperium.realms.professions.ImperialProfessionRegistry;
 import com.mojang.logging.LogUtils;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
@@ -13,6 +14,7 @@ public final class ImperiumRealms {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public ImperiumRealms(final IEventBus modEventBus) {
+        ImperialProfessionRegistry.register(modEventBus);
         modEventBus.addListener(this::commonSetup);
     }
 
