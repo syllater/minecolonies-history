@@ -32,6 +32,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /** Server-authoritative commands for the ledger and first parliament. */
@@ -77,6 +78,8 @@ public final class ImperiumCommands {
                                 .executes(context -> showDefensiveOrders(context.getSource())))
                         .then(Commands.literal("theatre")
                                 .executes(context -> showImperialTheatre(context.getSource())))
+                        .then(Commands.literal("map")
+                                .executes(context -> showEmpireMap(context.getSource())))
                         .then(Commands.literal("defense")
                                 .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                         .executes(context -> issueDefensiveOrder(
@@ -696,6 +699,109 @@ public final class ImperiumCommands {
      * Text-based strategic theatre overview: one line per real MineColonies
      * province plus the active operations originating there.
      */
+    /**
+     * Render a compact strategic map from real MineColonies hut centers.
+     * The display is read-only; strategic changes remain permission-checked
+     * server commands.
+     */
+    private static int showEmpireMap(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            return 0;
+        }
+
+        record ProvinceMapPoint(
+                ColonyIdentity identity, String name, int x, int z, char marker) { }
+
+        final String markerPool = "0123456789ABCDEFGIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz@!";
+        final List<ProvinceMapPoint> mapped = new ArrayList<>();
+        final List<ProvinceMapPoint> otherDimensions = new ArrayList<>();
+        final List<ColonyIdentity> unresolved = new ArrayList<>();
+        int nextMarker = 0;
+
+        for (final ColonyIdentity identity : realm.provinces()) {
+            final char marker = identity.equals(realm.capital())
+                    ? 'H' : markerPool.charAt(nextMarker++);
+            final IColony colony = MineColoniesIntegration
+                    .colonyByIdentity(source.getServer(), identity).orElse(null);
+            if (colony == null) {
+                unresolved.add(identity);
+                continue;
+            }
+
+            final ProvinceMapPoint point = new ProvinceMapPoint(
+                    identity, colony.getName(), colony.getCenter().getX(),
+                    colony.getCenter().getZ(), marker);
+            if (identity.dimensionId().equals(realm.capital().dimensionId())) {
+                mapped.add(point);
+            } else {
+                otherDimensions.add(point);
+            }
+        }
+
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.empire_map_header",
+                realm.name(), realm.capital().dimensionId(), mapped.size(), realm.provinceCount()), false);
+        if (mapped.isEmpty()) {
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.empire_map_no_centers"), false);
+        } else {
+            final int width = 25;
+            final int height = 9;
+            final int minX = mapped.stream().mapToInt(ProvinceMapPoint::x).min().orElse(0);
+            final int maxX = mapped.stream().mapToInt(ProvinceMapPoint::x).max().orElse(0);
+            final int minZ = mapped.stream().mapToInt(ProvinceMapPoint::z).min().orElse(0);
+            final int maxZ = mapped.stream().mapToInt(ProvinceMapPoint::z).max().orElse(0);
+            final char[][] grid = new char[height][width];
+            for (int row = 0; row < height; row++) {
+                java.util.Arrays.fill(grid[row], '.');
+            }
+
+            for (final ProvinceMapPoint point : mapped) {
+                final int column = maxX == minX ? width / 2
+                        : (int) Math.round((point.x() - minX) * (width - 1.0) / (maxX - minX));
+                final int row = maxZ == minZ ? height / 2
+                        : (int) Math.round((point.z() - minZ) * (height - 1.0) / (maxZ - minZ));
+                if (grid[row][column] == '.') {
+                    grid[row][column] = point.marker();
+                } else {
+                    grid[row][column] = '*';
+                }
+            }
+
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.empire_map_orientation"), false);
+            for (final char[] row : grid) {
+                final String line = new String(row);
+                source.sendSuccess(() -> Component.literal(line), false);
+            }
+            for (final ProvinceMapPoint point : mapped) {
+                source.sendSuccess(() -> Component.translatable(
+                        "imperium_realms.message.empire_map_legend_entry",
+                        Character.toString(point.marker()), point.name(),
+                        point.identity().colonyId(), point.x(), point.z()), false);
+            }
+        }
+
+        for (final ProvinceMapPoint point : otherDimensions) {
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.empire_map_cross_dimension",
+                    point.name(), point.identity().colonyId(),
+                    point.identity().dimensionId(), point.x(), point.z()), false);
+        }
+        for (final ColonyIdentity identity : unresolved) {
+            final String provinceName = context.data().get(identity)
+                    .map(EmpireState::colonyName).orElse(identity.storageKey());
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.empire_map_unresolved",
+                    provinceName, identity.colonyId(), identity.dimensionId()), false);
+        }
+        return 1;
+    }
+
     private static int showImperialTheatre(final CommandSourceStack source) {
         final ColonyContext context = resolveColony(source);
         if (context == null) return 0;

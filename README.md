@@ -29,32 +29,31 @@ To launch a development client:
 ./gradlew runClient
 ```
 
-The GitHub Actions workflow builds and tests the mod, launches a dedicated server to validate the generated Structurize blueprints, and performs a headless client-startup smoke test. A green smoke test is not a substitute for an in-world survival construction/save/reload playtest.
+GitHub Actions builds/tests the mod, launches a dedicated server to validate the generated Structurize blueprints, and performs a headless client-startup smoke test. A green smoke test does not replace an in-world survival construction/save/reload playtest.
 
 ## Current systems
 
-The current source includes:
 - MineColonies-aware colony identities and Imperium-owned persistent world state.
-- A five-tier Imperial Archive with Philosopher, Tax Collector and Diplomat worker roles.
-- A five-tier Imperial Guard Tower with Imperial Siege Engineer, Field Medic and Cavalier roles.
-- Treasury, daily taxation, investment in knowledge and four economic policies.
+- Five-tier Imperial Archive and Imperial Guard Tower with ten generated Structurize schematics.
+- Philosopher, Tax Collector and Diplomat professions; Imperial Siege Engineer, Field Medic and Cavalier specialist training.
+- Treasury, daily taxation, investment in knowledge, economic policies, province focus and development.
 - Parliament bills with faction votes, imperial assent/veto and expiry.
-- Faction approval, stability, legitimacy, strikes and revolts driven by MineColonies citizen happiness.
-- Diplomatic influence and relationship scores between actual MineColonies colonies.
-- Military training tracks and a development ledger.
-- Federated imperial realms that unite up to 64 real MineColonies colonies under one Emperor, with saved invitations, province membership, aggregate status and a separate imperial treasury.
-- Abstract provincial administration: settlement/county/duchy/principality/kingdom tiers, five provincial focuses, focus effects and knowledge-funded development.
+- Faction approval, stability, legitimacy, strikes, revolts and separatist petitions driven by MineColonies citizen happiness and provincial conditions.
+- Diplomatic influence and relationship scores between real MineColonies colonies.
+- Federated realms with an Emperor/capital, member invitations, a separate central treasury, audit log, common tax/policy laws, provincial governors and regional events.
+- Up to three concurrent military operations against distinct colony targets, military postures, persistent supply routes and temporary defensive orders.
+- Strategic priority planning for routes and defense, plus a strategic map command using actual MineColonies colony center coordinates.
 - English and Dutch translations, a BlockUI imperial ledger and permission-checked server commands.
-- Ten original generated Structurize blueprints covering the Archive and Guard Tower at levels 1–5.
 
 ## Province commands
 
 Stand inside your MineColonies colony and use:
+
 - `/imperium province status`
 - `/imperium province focus <agriculture|trade|scholarship|military|civic>`
 - `/imperium province develop`
 
-Province development costs 10 knowledge points. Province focus changes daily economic/political effects or specialist military training. The GUI exposes the most common province actions; the server remains authoritative.
+Province development costs 10 knowledge points. Focus changes daily economic/political effects or specialist military training.
 
 ## Strategic military operations
 
@@ -62,22 +61,28 @@ Province development costs 10 knowledge points. Province focus changes daily eco
 - `/imperium campaign launch border_patrol <colonyId>` costs 25 crowns and resolves after one in-game day.
 - `/imperium campaign launch relief_expedition <colonyId>` costs 75 crowns and 5 diplomatic influence and resolves after two days.
 - `/imperium campaign launch war_campaign <colonyId>` costs 150 crowns and 10 influence, requires at least 3 specialist military training points, and resolves after three days.
-- Only real MineColonies colonies in the same dimension are valid targets. A realm can run one operation at a time; campaigns and consequences persist across save/reload.
-- War outcomes affect stability, legitimacy, training, treasury and relations, but never automatically transfer territory.
+- A colony cannot target itself; the selected MineColonies colony must be resolvable in the current dimension for the campaign commands.
+- Up to three operations may run concurrently, but each target may only be used by one active operation from that colony.
+- Outcomes affect stability, legitimacy, training, treasury and relations; they do not automatically transfer territory.
 
 ## Imperial realms
 
-Each real MineColonies colony can remain independent or join a multi-colony realm. The capital owner can found a realm, and the Emperor can invite additional colonies. The owner of an invited colony must accept while standing in that colony; invitations expire after seven in-game days. Non-capital provinces can leave.
+Each real MineColonies colony can remain independent or join a multi-colony realm. The capital owner founds a realm, and the Emperor invites additional colonies. An invited colony's owner accepts while standing in that colony; invitations expire after seven in-game days. Non-capital provinces may leave.
 
-- /imperium empire status — view Emperor, capital, member provinces, combined provincial reserves, knowledge and stability.
-- /imperium empire found <name> — found a realm with the current colony as capital.
-- /imperium empire invite <colonyId> — invite a real MineColonies colony in the same dimension.
-- /imperium empire join — accept an invitation while in the invited colony.
-- /imperium empire leave — leave from a non-capital province.
-- /imperium empire deposit <crowns> — move crowns from the current province's local treasury into the shared imperial reserve.
-- /imperium empire withdraw <crowns> — Emperor-only withdrawal from the imperial reserve to the current province's local treasury.
+- `/imperium empire status` — view Emperor, capital, member provinces and the central reserve.
+- `/imperium empire found <name>` — found a realm using the current colony as capital.
+- `/imperium empire invite <colonyId>` — invite a real MineColonies colony in the current dimension.
+- `/imperium empire join` — accept an invitation while in the invited colony.
+- `/imperium empire leave` — leave from a non-capital province.
+- `/imperium empire deposit <crowns>` — move crowns from local treasury to the shared imperial reserve.
+- `/imperium empire withdraw <crowns>` — Emperor-only withdrawal to the current province.
+- `/imperium empire route build <colonyId>` — build a supply route to an existing member province.
+- `/imperium empire route build-priority` — build a route to the highest-priority unsupplied province.
+- `/imperium empire defense priority` — issue an emergency defensive order to the highest-risk eligible province.
+- `/imperium empire routes`, `/imperium empire defenses` and `/imperium empire theatre` — inspect logistics and operations.
+- `/imperium empire map` — show a coordinate-grid map derived from loaded MineColonies hut centers in the capital's dimension. Other-dimension and currently unloaded colonies are listed separately.
 
-The shared reserve is separate from provincial treasuries. Province tax receipts and policy/parliament decisions remain local to each colony in this iteration; contribution to the imperial reserve is explicit rather than silently double-taxing every province.
+The shared reserve is separate from provincial treasuries. Enacted empire-wide tax law remits a portion of already-collected provincial tax receipts instead of taxing those citizens a second time.
 
 ## Project documents
 
@@ -85,5 +90,5 @@ The shared reserve is separate from provincial treasuries. Province tax receipts
 - `ROADMAP.md`: milestones and unfinished work.
 - `STATUS.md`: current implementation and verification.
 - `COMPATIBILITY.md`: dependency version notes.
-- `docs/MINECOLONIES_INTEGRATION.md`: integration and persistence boundaries.
-- `docs/MILESTONE_3.md`: playable systems and their current limits.
+- `docs/MINECOLONIES_INTEGRATION.md`: integration/persistence boundaries.
+- `docs/MILESTONE_3.md`: playable systems and current limitations.

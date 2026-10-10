@@ -28,6 +28,7 @@ public final class ImperiumLedgerWindow extends BOWindow implements ButtonHandle
             Map.entry("empire_routes", "imperium empire routes"),
             Map.entry("empire_defenses", "imperium empire defenses"),
             Map.entry("empire_theatre", "imperium empire theatre"),
+            Map.entry("empire_map", "imperium empire map"),
             Map.entry("priority_route", "imperium empire route build-priority"),
             Map.entry("priority_defense", "imperium empire defense priority"),
             Map.entry("posture_balanced", "imperium campaign posture balanced"),

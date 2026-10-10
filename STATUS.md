@@ -5,18 +5,19 @@ Last updated: 2026-10-10 Europe/Amsterdam.
 ## Repository
 - Repository: https://github.com/syllater/minecolonies-history
 - Active development branch: `milestone-2/colony-integration`
-- This connected environment uses GitHub file operations and CI; it cannot run a local shell. All build/runtime claims here refer to actual Actions runs.
+- This connected environment uses GitHub file operations and CI; it cannot execute a local shell. Build/runtime claims refer only to actual Actions runs.
 
-## Verified implementation
-The complete CI workflow passed on commit `489fcf9311883230d1b6b50038ad7560ad59b35b`:
-- Gradle build and unit tests: success.
-- Dedicated-server start and packaged Structurize schematic validation: success.
-- Headless Minecraft client startup: success.
-- JAR artifact uploaded.
+## Latest verified baseline before the current map commit
+Commit `e06f7c71cd8f6e1572df3e35d16996bfa37f1a57` passed the complete GitHub Actions workflow:
+- Gradle compile, tests, and JAR upload: success.
+- Headless client startup smoke test: success.
+- Dedicated server startup and validation of all 10 generated Structurize schematics: success.
 
-Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38062626937
+Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38073979260
 
-## Major systems
+The current working change adds a coordinate-based strategic map and cross-dimension colony resolution. It still needs its own complete CI run before that feature can be called verified.
+
+## Major systems implemented
 - MineColonies API integration with stable identity (dimension + colony ID) and Imperium-owned versioned SavedData.
 - Five-tier Imperial Archive and Imperial Guard Tower with ten generated Structurize schematics.
 - Philosopher, Tax Collector and Diplomat MineColonies professions with work AI.
@@ -27,27 +28,22 @@ Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38062626
 - Province ranks and agriculture, trade, scholarship, military and civic focus.
 - Federated realms with Emperor/capital, up to 64 real colony provinces, invitations and shared central reserve.
 - Imperial tax/policy laws voted through the capital propagate to current provinces; new members inherit active laws.
-- When an imperial tax law is active, 10% of already-collected provincial tax receipts transfer to the central reserve (not a second citizen tax).
+- An enacted imperial tax law transfers 10% of already-collected provincial receipts to the central reserve, not a second citizen tax.
 - Persistent audit history (max 100 entries per realm), visible via `/imperium empire audit` and the BlockUI ledger.
-- Persistent governor appointments for non-capital provinces; Emperor/server operator control, daily stability/legitimacy bonus and unrest reduction.
-- Up to three concurrent operations against distinct targets with persisted balanced/offensive/defensive doctrine.
-- Temporary seven-day defensive orders, costing 50 central crowns and adding +20 defensive readiness at resolution.
-- Emperor-managed supply routes connect the capital to member provinces, persist condition/upkeep history and add military logistics readiness while operational.
-- The text-based strategic theatre overview lists province tier/focus/loyalty/treasury/stability/unrest, active operations, route condition and active defensive orders.
+- Persistent governor appointments for non-capital provinces.
+- Up to three concurrent operations against distinct targets, persisted military doctrine, direct supply routes and temporary emergency defence orders.
+- Strategic priority planner and BlockUI controls for balanced/defensive/offensive doctrine, priority route construction and priority defence.
 - English and Dutch translations.
 - CI for build/tests, dedicated server/schematic validation and client startup.
 
 ## Remaining acceptance gaps
-- Real survival test: place both buildings, hire workers, upgrade levels 1–5, and save/reload an existing and a new colony.
+- Real survival test: place both buildings, hire workers, upgrade levels 1–5, then save/reload existing and new colonies.
 - Multiplayer playtest with at least two players for permissions, realm membership, governor appointments and concurrent treasury actions.
-- More mechanical/visual differentiation between building levels.
-- Strategic logistics: direct supply routes, up to three fronts and temporary defensive orders are implemented; a theatre map and in-world strategic planning remain open.
-- Regional events and broader realm cohesion systems.
-- Release notes and a clear distribution/license arrangement.
+- More mechanical/visual differentiation between building levels and deeper building modules.
+- The new coordinate map is a compact text-grid/chat view, not a fully interactive pan/zoom theatre map; it requires CI verification on the current commit.
+- Release notes and an explicit distribution/license decision.
 
 ## Next actions
-1. Verify route/order persistence and campaign bonuses with build/tests/client/server smoke runs.
-2. Add a strategic theatre map and in-world strategic planning controls.
-3. Continue save/reload and multiplayer acceptance checks before preparing a release candidate.
-
-- The first supply-route CI attempt identified a missing `ImperialSupplyRoute` import in the command handler before tests executed; the follow-up commit fixes it and corrects the route-construction treasury assertion.
+1. Verify the strategic map change with the full current-commit CI workflow.
+2. Fix any build/runtime blocking errors; defer non-blocking visual polish.
+3. Continue in-world save/reload and multiplayer acceptance gaps, and prepare release documentation only after these limitations are recorded.

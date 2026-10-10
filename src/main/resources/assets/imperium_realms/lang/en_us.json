@@ -282,5 +282,12 @@
   "imperium_realms.message.supply_route_priority_no_target": "No unsupplied member province needs a new route, or the realm has no registered province state.",
   "imperium_realms.message.supply_route_priority_built": "Priority supply route built to %1$s (colony %2$d) for %3$d crowns. Remaining central reserve: %4$d crowns.",
   "imperium_realms.message.defense_priority_no_target": "No eligible province was found for an emergency defensive order.",
-  "imperium_realms.message.defense_priority_issued": "Emergency defence was prioritised for %1$s (colony %2$d). Cost: %3$d crowns; duration: %4$d days; readiness bonus: +%5$d. Central reserve remaining: %6$d crowns."
+  "imperium_realms.message.defense_priority_issued": "Emergency defence was prioritised for %1$s (colony %2$d). Cost: %3$d crowns; duration: %4$d days; readiness bonus: +%5$d. Central reserve remaining: %6$d crowns.",
+  "imperium_realms.gui.empire_map": "Strategic map",
+  "imperium_realms.message.empire_map_header": "Strategic map for %1$s — capital dimension: %2$s — mapped colonies: %3$d of %4$d.",
+  "imperium_realms.message.empire_map_orientation": "H marks the capital; * means multiple colonies share one map cell. North (lower Z) is at the top; east (+X) is right.",
+  "imperium_realms.message.empire_map_legend_entry": "%1$s — %2$s (colony %3$d) at X %4$d, Z %5$d.",
+  "imperium_realms.message.empire_map_cross_dimension": "%1$s (colony %2$d) is outside this map in dimension %3$s at X %4$d, Z %5$d.",
+  "imperium_realms.message.empire_map_unresolved": "%1$s (colony %2$d, %3$s) is not currently resolvable to a loaded MineColonies colony; its saved realm record remains available.",
+  "imperium_realms.message.empire_map_no_centers": "No loaded MineColonies colony centers could be plotted. The map will populate when at least one realm colony is available."
 }

@@ -282,5 +282,12 @@
   "imperium_realms.message.supply_route_priority_no_target": "Er is geen aangesloten provincie zonder bevoorradingsroute waarvoor een nieuwe route nodig is, of de rijkgegevens ontbreken.",
   "imperium_realms.message.supply_route_priority_built": "Prioriteitsroute gebouwd naar %1$s (kolonie %2$d) voor %3$d kronen. Resterende centrale reserve: %4$d kronen.",
   "imperium_realms.message.defense_priority_no_target": "Er is geen geschikte provincie gevonden voor een tijdelijk verdedigingsbevel.",
-  "imperium_realms.message.defense_priority_issued": "Noodverdediging toegewezen aan %1$s (kolonie %2$d). Kosten: %3$d kronen; duur: %4$d dagen; verdedigingsbonus: +%5$d. Resterende centrale reserve: %6$d kronen."
+  "imperium_realms.message.defense_priority_issued": "Noodverdediging toegewezen aan %1$s (kolonie %2$d). Kosten: %3$d kronen; duur: %4$d dagen; verdedigingsbonus: +%5$d. Resterende centrale reserve: %6$d kronen.",
+  "imperium_realms.gui.empire_map": "Strategische kaart",
+  "imperium_realms.message.empire_map_header": "Strategische kaart van %1$s — dimensie van de hoofdstad: %2$s — zichtbare kolonies: %3$d van %4$d.",
+  "imperium_realms.message.empire_map_orientation": "H markeert de hoofdstad; * betekent dat meerdere kolonies hetzelfde kaartvak delen. Noord (lagere Z) staat boven; oost (+X) staat rechts.",
+  "imperium_realms.message.empire_map_legend_entry": "%1$s — %2$s (kolonie %3$d) op X %4$d, Z %5$d.",
+  "imperium_realms.message.empire_map_cross_dimension": "%1$s (kolonie %2$d) staat buiten deze kaart in dimensie %3$s op X %4$d, Z %5$d.",
+  "imperium_realms.message.empire_map_unresolved": "%1$s (kolonie %2$d, %3$s) kan momenteel niet aan een geladen MineColonies-kolonie worden gekoppeld; de opgeslagen rijkgegevens blijven beschikbaar.",
+  "imperium_realms.message.empire_map_no_centers": "Er zijn geen geladen MineColonies-koloniecentra om op de kaart te plaatsen. De kaart wordt gevuld zodra er minstens één rijkkolonie beschikbaar is."
 }

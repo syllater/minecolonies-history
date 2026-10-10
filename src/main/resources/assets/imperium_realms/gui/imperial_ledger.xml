@@ -50,6 +50,7 @@
     <button id="empire_routes" pos="22 385" size="170 20" label="$(imperium_realms.gui.empire_routes)"/>
     <button id="empire_defenses" pos="208 385" size="190 20" label="$(imperium_realms.gui.empire_defenses)"/>
     <button id="empire_theatre" pos="22 413" size="170 20" label="$(imperium_realms.gui.empire_theatre)"/>
+    <button id="empire_map" pos="208 413" size="190 20" label="$(imperium_realms.gui.empire_map)"/>
     <text id="strategyHeading" pos="22 441" size="376 12" color="white"
           label="$(imperium_realms.gui.strategy_heading)"/>
     <button id="posture_balanced" pos="22 457" size="112 20"
