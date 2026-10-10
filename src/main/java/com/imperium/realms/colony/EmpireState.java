@@ -850,7 +850,7 @@ public final class EmpireState {
      * happiness reading. The live integration uses the three-argument method.
      */
     public long collectDailyTaxes(final long dayIndex, final long population) {
-        return collectDailyTaxes(dayIndex, population, Double.NaN);
+        return collectDailyTaxes(dayIndex, population, Double.NaN, false);
     }
 
     /**
@@ -864,6 +864,18 @@ public final class EmpireState {
             final long dayIndex,
             final long population,
             final double overallHappiness) {
+        return collectDailyTaxes(dayIndex, population, overallHappiness, false);
+    }
+
+    /**
+     * Processes a daily tax turn; a governed province gains modest stability,
+     * legitimacy and unrest-reduction benefits from active regional administration.
+     */
+    public long collectDailyTaxes(
+            final long dayIndex,
+            final long population,
+            final double overallHappiness,
+            final boolean hasGovernor) {
         expireParliamentProposals(dayIndex);
         if (dayIndex <= lastTaxDay) {
             return 0L;
@@ -873,6 +885,10 @@ public final class EmpireState {
         int stabilityChange = economicPolicy.dailyStabilityChange()
                 + provinceFocus.dailyStabilityBonus();
         int legitimacyChange = provinceFocus.dailyStabilityBonus();
+        if (hasGovernor) {
+            stabilityChange++;
+            legitimacyChange++;
+        }
         if (Double.isFinite(overallHappiness)) {
             final int citizenApprovalChange = citizenApprovalChange(population, overallHappiness);
             final int taxBurdenChange = population <= 0L ? 0
@@ -884,6 +900,9 @@ public final class EmpireState {
         stability = clamp(stability + stabilityChange, 0, 100);
         updateFactionApproval(population, overallHappiness);
         updateCivicDisorder(dayIndex, population, overallHappiness);
+        if (hasGovernor && unrest > 0) {
+            unrest--;
+        }
 
         final long safePopulation = Math.max(0L, Math.min(population, 1_000_000L));
         final long taxableBase = (safePopulation * taxRatePercent) / 5L;

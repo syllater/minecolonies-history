@@ -330,6 +330,24 @@ public final class EmpireStateSavedData extends SavedData {
                         }
                     }
 
+                    final Map<ColonyIdentity, ProvinceGovernor> governors = new LinkedHashMap<>();
+                    if (realmTag.contains("governors", Tag.TAG_LIST)) {
+                        final ListTag savedGovernors = realmTag.getList("governors", Tag.TAG_COMPOUND);
+                        for (int governorIndex = 0; governorIndex < savedGovernors.size(); governorIndex++) {
+                            final CompoundTag governorTag = savedGovernors.getCompound(governorIndex);
+                            try {
+                                final ColonyIdentity province = new ColonyIdentity(
+                                        governorTag.getString("dimension"), governorTag.getInt("colony_id"));
+                                governors.put(province, new ProvinceGovernor(
+                                        governorTag.getString("player_uuid"),
+                                        governorTag.getString("player_name"),
+                                        Math.max(0L, governorTag.getLong("appointed_day"))));
+                            } catch (IllegalArgumentException ignored) {
+                                // Skip one malformed appointment without losing other provinces.
+                            }
+                        }
+                    }
+
                     final EmpireRealm realm = EmpireRealm.restore(
                             realmId,
                             realmTag.getString("name"),
@@ -343,7 +361,8 @@ public final class EmpireStateSavedData extends SavedData {
                             realmTag.contains("imperial_tax_rate", Tag.TAG_INT)
                                     ? realmTag.getInt("imperial_tax_rate") : -1,
                             realmTag.getString("imperial_policy"),
-                            auditEntries);
+                            auditEntries,
+                            governors);
                     data.realms.put(realmId, realm);
                     if (realmId < Long.MAX_VALUE) {
                         data.nextRealmId = Math.max(data.nextRealmId, realmId + 1L);
@@ -588,6 +607,29 @@ public final class EmpireStateSavedData extends SavedData {
         return remittance;
     }
 
+    /** Assigns a player as governor of a non-capital province in this realm. */
+    public boolean appointGovernor(final long realmId, final ColonyIdentity province,
+            final String playerUuid, final String playerName, final long currentDay) {
+        final EmpireRealm realm = realms.get(realmId);
+        if (realm == null || !colonies.containsKey(province)
+                || !realm.appointGovernor(province, playerUuid, playerName, currentDay)) {
+            return false;
+        }
+        realm.recordAudit(currentDay, playerName, "governor-appointed", province.storageKey(), 0L);
+        setDirty();
+        return true;
+    }
+
+    /** Removes the current governor appointment from a member province. */
+    public boolean dismissGovernor(final long realmId, final ColonyIdentity province,
+            final String actor, final long currentDay) {
+        final EmpireRealm realm = realms.get(realmId);
+        if (realm == null || !realm.dismissGovernor(province)) return false;
+        realm.recordAudit(currentDay, actor, "governor-dismissed", province.storageKey(), 0L);
+        setDirty();
+        return true;
+    }
+
     /** Adds a bounded audit entry to a realm and persists the change. */
     public boolean recordImperialAudit(
             final long realmId,
@@ -767,6 +809,18 @@ public final class EmpireStateSavedData extends SavedData {
                 auditEntries.add(auditTag);
             }
             realmTag.put("audit_entries", auditEntries);
+
+            final ListTag savedGovernors = new ListTag();
+            for (final Map.Entry<ColonyIdentity, ProvinceGovernor> governor : realm.governors().entrySet()) {
+                final CompoundTag governorTag = new CompoundTag();
+                governorTag.putString("dimension", governor.getKey().dimensionId());
+                governorTag.putInt("colony_id", governor.getKey().colonyId());
+                governorTag.putString("player_uuid", governor.getValue().playerUuid());
+                governorTag.putString("player_name", governor.getValue().playerName());
+                governorTag.putLong("appointed_day", governor.getValue().appointedDay());
+                savedGovernors.add(governorTag);
+            }
+            realmTag.put("governors", savedGovernors);
             savedRealms.add(realmTag);
         }
         root.put("realms", savedRealms);

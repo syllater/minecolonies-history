@@ -36,6 +36,7 @@ public final class EmpireRealm {
     private final Set<ColonyIdentity> provinces = new LinkedHashSet<>();
     private final Map<ColonyIdentity, Long> invitations = new LinkedHashMap<>();
     private final List<ImperialAuditEntry> auditEntries = new ArrayList<>();
+    private final Map<ColonyIdentity, ProvinceGovernor> governors = new LinkedHashMap<>();
 
     private EmpireRealm(
             final long id,
@@ -80,7 +81,8 @@ public final class EmpireRealm {
             final Map<ColonyIdentity, Long> savedInvitations,
             final int savedImperialTaxRatePercent,
             final String savedImperialEconomicPolicyId,
-            final List<ImperialAuditEntry> savedAuditEntries) {
+            final List<ImperialAuditEntry> savedAuditEntries,
+            final Map<ColonyIdentity, ProvinceGovernor> savedGovernors) {
         final EmpireRealm realm = new EmpireRealm(
                 id, name, capital, emperorUuid, emperorName, Math.max(0L, foundedDay),
                 clampTreasury(savedImperialTreasury));
@@ -105,6 +107,7 @@ public final class EmpireRealm {
             }
         }
         realm.restoreAuditEntries(savedAuditEntries);
+        realm.restoreGovernors(savedGovernors);
         return realm;
     }
 
@@ -243,6 +246,47 @@ public final class EmpireRealm {
         }
     }
 
+    public Map<ColonyIdentity, ProvinceGovernor> governors() {
+        return Collections.unmodifiableMap(new LinkedHashMap<>(governors));
+    }
+
+    public java.util.Optional<ProvinceGovernor> governorFor(final ColonyIdentity province) {
+        return java.util.Optional.ofNullable(governors.get(province));
+    }
+
+    public boolean hasGovernor(final ColonyIdentity province) {
+        return governors.containsKey(province);
+    }
+
+    boolean appointGovernor(final ColonyIdentity province, final String playerUuid,
+            final String playerName, final long appointedDay) {
+        if (province == null || !provinces.contains(province) || capital.equals(province)
+                || playerUuid == null || playerUuid.isBlank() || appointedDay < 0L) {
+            return false;
+        }
+        final ProvinceGovernor next = new ProvinceGovernor(playerUuid, playerName, appointedDay);
+        if (next.equals(governors.get(province))) return false;
+        governors.put(province, next);
+        return true;
+    }
+
+    boolean dismissGovernor(final ColonyIdentity province) {
+        if (province == null || capital.equals(province)) return false;
+        return governors.remove(province) != null;
+    }
+
+    void restoreGovernors(final Map<ColonyIdentity, ProvinceGovernor> savedGovernors) {
+        governors.clear();
+        if (savedGovernors == null) return;
+        for (final Map.Entry<ColonyIdentity, ProvinceGovernor> entry : savedGovernors.entrySet()) {
+            if (entry.getKey() != null && entry.getValue() != null
+                    && provinces.contains(entry.getKey()) && !capital.equals(entry.getKey())
+                    && governors.size() < MAX_PROVINCES - 1) {
+                governors.put(entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
     public boolean isEmperor(final String playerUuid) {
         return playerUuid != null && emperorUuid.equals(playerUuid);
     }
@@ -284,6 +328,7 @@ public final class EmpireRealm {
             return false;
         }
         invitations.remove(identity);
+        governors.remove(identity);
         return provinces.remove(identity);
     }
 

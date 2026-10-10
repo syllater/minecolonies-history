@@ -64,8 +64,10 @@ public final class MineColoniesLifecycleEvents {
 
                 final EmpireState state = MineColoniesIntegration.getOrCreateState(overworld, colony);
                 final long population = colony.getCitizenManager().getCitizens().size();
+                final boolean hasGovernor = data.realmForProvince(state.identity())
+                        .map(realm -> realm.hasGovernor(state.identity())).orElse(false);
                 final long provinceRevenue = state.collectDailyTaxes(
-                        dayIndex, population, colony.getOverallHappiness());
+                        dayIndex, population, colony.getOverallHappiness(), hasGovernor);
                 totalRevenue += provinceRevenue;
                 totalImperialRemittance += data.remitImperialTaxReceipts(state.identity(), provinceRevenue, dayIndex);
                 coloniesAssessed++;

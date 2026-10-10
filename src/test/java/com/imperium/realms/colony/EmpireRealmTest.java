@@ -45,7 +45,7 @@ final class EmpireRealmTest {
     void realmRestoreKeepsCapitalAndMembership() {
         final EmpireRealm realm = EmpireRealm.restore(
                 2L, "Realm", capital, "uuid", "Emperor", 4L,
-                0L, java.util.List.of(province), java.util.Map.of(), 15, "welfare", java.util.List.of());
+                0L, java.util.List.of(province), java.util.Map.of(), 15, "welfare", java.util.List.of(), java.util.Map.of());
         assertEquals(2, realm.provinceCount());
         assertTrue(realm.containsProvince(capital));
         assertTrue(realm.containsProvince(province));
@@ -97,6 +97,21 @@ final class EmpireRealmTest {
         assertEquals("province-104", recent.get(0).subject());
         assertEquals("province-5", recent.get(recent.size() - 1).subject());
         assertEquals(104L, recent.get(0).dayIndex());
+    }
+
+    @Test
+    void governorsCanOnlyBeAssignedToExistingNonCapitalProvinces() {
+        final EmpireRealm realm = EmpireRealm.found(
+                1L, "North Sea Union", capital, "uuid-emperor", "Ada", 0L);
+        assertFalse(realm.appointGovernor(capital, "uuid", "Governor", 1L));
+        assertTrue(realm.inviteProvince(province, 1L));
+        assertTrue(realm.acceptInvitation(province, 1L));
+        assertTrue(realm.appointGovernor(province, "uuid-governor", "Bram", 2L));
+        assertEquals("Bram", realm.governorFor(province).orElseThrow().playerName());
+        assertTrue(realm.hasGovernor(province));
+        assertFalse(realm.appointGovernor(province, "uuid-governor", "Bram", 2L));
+        assertTrue(realm.dismissGovernor(province));
+        assertFalse(realm.hasGovernor(province));
     }
 
     @Test
