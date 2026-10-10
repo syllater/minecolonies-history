@@ -755,8 +755,9 @@ public final class ImperiumCommands {
             }
         }
 
+        final int pendingOperations = operationsListed;
         source.sendSuccess(() -> Component.translatable(
-                "imperium_realms.message.theatre_footer", operationsListed), false);
+                "imperium_realms.message.theatre_footer", pendingOperations), false);
         source.sendSuccess(() -> Component.translatable(
                 "imperium_realms.message.theatre_help"), false);
         return 1;
