@@ -185,5 +185,21 @@
   "imperium_realms.audit.action.deposit": "Treasury deposit",
   "imperium_realms.audit.action.withdraw": "Treasury withdrawal",
   "imperium_realms.audit.action.tax-remittance": "Provincial tax remittance",
-  "imperium_realms.audit.action.unknown": "Other action"
+  "imperium_realms.audit.action.unknown": "Other action",
+  "imperium_realms.gui.governors": "Governors",
+  "imperium_realms.message.governor_empire_required": "Found or join an empire before appointing governors.",
+  "imperium_realms.message.governor_emperor_only": "Only the Emperor or a server operator can appoint or dismiss provincial governors.",
+  "imperium_realms.message.governor_target_not_found": "No MineColonies colony with ID %1$d exists in this dimension.",
+  "imperium_realms.message.governor_not_member": "That colony is not a province of your empire.",
+  "imperium_realms.message.governor_capital": "The capital is administered directly by the Emperor and cannot have a governor.",
+  "imperium_realms.message.governor_unchanged": "Could not appoint that player as governor of the selected province.",
+  "imperium_realms.message.governor_assigned": "%1$s has been appointed governor of %2$s.",
+  "imperium_realms.message.governor_dismissed": "The governor of %1$s has been dismissed.",
+  "imperium_realms.message.governor_none": "That province has no governor to dismiss.",
+  "imperium_realms.message.governor_header": "Governors of %1$s (%2$d appointed).",
+  "imperium_realms.message.governor_empty": "No provincial governors are currently appointed.",
+  "imperium_realms.message.governor_entry": "%1$s governs %2$s; appointed on day %3$d.",
+  "imperium_realms.message.governor_help": "The Emperor can appoint an online player to a non-capital province: /imperium governor appoint <colonyId> <player>. Dismiss with /imperium governor dismiss <colonyId>. Governed provinces gain +1 daily stability, +1 legitimacy and reduce unrest by 1.",
+  "imperium_realms.audit.action.governor-appointed": "Provincial governor appointed",
+  "imperium_realms.audit.action.governor-dismissed": "Provincial governor dismissed"
 }

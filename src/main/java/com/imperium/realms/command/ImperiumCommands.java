@@ -10,6 +10,7 @@ import com.imperium.realms.colony.EmpireRealm;
 import com.imperium.realms.colony.MineColoniesIntegration;
 import com.imperium.realms.colony.MilitaryCampaign;
 import com.imperium.realms.colony.ParliamentProposal;
+import com.imperium.realms.colony.ProvinceGovernor;
 import com.imperium.realms.colony.ProvinceFocus;
 import com.minecolonies.api.colony.IColony;
 import com.minecolonies.api.colony.permissions.Action;
@@ -19,6 +20,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -89,6 +91,21 @@ public final class ImperiumCommands {
                                         .executes(context -> withdrawEmpireTreasury(
                                                 context.getSource(),
                                                 LongArgumentType.getLong(context, "crowns"))))))
+                .then(Commands.literal("governor")
+                        .then(Commands.literal("status")
+                                .executes(context -> showGovernors(context.getSource())))
+                        .then(Commands.literal("appoint")
+                                .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                        .then(Commands.argument("governor", EntityArgument.player())
+                                                .executes(context -> appointGovernor(
+                                                        context.getSource(),
+                                                        IntegerArgumentType.getInteger(context, "colonyId"),
+                                                        EntityArgument.getPlayer(context, "governor"))))))
+                        .then(Commands.literal("dismiss")
+                                .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                        .executes(context -> dismissGovernor(
+                                                context.getSource(),
+                                                IntegerArgumentType.getInteger(context, "colonyId"))))))
                 .then(Commands.literal("campaign")
                         .then(Commands.literal("status")
                                 .executes(context -> showCampaigns(context.getSource())))
@@ -752,6 +769,111 @@ public final class ImperiumCommands {
         source.sendSuccess(() -> Component.translatable(
                 "imperium_realms.message.empire_withdrawn", amount,
                 realm.imperialTreasuryCrowns()), true);
+        return 1;
+    }
+
+    private static int showGovernors(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.governor_empire_required"));
+            return 0;
+        }
+        final List<java.util.Map.Entry<ColonyIdentity, ProvinceGovernor>> governors =
+                List.copyOf(realm.governors().entrySet());
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.governor_header", realm.name(), governors.size()), false);
+        if (governors.isEmpty()) {
+            source.sendSuccess(() -> Component.translatable("imperium_realms.message.governor_empty"), false);
+        } else {
+            for (final java.util.Map.Entry<ColonyIdentity, ProvinceGovernor> appointment : governors) {
+                final EmpireState provinceState = context.data().get(appointment.getKey()).orElse(null);
+                final String provinceName = provinceState == null
+                        ? appointment.getKey().storageKey() : provinceState.colonyName();
+                source.sendSuccess(() -> Component.translatable(
+                        "imperium_realms.message.governor_entry",
+                        appointment.getValue().playerName(), provinceName,
+                        appointment.getValue().appointedDay()), false);
+            }
+        }
+        source.sendSuccess(() -> Component.translatable("imperium_realms.message.governor_help"), false);
+        return 1;
+    }
+
+    private static int appointGovernor(
+            final CommandSourceStack source, final int targetColonyId, final ServerPlayer governorPlayer) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.governor_empire_required"));
+            return 0;
+        }
+        if (!mayManageRealm(context, realm)) {
+            source.sendFailure(Component.translatable("imperium_realms.message.governor_emperor_only"));
+            return 0;
+        }
+        final IColony target = MineColoniesIntegration
+                .colonyById(context.player().serverLevel(), targetColonyId).orElse(null);
+        if (target == null) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.governor_target_not_found", targetColonyId));
+            return 0;
+        }
+        final ColonyIdentity identity = ColonyIdentity.from(target);
+        if (identity.equals(realm.capital())) {
+            source.sendFailure(Component.translatable("imperium_realms.message.governor_capital"));
+            return 0;
+        }
+        if (!realm.containsProvince(identity)) {
+            source.sendFailure(Component.translatable("imperium_realms.message.governor_not_member"));
+            return 0;
+        }
+        final EmpireState provinceState = MineColoniesIntegration
+                .getOrCreateState(context.player().serverLevel(), target);
+        if (!context.data().appointGovernor(realm.id(), identity,
+                governorPlayer.getUUID().toString(), governorPlayer.getGameProfile().getName(), currentDay(source))) {
+            source.sendFailure(Component.translatable("imperium_realms.message.governor_unchanged"));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.governor_assigned", governorPlayer.getGameProfile().getName(),
+                provinceState.colonyName()), true);
+        return 1;
+    }
+
+    private static int dismissGovernor(final CommandSourceStack source, final int targetColonyId) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.governor_empire_required"));
+            return 0;
+        }
+        if (!mayManageRealm(context, realm)) {
+            source.sendFailure(Component.translatable("imperium_realms.message.governor_emperor_only"));
+            return 0;
+        }
+        final IColony target = MineColoniesIntegration
+                .colonyById(context.player().serverLevel(), targetColonyId).orElse(null);
+        if (target == null) {
+            source.sendFailure(Component.translatable(
+                    "imperium_realms.message.governor_target_not_found", targetColonyId));
+            return 0;
+        }
+        final ColonyIdentity identity = ColonyIdentity.from(target);
+        if (!realm.containsProvince(identity) || identity.equals(realm.capital())) {
+            source.sendFailure(Component.translatable("imperium_realms.message.governor_not_member"));
+            return 0;
+        }
+        if (!context.data().dismissGovernor(realm.id(), identity,
+                context.player().getGameProfile().getName(), currentDay(source))) {
+            source.sendFailure(Component.translatable("imperium_realms.message.governor_none"));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.governor_dismissed", target.getName()), true);
         return 1;
     }
 
