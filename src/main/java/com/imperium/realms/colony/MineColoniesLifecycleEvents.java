@@ -67,7 +67,7 @@ public final class MineColoniesLifecycleEvents {
                 final long provinceRevenue = state.collectDailyTaxes(
                         dayIndex, population, colony.getOverallHappiness());
                 totalRevenue += provinceRevenue;
-                totalImperialRemittance += data.remitImperialTaxReceipts(state.identity(), provinceRevenue);
+                totalImperialRemittance += data.remitImperialTaxReceipts(state.identity(), provinceRevenue, dayIndex);
                 coloniesAssessed++;
             }
         }
