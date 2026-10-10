@@ -3,6 +3,7 @@ package com.imperium.realms.command;
 import com.imperium.realms.ImperiumRealms;
 import com.imperium.realms.colony.ColonyIdentity;
 import com.imperium.realms.colony.EconomicPolicy;
+import com.imperium.realms.colony.ImperialAuditEntry;
 import com.imperium.realms.colony.EmpireState;
 import com.imperium.realms.colony.EmpireStateSavedData;
 import com.imperium.realms.colony.EmpireRealm;
@@ -60,6 +61,8 @@ public final class ImperiumCommands {
                 .then(Commands.literal("empire")
                         .then(Commands.literal("status")
                                 .executes(context -> showEmpire(context.getSource())))
+                        .then(Commands.literal("audit")
+                                .executes(context -> showEmpireAudit(context.getSource())))
                         .then(Commands.literal("found")
                                 .then(Commands.argument("name", StringArgumentType.greedyString())
                                         .executes(context -> foundEmpire(
@@ -301,6 +304,11 @@ public final class ImperiumCommands {
                 source.sendFailure(Component.translatable("imperium_realms.message.empire_law_apply_failed"));
                 return 0;
             }
+            context.data().recordImperialAudit(realm.id(), currentDay(source),
+                    context.player().getGameProfile().getName(),
+                    proposal.type() == ParliamentProposal.Type.TAX_RATE ? "tax-law" : "policy-law",
+                    proposal.valueId(), proposal.type() == ParliamentProposal.Type.TAX_RATE
+                            ? context.state().taxRatePercent() : 0L);
         }
 
         context.data().markChanged();
@@ -538,6 +546,31 @@ public final class ImperiumCommands {
         return 1;
     }
 
+    private static int showEmpireAudit(final CommandSourceStack source) {
+        final ColonyContext context = resolveColony(source);
+        if (context == null) return 0;
+        if (!mayManageEconomy(context)) return denyPermission(source);
+        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
+        if (realm == null) {
+            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
+            return 0;
+        }
+        final List<ImperialAuditEntry> entries = realm.recentAuditEntries().stream().limit(10).toList();
+        source.sendSuccess(() -> Component.translatable(
+                "imperium_realms.message.empire_audit_header", realm.name(), entries.size()), false);
+        if (entries.isEmpty()) {
+            source.sendSuccess(() -> Component.translatable("imperium_realms.message.empire_audit_empty"), false);
+            return 1;
+        }
+        for (final ImperialAuditEntry entry : entries) {
+            final Component action = Component.translatable("imperium_realms.audit.action." + entry.actionId());
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.empire_audit_entry",
+                    entry.dayIndex(), action, entry.actor(), entry.subject(), entry.amount()), false);
+        }
+        return 1;
+    }
+
     private static int foundEmpire(final CommandSourceStack source, final String name) {
         final ColonyContext context = resolveColony(source);
         if (context == null) return 0;
@@ -555,6 +588,8 @@ public final class ImperiumCommands {
             source.sendFailure(Component.translatable("imperium_realms.message.empire_found_failed"));
             return 0;
         }
+        context.data().recordImperialAudit(realm.id(), currentDay(source),
+                context.player().getGameProfile().getName(), "found", realm.name(), 0L);
         source.sendSuccess(() -> Component.translatable(
                 "imperium_realms.message.empire_founded", realm.name(), realm.id()), true);
         return 1;
@@ -587,6 +622,9 @@ public final class ImperiumCommands {
             source.sendFailure(Component.translatable("imperium_realms.message.empire_invite_failed"));
             return 0;
         }
+        context.data().recordImperialAudit(realm.id(), currentDay(source),
+                context.player().getGameProfile().getName(), "province-invited",
+                target.getName() + " (#" + target.getID() + ")", target.getID());
         source.sendSuccess(() -> Component.translatable(
                 "imperium_realms.message.empire_invited",
                 target.getName(), target.getID(), realm.name(),
@@ -608,6 +646,9 @@ public final class ImperiumCommands {
             source.sendFailure(Component.translatable("imperium_realms.message.empire_invitation_missing"));
             return 0;
         }
+        context.data().recordImperialAudit(realm.id(), currentDay(source),
+                context.player().getGameProfile().getName(), "province-joined",
+                context.state().identity().storageKey(), context.state().identity().colonyId());
         source.sendSuccess(() -> Component.translatable(
                 "imperium_realms.message.empire_joined", realm.name(), realm.id()), true);
         return 1;
@@ -630,6 +671,9 @@ public final class ImperiumCommands {
             source.sendFailure(Component.translatable("imperium_realms.message.empire_leave_failed"));
             return 0;
         }
+        context.data().recordImperialAudit(realm.id(), currentDay(source),
+                context.player().getGameProfile().getName(), "province-left",
+                context.state().identity().storageKey(), context.state().identity().colonyId());
         source.sendSuccess(() -> Component.translatable(
                 "imperium_realms.message.empire_left", realm.name()), true);
         return 1;
@@ -669,6 +713,9 @@ public final class ImperiumCommands {
             return 0;
         }
         context.data().markChanged();
+        context.data().recordImperialAudit(realm.id(), currentDay(source),
+                context.player().getGameProfile().getName(), "deposit",
+                context.state().identity().storageKey(), amount);
         source.sendSuccess(() -> Component.translatable(
                 "imperium_realms.message.empire_deposited", amount,
                 realm.imperialTreasuryCrowns()), true);
@@ -699,6 +746,9 @@ public final class ImperiumCommands {
             return 0;
         }
         context.data().markChanged();
+        context.data().recordImperialAudit(realm.id(), currentDay(source),
+                context.player().getGameProfile().getName(), "withdraw",
+                context.state().identity().storageKey(), amount);
         source.sendSuccess(() -> Component.translatable(
                 "imperium_realms.message.empire_withdrawn", amount,
                 realm.imperialTreasuryCrowns()), true);
