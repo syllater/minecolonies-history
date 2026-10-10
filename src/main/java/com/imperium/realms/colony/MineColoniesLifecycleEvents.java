@@ -1,8 +1,10 @@
 package com.imperium.realms.colony;
 
 import com.imperium.realms.ImperiumRealms;
+import com.imperium.realms.professions.ImperialProfessionRegistry;
 import com.minecolonies.api.IMinecoloniesAPI;
 import com.minecolonies.api.colony.IColony;
+import com.minecolonies.api.colony.jobs.IJob;
 import com.mojang.logging.LogUtils;
 import net.minecraft.server.level.ServerLevel;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -48,13 +50,22 @@ public final class MineColoniesLifecycleEvents {
             final ColonyIdentity identity = ColonyIdentity.from(colony);
             empireData.observeColony(identity, colony.getName(), sharedGameTime);
 
-            final int population = colony.getCitizenManager().getCitizens().size();
-            empireData.collectTaxes(identity, population, sharedGameTime).ifPresent(report ->
+            final var citizens = colony.getCitizenManager().getCitizens();
+            final int population = citizens.size();
+            final int taxCollectorCount = (int) citizens.stream()
+                    .map(citizen -> citizen.getJob())
+                    .filter(job -> job != null && job.getJobRegistryEntry() != null)
+                    .map(IJob::getJobRegistryEntry)
+                    .filter(entry -> ImperialProfessionRegistry.TAX_COLLECTOR_JOB_ID.equals(entry.getKey()))
+                    .count();
+
+            empireData.collectTaxes(identity, population, taxCollectorCount, sharedGameTime).ifPresent(report ->
                     LOGGER.info(
-                            "Imperial accounts for '{}' on day {}: population={}, revenue={}, upkeep={}, balance={}",
+                            "Imperial accounts for '{}' on day {}: population={}, tax collectors={}, revenue={}, upkeep={}, balance={}",
                             colony.getName(),
                             report.gameDay(),
                             report.population(),
+                            taxCollectorCount,
                             report.grossRevenue(),
                             report.upkeepPaid(),
                             report.treasuryBalance()));
