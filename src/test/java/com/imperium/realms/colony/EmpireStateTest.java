@@ -83,6 +83,22 @@ final class EmpireStateTest {
     }
 
     @Test
+    void staffedTaxCollectorsImproveRevenueAndEffectiveRateIsCapped() {
+        final ColonyIdentity identity = new ColonyIdentity("minecraft:overworld", 12);
+        final EmpireState state = EmpireState.create(identity, "Capital", 0L);
+
+        final EmpireState.TaxCollectionResult staffed = state.collectTaxes(10, 2, 24_000L).orElseThrow();
+        assertEquals(200L, staffed.grossRevenue());
+        assertEquals(200L, staffed.treasuryBalance());
+
+        final EmpireState capped = EmpireState.create(identity, "Other Capital", 0L);
+        capped.setTaxRatePercent(50);
+        final EmpireState.TaxCollectionResult maxStaffed = capped.collectTaxes(10, 99, 24_000L).orElseThrow();
+        assertEquals(750L, maxStaffed.grossRevenue());
+        assertEquals(750L, maxStaffed.treasuryBalance());
+    }
+
+    @Test
     void policyUpkeepNeverMakesTreasuryNegative() {
         final ColonyIdentity identity = new ColonyIdentity("minecraft:overworld", 12);
         final EmpireState state = EmpireState.create(identity, "Capital", 0L);
