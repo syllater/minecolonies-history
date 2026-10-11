@@ -98,13 +98,15 @@ public final class EmpireStateSavedData extends SavedData {
                 final List<ParliamentProposal> proposals = new ArrayList<>();
                 if (entry.contains("parliament_proposals", Tag.TAG_LIST)) {
                     final ListTag savedProposals = entry.getList("parliament_proposals", Tag.TAG_COMPOUND);
-                    for (int proposalIndex = 0; proposalIndex < savedProposals.size(); proposalIndex++) {
+                    final int firstProposal = Math.max(0,
+                            savedProposals.size() - EmpireState.MAX_STORED_PROPOSALS);
+                    for (int proposalIndex = firstProposal; proposalIndex < savedProposals.size(); proposalIndex++) {
                         final CompoundTag proposalTag = savedProposals.getCompound(proposalIndex);
                         try {
                             final Map<String, Boolean> votes = new LinkedHashMap<>();
                             if (proposalTag.contains("council_votes", Tag.TAG_LIST)) {
                                 final ListTag savedVotes = proposalTag.getList("council_votes", Tag.TAG_COMPOUND);
-                                for (int voteIndex = 0; voteIndex < savedVotes.size(); voteIndex++) {
+                                for (int voteIndex = 0; voteIndex < Math.min(savedVotes.size(), 4); voteIndex++) {
                                     final CompoundTag vote = savedVotes.getCompound(voteIndex);
                                     final String seat = vote.getString("seat");
                                     if (seat.equals("merchants") || seat.equals("commons")
@@ -166,7 +168,9 @@ public final class EmpireStateSavedData extends SavedData {
                 final Map<ColonyIdentity, Integer> diplomaticRelations = new LinkedHashMap<>();
                 if (entry.contains("diplomatic_relations", Tag.TAG_LIST)) {
                     final ListTag savedRelations = entry.getList("diplomatic_relations", Tag.TAG_COMPOUND);
-                    for (int relationIndex = 0; relationIndex < savedRelations.size(); relationIndex++) {
+                    final int firstRelation = Math.max(0,
+                            savedRelations.size() - EmpireState.MAX_DIPLOMATIC_RELATIONS);
+                    for (int relationIndex = firstRelation; relationIndex < savedRelations.size(); relationIndex++) {
                         final CompoundTag relation = savedRelations.getCompound(relationIndex);
                         try {
                             final ColonyIdentity target = new ColonyIdentity(
@@ -215,7 +219,7 @@ public final class EmpireStateSavedData extends SavedData {
                 final Map<String, Integer> factionApproval = new LinkedHashMap<>();
                 if (entry.contains("faction_approval", Tag.TAG_LIST)) {
                     final ListTag savedFactionApproval = entry.getList("faction_approval", Tag.TAG_COMPOUND);
-                    for (int factionIndex = 0; factionIndex < savedFactionApproval.size(); factionIndex++) {
+                    for (int factionIndex = 0; factionIndex < Math.min(savedFactionApproval.size(), 4); factionIndex++) {
                         final CompoundTag faction = savedFactionApproval.getCompound(factionIndex);
                         final String factionId = faction.getString("id");
                         if (factionId.equals("merchants") || factionId.equals("commons")
@@ -254,7 +258,9 @@ public final class EmpireStateSavedData extends SavedData {
                 final List<MilitaryCampaign> campaigns = new ArrayList<>();
                 if (entry.contains("military_campaigns", Tag.TAG_LIST)) {
                     final ListTag savedCampaigns = entry.getList("military_campaigns", Tag.TAG_COMPOUND);
-                    for (int campaignIndex = 0; campaignIndex < savedCampaigns.size(); campaignIndex++) {
+                    final int firstCampaign = Math.max(0,
+                            savedCampaigns.size() - EmpireState.MAX_STORED_CAMPAIGNS);
+                    for (int campaignIndex = firstCampaign; campaignIndex < savedCampaigns.size(); campaignIndex++) {
                         final CompoundTag campaignTag = savedCampaigns.getCompound(campaignIndex);
                         try {
                             final MilitaryCampaign.Type type = MilitaryCampaign.Type
@@ -319,7 +325,9 @@ public final class EmpireStateSavedData extends SavedData {
                     final List<ColonyIdentity> memberProvinces = new ArrayList<>();
                     if (realmTag.contains("provinces", Tag.TAG_LIST)) {
                         final ListTag members = realmTag.getList("provinces", Tag.TAG_COMPOUND);
-                        for (int memberIndex = 0; memberIndex < members.size(); memberIndex++) {
+                        for (int memberIndex = 0;
+                                memberIndex < Math.min(members.size(), EmpireRealm.MAX_PROVINCES);
+                                memberIndex++) {
                             final CompoundTag member = members.getCompound(memberIndex);
                             try {
                                 final ColonyIdentity identity = new ColonyIdentity(
@@ -339,7 +347,9 @@ public final class EmpireStateSavedData extends SavedData {
                     final Map<ColonyIdentity, Long> invitations = new LinkedHashMap<>();
                     if (realmTag.contains("invitations", Tag.TAG_LIST)) {
                         final ListTag savedInvitations = realmTag.getList("invitations", Tag.TAG_COMPOUND);
-                        for (int invitationIndex = 0; invitationIndex < savedInvitations.size(); invitationIndex++) {
+                        for (int invitationIndex = 0;
+                                invitationIndex < Math.min(savedInvitations.size(), EmpireRealm.MAX_INVITATIONS);
+                                invitationIndex++) {
                             final CompoundTag invitation = savedInvitations.getCompound(invitationIndex);
                             try {
                                 final ColonyIdentity identity = new ColonyIdentity(
@@ -358,7 +368,9 @@ public final class EmpireStateSavedData extends SavedData {
                     final List<ImperialAuditEntry> auditEntries = new ArrayList<>();
                     if (realmTag.contains("audit_entries", Tag.TAG_LIST)) {
                         final ListTag savedAudit = realmTag.getList("audit_entries", Tag.TAG_COMPOUND);
-                        for (int auditIndex = 0; auditIndex < savedAudit.size(); auditIndex++) {
+                        final int firstAudit = Math.max(0,
+                                savedAudit.size() - EmpireRealm.MAX_AUDIT_ENTRIES);
+                        for (int auditIndex = firstAudit; auditIndex < savedAudit.size(); auditIndex++) {
                             final CompoundTag auditTag = savedAudit.getCompound(auditIndex);
                             try {
                                 auditEntries.add(new ImperialAuditEntry(
@@ -376,7 +388,9 @@ public final class EmpireStateSavedData extends SavedData {
                     final Map<ColonyIdentity, ProvinceGovernor> governors = new LinkedHashMap<>();
                     if (realmTag.contains("governors", Tag.TAG_LIST)) {
                         final ListTag savedGovernors = realmTag.getList("governors", Tag.TAG_COMPOUND);
-                        for (int governorIndex = 0; governorIndex < savedGovernors.size(); governorIndex++) {
+                        for (int governorIndex = 0;
+                                governorIndex < Math.min(savedGovernors.size(), EmpireRealm.MAX_PROVINCES - 1);
+                                governorIndex++) {
                             final CompoundTag governorTag = savedGovernors.getCompound(governorIndex);
                             try {
                                 final ColonyIdentity province = new ColonyIdentity(
@@ -394,7 +408,7 @@ public final class EmpireStateSavedData extends SavedData {
                     final Map<ColonyIdentity, Integer> loyalty = new LinkedHashMap<>();
                     if (realmTag.contains("provincial_loyalty", Tag.TAG_LIST)) {
                         final ListTag list = realmTag.getList("provincial_loyalty", Tag.TAG_COMPOUND);
-                        for (int i = 0; i < list.size(); i++) {
+                        for (int i = 0; i < Math.min(list.size(), EmpireRealm.MAX_PROVINCES); i++) {
                             final CompoundTag tag = list.getCompound(i);
                             try { loyalty.put(new ColonyIdentity(tag.getString("dimension"), tag.getInt("colony_id")), tag.getInt("value")); }
                             catch (IllegalArgumentException ignored) { /* Skip malformed loyalty. */ }
@@ -403,7 +417,7 @@ public final class EmpireStateSavedData extends SavedData {
                     final Map<ColonyIdentity, Integer> pressureDays = new LinkedHashMap<>();
                     if (realmTag.contains("loyalty_pressure_days", Tag.TAG_LIST)) {
                         final ListTag list = realmTag.getList("loyalty_pressure_days", Tag.TAG_COMPOUND);
-                        for (int i = 0; i < list.size(); i++) {
+                        for (int i = 0; i < Math.min(list.size(), EmpireRealm.MAX_PROVINCES); i++) {
                             final CompoundTag tag = list.getCompound(i);
                             try { pressureDays.put(new ColonyIdentity(tag.getString("dimension"), tag.getInt("colony_id")), tag.getInt("days")); }
                             catch (IllegalArgumentException ignored) { /* Skip malformed pressure data. */ }
@@ -412,7 +426,7 @@ public final class EmpireStateSavedData extends SavedData {
                     final Map<ColonyIdentity, Long> petitions = new LinkedHashMap<>();
                     if (realmTag.contains("separatist_petitions", Tag.TAG_LIST)) {
                         final ListTag list = realmTag.getList("separatist_petitions", Tag.TAG_COMPOUND);
-                        for (int i = 0; i < list.size(); i++) {
+                        for (int i = 0; i < Math.min(list.size(), EmpireRealm.MAX_PROVINCES); i++) {
                             final CompoundTag tag = list.getCompound(i);
                             try { petitions.put(new ColonyIdentity(tag.getString("dimension"), tag.getInt("colony_id")), Math.max(0L, tag.getLong("day"))); }
                             catch (IllegalArgumentException ignored) { /* Skip malformed petitions. */ }
@@ -422,7 +436,9 @@ public final class EmpireStateSavedData extends SavedData {
                     final Map<ColonyIdentity, ImperialSupplyRoute> supplyRoutes = new LinkedHashMap<>();
                     if (realmTag.contains("supply_routes", Tag.TAG_LIST)) {
                         final ListTag savedRoutes = realmTag.getList("supply_routes", Tag.TAG_COMPOUND);
-                        for (int routeIndex = 0; routeIndex < savedRoutes.size(); routeIndex++) {
+                        for (int routeIndex = 0;
+                                routeIndex < Math.min(savedRoutes.size(), EmpireRealm.MAX_PROVINCES - 1);
+                                routeIndex++) {
                             final CompoundTag routeTag = savedRoutes.getCompound(routeIndex);
                             try {
                                 final ColonyIdentity destination = new ColonyIdentity(
@@ -441,7 +457,9 @@ public final class EmpireStateSavedData extends SavedData {
                     final Map<ColonyIdentity, ImperialDefensiveOrder> defensiveOrders = new LinkedHashMap<>();
                     if (realmTag.contains("defensive_orders", Tag.TAG_LIST)) {
                         final ListTag savedOrders = realmTag.getList("defensive_orders", Tag.TAG_COMPOUND);
-                        for (int orderIndex = 0; orderIndex < savedOrders.size(); orderIndex++) {
+                        for (int orderIndex = 0;
+                                orderIndex < Math.min(savedOrders.size(), EmpireRealm.MAX_PROVINCES);
+                                orderIndex++) {
                             final CompoundTag orderTag = savedOrders.getCompound(orderIndex);
                             try {
                                 final ColonyIdentity province = new ColonyIdentity(
