@@ -14,7 +14,8 @@ import java.util.Objects;
 public record ColonyIdentity(String dimensionId, int colonyId) {
     public ColonyIdentity {
         Objects.requireNonNull(dimensionId, "dimensionId");
-        if (dimensionId.isBlank() || !dimensionId.contains(":")) {
+        final int separator = dimensionId.indexOf(':');
+        if (dimensionId.isBlank() || separator <= 0 || separator == dimensionId.length() - 1) {
             throw new IllegalArgumentException("dimensionId must be a namespaced dimension key");
         }
 
