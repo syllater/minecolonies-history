@@ -391,6 +391,71 @@ final class EmpireStateSavedDataTest {
         assertEquals(fixture.realm().recentAuditEntries(), loadedRealm.recentAuditEntries());
     }
 
+    @Test
+    void imperialTaxRemittanceMovesOnlyExistingReceiptsAndAuditsSuccess() {
+        final TreasuryFixture fixture = treasuryFixture(1_000L, 200L);
+        assertTrue(fixture.realm().setImperialTaxRatePercent(10));
+
+        final long remitted = fixture.data().remitImperialTaxReceipts(
+                fixture.province(), 100L, 12L);
+
+        assertEquals(10L, remitted);
+        assertEquals(990L, fixture.provinceState().treasuryCrowns());
+        assertEquals(210L, fixture.realm().imperialTreasuryCrowns());
+        assertEquals(1_200L,
+                fixture.provinceState().treasuryCrowns() + fixture.realm().imperialTreasuryCrowns());
+        final ImperialAuditEntry audit = fixture.realm().recentAuditEntries().get(0);
+        assertEquals("tax-remittance", audit.actionId());
+        assertEquals(fixture.province().storageKey(), audit.subject());
+        assertEquals(10L, audit.amount());
+        assertEquals(12L, audit.dayIndex());
+
+        final EmpireStateSavedData loaded = EmpireStateSavedData.load(
+                fixture.data().save(new CompoundTag(), null), null);
+        final EmpireState loadedProvince = loaded.get(fixture.province()).orElseThrow();
+        final EmpireRealm loadedRealm = loaded.realmForProvince(fixture.province()).orElseThrow();
+        assertEquals(990L, loadedProvince.treasuryCrowns());
+        assertEquals(210L, loadedRealm.imperialTreasuryCrowns());
+        assertEquals(fixture.realm().recentAuditEntries(), loadedRealm.recentAuditEntries());
+    }
+
+    @Test
+    void imperialTaxRemittanceRejectsInvalidTurnOrMissingLawWithoutMutation() {
+        final TreasuryFixture fixture = treasuryFixture(100L, 0L);
+
+        assertEquals(0L, fixture.data().remitImperialTaxReceipts(
+                fixture.province(), 100L, 1L), "no imperial tax law has been enacted");
+        assertTrue(fixture.realm().setImperialTaxRatePercent(10));
+        assertEquals(0L, fixture.data().remitImperialTaxReceipts(
+                fixture.province(), 100L, -1L), "negative day index must be rejected");
+        assertEquals(0L, fixture.data().remitImperialTaxReceipts(
+                fixture.province(), 0L, 1L), "zero receipts must be ignored");
+        assertEquals(100L, fixture.provinceState().treasuryCrowns());
+        assertEquals(0L, fixture.realm().imperialTreasuryCrowns());
+        assertTrue(fixture.realm().recentAuditEntries().isEmpty());
+    }
+
+    @Test
+    void imperialTaxRemittanceRollsBackWhenProvinceFundsOrReserveCapacityIsInsufficient() {
+        final TreasuryFixture insufficientProvince = treasuryFixture(5L, 0L);
+        assertTrue(insufficientProvince.realm().setImperialTaxRatePercent(10));
+        assertEquals(0L, insufficientProvince.data().remitImperialTaxReceipts(
+                insufficientProvince.province(), 100L, 3L));
+        assertEquals(5L, insufficientProvince.provinceState().treasuryCrowns());
+        assertEquals(0L, insufficientProvince.realm().imperialTreasuryCrowns());
+        assertTrue(insufficientProvince.realm().recentAuditEntries().isEmpty());
+
+        final TreasuryFixture fullReserve = treasuryFixture(
+                100L, EmpireRealm.MAX_IMPERIAL_TREASURY);
+        assertTrue(fullReserve.realm().setImperialTaxRatePercent(10));
+        assertEquals(0L, fullReserve.data().remitImperialTaxReceipts(
+                fullReserve.province(), 100L, 4L));
+        assertEquals(100L, fullReserve.provinceState().treasuryCrowns());
+        assertEquals(EmpireRealm.MAX_IMPERIAL_TREASURY,
+                fullReserve.realm().imperialTreasuryCrowns());
+        assertTrue(fullReserve.realm().recentAuditEntries().isEmpty());
+    }
+
     private static TreasuryFixture treasuryFixture(
             final long provinceTreasury,
             final long imperialTreasury) {
