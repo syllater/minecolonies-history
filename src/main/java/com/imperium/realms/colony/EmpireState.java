@@ -24,6 +24,15 @@ public final class EmpireState {
     private static final int MAX_DIPLOMATIC_RELATIONS = 256;
     private static final int MAX_STORED_PROPOSALS = 20;
 
+    /**
+     * Tier 1–2 yields one unit, tier 3–4 yields two, and tier 5 yields three.
+     * An unbuilt hut yields nothing; invalid levels are clamped.
+     */
+    private static int workYieldForBuildingLevel(final int buildingLevel) {
+        final int level = Math.max(0, Math.min(5, buildingLevel));
+        return level == 0 ? 0 : 1 + (level - 1) / 2;
+    }
+
     public enum ProposalResolution {
         PASSED,
         REJECTED,
@@ -486,8 +495,17 @@ public final class EmpireState {
         lastCivicDisorderChangeDay = Math.max(-1L, loadedLastChangeDay);
     }
 
-    /** A Diplomat files reports at most once every 2,400 ticks for the colony. */
+    /** Compatibility overload; legacy callers are treated as a tier-1 Archive. */
     public boolean recordDiplomatWork(final long gameTime) {
+        return recordDiplomatWork(gameTime, 1);
+    }
+
+    /** A Diplomat produces tier-scaled influence no more often than every 2,400 ticks. */
+    public boolean recordDiplomatWork(final long gameTime, final int buildingLevel) {
+        final int yield = workYieldForBuildingLevel(buildingLevel);
+        if (yield == 0) {
+            return false;
+        }
         final long safeTime = Math.max(0L, gameTime);
         if (diplomaticInfluence >= MAX_DIPLOMATIC_INFLUENCE
                 || (lastDiplomatWorkTick >= 0L
@@ -495,7 +513,7 @@ public final class EmpireState {
                         || safeTime - lastDiplomatWorkTick < DIPLOMAT_WORK_INTERVAL_TICKS))) {
             return false;
         }
-        diplomaticInfluence++;
+        diplomaticInfluence = Math.min(MAX_DIPLOMATIC_INFLUENCE - yield, diplomaticInfluence) + yield;
         lastDiplomatWorkTick = safeTime;
         return true;
     }
@@ -873,30 +891,42 @@ public final class EmpireState {
         return true;
     }
 
-    /**
-     * A scholar assigned to the Imperial Archive produces one knowledge point
-     * no more often than every in-game minute.
-     */
+    /** Compatibility overload; legacy callers are treated as a tier-1 Archive. */
     public boolean recordScholarWork(final long gameTime) {
+        return recordScholarWork(gameTime, 1);
+    }
+
+    /** A Philosopher produces tier-scaled knowledge once per in-game minute. */
+    public boolean recordScholarWork(final long gameTime, final int buildingLevel) {
+        final int yield = workYieldForBuildingLevel(buildingLevel);
+        if (yield == 0) {
+            return false;
+        }
         final long safeTime = Math.max(0L, gameTime);
         if (lastScholarWorkTick >= 0L
                 && (safeTime < lastScholarWorkTick
                     || safeTime - lastScholarWorkTick < SCHOLAR_WORK_INTERVAL_TICKS)) {
             return false;
         }
-        if (knowledgePoints < Long.MAX_VALUE) {
-            knowledgePoints++;
-        }
+        knowledgePoints = Math.min(Long.MAX_VALUE - yield, knowledgePoints) + yield;
         lastScholarWorkTick = safeTime;
         return true;
     }
 
-    /**
-     * A working Tax Collector improves collection accuracy. One successful
-     * filing cycle adds one percentage point, capped at 25%, and is shared by
-     * the colony rather than multiplying for every worker on the same tick.
-     */
+    /** Compatibility overload; legacy callers are treated as a tier-1 Archive. */
     public boolean recordTaxCollectorWork(final long gameTime) {
+        return recordTaxCollectorWork(gameTime, 1);
+    }
+
+    /**
+     * Higher Archive tiers improve collection efficiency faster while retaining
+     * one shared colony bonus and its 25-percent cap.
+     */
+    public boolean recordTaxCollectorWork(final long gameTime, final int buildingLevel) {
+        final int yield = workYieldForBuildingLevel(buildingLevel);
+        if (yield == 0) {
+            return false;
+        }
         final long safeTime = Math.max(0L, gameTime);
         if (taxCollectionEfficiencyPercent >= MAX_TAX_COLLECTION_EFFICIENCY_PERCENT
                 || (lastTaxCollectorWorkTick >= 0L
@@ -904,7 +934,8 @@ public final class EmpireState {
                         || safeTime - lastTaxCollectorWorkTick < TAX_COLLECTOR_WORK_INTERVAL_TICKS))) {
             return false;
         }
-        taxCollectionEfficiencyPercent++;
+        taxCollectionEfficiencyPercent = Math.min(
+                MAX_TAX_COLLECTION_EFFICIENCY_PERCENT, taxCollectionEfficiencyPercent + yield);
         lastTaxCollectorWorkTick = safeTime;
         return true;
     }

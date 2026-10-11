@@ -67,7 +67,7 @@ public final class EntityAIWorkDiplomat
         if (job.getColony() != null && world != null) {
             final EmpireStateSavedData data = EmpireStateSavedData.get(world);
             final var state = MineColoniesIntegration.getOrCreateState(world, job.getColony());
-            if (state.recordDiplomatWork(world.getGameTime())) {
+            if (state.recordDiplomatWork(world.getGameTime(), building.getBuildingLevel())) {
                 data.markChanged();
             }
         }

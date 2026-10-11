@@ -167,6 +167,34 @@ final class EmpireStateTest {
     }
 
     @Test
+    void archiveTierImprovesScholarTaxAndDiplomaticWorkYield() {
+        final EmpireState tierOne = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 305), "Tier One", 0L);
+        final EmpireState tierThree = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 306), "Tier Three", 0L);
+        final EmpireState tierFive = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 307), "Tier Five", 0L);
+
+        assertFalse(tierOne.recordScholarWork(0L, 0));
+        assertTrue(tierOne.recordScholarWork(0L, 1));
+        assertEquals(1L, tierOne.knowledgePoints());
+        assertTrue(tierThree.recordScholarWork(0L, 3));
+        assertEquals(2L, tierThree.knowledgePoints());
+        assertTrue(tierFive.recordScholarWork(0L, 5));
+        assertEquals(3L, tierFive.knowledgePoints());
+
+        assertTrue(tierOne.recordTaxCollectorWork(0L, 1));
+        assertEquals(1, tierOne.taxCollectionEfficiencyPercent());
+        assertTrue(tierFive.recordTaxCollectorWork(0L, 5));
+        assertEquals(3, tierFive.taxCollectionEfficiencyPercent());
+
+        assertTrue(tierOne.recordDiplomatWork(0L, 1));
+        assertEquals(1L, tierOne.diplomaticInfluence());
+        assertTrue(tierFive.recordDiplomatWork(0L, 5));
+        assertEquals(3L, tierFive.diplomaticInfluence());
+    }
+
+    @Test
     void treasuryCannotBeOverdrawnOrOverflowItsCap() {
         final EmpireState state = EmpireState.create(
                 new ColonyIdentity("minecraft:overworld", 6), "Capital", 0L);

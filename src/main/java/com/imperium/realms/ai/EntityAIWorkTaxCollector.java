@@ -67,7 +67,7 @@ public final class EntityAIWorkTaxCollector
         if (job.getColony() != null && world != null) {
             final EmpireStateSavedData data = EmpireStateSavedData.get(world);
             final var state = MineColoniesIntegration.getOrCreateState(world, job.getColony());
-            if (state.recordTaxCollectorWork(world.getGameTime())) {
+            if (state.recordTaxCollectorWork(world.getGameTime(), building.getBuildingLevel())) {
                 data.markChanged();
             }
         }

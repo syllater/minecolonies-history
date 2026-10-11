@@ -66,7 +66,7 @@ public final class EntityAIWorkPhilosopher
         if (job.getColony() != null && world != null) {
             final EmpireStateSavedData data = EmpireStateSavedData.get(world);
             final var state = MineColoniesIntegration.getOrCreateState(world, job.getColony());
-            if (state.recordScholarWork(world.getGameTime())) {
+            if (state.recordScholarWork(world.getGameTime(), building.getBuildingLevel())) {
                 data.markChanged();
             }
         }
