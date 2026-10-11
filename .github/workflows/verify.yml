@@ -68,6 +68,9 @@ jobs:
           set -euo pipefail
           cd build/libs
           sha256sum --check SHA256SUMS.txt
+      - name: Assemble and validate release-candidate bundle
+        if: success()
+        run: python3 tools/package_release_candidate.py --manifest build/libs/SHA256SUMS.txt
       - name: Upload mod JAR and checksum manifest
         if: success()
         uses: actions/upload-artifact@v4
