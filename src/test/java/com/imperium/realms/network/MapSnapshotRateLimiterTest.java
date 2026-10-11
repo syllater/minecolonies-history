@@ -40,7 +40,8 @@ final class MapSnapshotRateLimiterTest {
 
         assertTrue(limiter.tryAcquire(player, 100L));
         // Pruning happens every 200 ticks and removes a one-day-old entry.
-        assertTrue(limiter.tryAcquire(otherPlayer, 24_200L));
+        // The time is past the prune deadline, but not an exact 200-tick multiple.
+        assertTrue(limiter.tryAcquire(otherPlayer, 24_201L));
         assertEquals(1, limiter.trackedPlayers());
 
         // Integrated-server worlds may restart their game clock in one JVM.

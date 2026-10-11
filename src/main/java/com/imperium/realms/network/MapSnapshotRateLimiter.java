@@ -19,6 +19,8 @@ final class MapSnapshotRateLimiter {
     private static final long ENTRY_TTL_TICKS = 24_000L;
 
     private final Map<UUID, Long> lastAcceptedTick = new HashMap<>();
+    private long nextPruneTick;
+    private long lastObservedTick = -1L;
 
     /**
      * Allows at most one request for a player per cooldown window.
@@ -31,9 +33,14 @@ final class MapSnapshotRateLimiter {
         Objects.requireNonNull(playerId, "playerId");
         final long now = Math.max(0L, serverTick);
 
-        if (Math.floorMod(now, PRUNE_INTERVAL_TICKS) == 0L) {
+        // Prune when an interval has elapsed, not only when a request happens
+        // on an exact tick multiple (players may request at a fixed offset).
+        if (lastObservedTick > now || now >= nextPruneTick) {
             pruneExpiredEntries(now);
+            nextPruneTick = now > Long.MAX_VALUE - PRUNE_INTERVAL_TICKS
+                    ? Long.MAX_VALUE : now + PRUNE_INTERVAL_TICKS;
         }
+        lastObservedTick = now;
 
         final Long previousTick = lastAcceptedTick.get(playerId);
         if (previousTick != null && now >= previousTick
