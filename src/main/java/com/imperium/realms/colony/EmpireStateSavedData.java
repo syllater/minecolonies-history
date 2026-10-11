@@ -74,6 +74,14 @@ public final class EmpireStateSavedData extends SavedData {
             data.setDirty();
         }
 
+        // Preserve the monotonic realm ID sequence across reloads, including IDs
+        // consumed by realms that have since been removed. Active realm records
+        // below still raise this floor if an older save contains a stale counter.
+        final long savedNextRealmId = root.contains("next_realm_id", Tag.TAG_LONG)
+                ? root.getLong("next_realm_id")
+                : 1L;
+        data.nextRealmId = Math.max(1L, savedNextRealmId);
+
         final ListTag entries = root.contains(TAG_COLONIES, Tag.TAG_LIST)
                 ? root.getList(TAG_COLONIES, Tag.TAG_COMPOUND) : new ListTag();
         for (int index = 0; index < entries.size(); index++) {
