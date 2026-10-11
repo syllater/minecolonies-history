@@ -290,5 +290,8 @@
   "imperium_realms.message.empire_map_cross_dimension": "%1$s (colony %2$d) is outside this map in dimension %3$s at X %4$d, Z %5$d.",
   "imperium_realms.message.empire_map_unresolved": "%1$s (colony %2$d, %3$s) is not currently resolvable to a loaded MineColonies colony; its saved realm record remains available.",
   "imperium_realms.message.empire_map_no_centers": "No loaded MineColonies colony centers could be plotted. The map will populate when at least one realm colony is available.",
-  "imperium_realms.audit.action.regional-event": "Regional event resolved"
+  "imperium_realms.audit.action.regional-event": "Regional event resolved",
+  "imperium_realms.message.empire_map_viewport_header": "Strategic map of %1$s — center X %2$d, Z %3$d — scale: one cell = %4$d blocks — visible provinces: %5$d of %6$d.",
+  "imperium_realms.message.empire_map_viewport_help": "Pan by changing center X/Z. Zoom in with fewer blocks per cell or zoom out with more. Command: /imperium empire map <centerX> <centerZ> <blocksPerCell>.",
+  "imperium_realms.message.empire_map_offscreen": "%1$s (colony %2$d) is outside this viewport at X %3$d, Z %4$d."
 }
