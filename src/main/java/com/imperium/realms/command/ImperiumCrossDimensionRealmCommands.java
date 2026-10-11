@@ -11,10 +11,10 @@ import com.imperium.realms.colony.EmpireStateSavedData.DefensiveOrderIssueResult
 import com.minecolonies.api.colony.IColony;
 import com.minecolonies.api.colony.permissions.Action;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -36,30 +36,30 @@ public final class ImperiumCrossDimensionRealmCommands {
     @SubscribeEvent
     public static void registerCommands(final RegisterCommandsEvent event) {
         final var defenseAt = Commands.literal("at")
-                .then(Commands.argument("dimension", StringArgumentType.word())
+                .then(Commands.argument("dimension", ResourceLocationArgument.id())
                         .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                 .executes(context -> issueDefensiveOrderAt(
                                         context.getSource(),
-                                        StringArgumentType.getString(context, "dimension"),
+                                        ResourceLocationArgument.getId(context, "dimension").toString(),
                                         IntegerArgumentType.getInteger(context, "colonyId")))));
         final var defense = Commands.literal("defense").then(defenseAt);
         final var empire = Commands.literal("empire").then(defense);
 
         final var appointAt = Commands.literal("appoint-at")
-                .then(Commands.argument("dimension", StringArgumentType.word())
+                .then(Commands.argument("dimension", ResourceLocationArgument.id())
                         .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                 .then(Commands.argument("governor", EntityArgument.player())
                                         .executes(context -> appointGovernorAt(
                                                 context.getSource(),
-                                                StringArgumentType.getString(context, "dimension"),
+                                                ResourceLocationArgument.getId(context, "dimension").toString(),
                                                 IntegerArgumentType.getInteger(context, "colonyId"),
                                                 EntityArgument.getPlayer(context, "governor"))))));
         final var dismissAt = Commands.literal("dismiss-at")
-                .then(Commands.argument("dimension", StringArgumentType.word())
+                .then(Commands.argument("dimension", ResourceLocationArgument.id())
                         .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                 .executes(context -> dismissGovernorAt(
                                         context.getSource(),
-                                        StringArgumentType.getString(context, "dimension"),
+                                        ResourceLocationArgument.getId(context, "dimension").toString(),
                                         IntegerArgumentType.getInteger(context, "colonyId")))));
         final var governor = Commands.literal("governor").then(appointAt).then(dismissAt);
 
