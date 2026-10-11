@@ -208,7 +208,7 @@ public final class ImperiumCommands {
                                                 .executes(context -> dismissGovernor(
                                                         context.getSource(),
                                                         StringArgumentType.getString(context, "dimension"),
-                                                        IntegerArgumentType.getInteger(context, "colonyId"))))))
+                                                        IntegerArgumentType.getInteger(context, "colonyId")))))))
                 .then(Commands.literal("campaign")
                         .then(Commands.literal("status")
                                 .executes(context -> showCampaigns(context.getSource())))
@@ -238,7 +238,7 @@ public final class ImperiumCommands {
                                                                 context.getSource(),
                                                                 StringArgumentType.getString(context, "type"),
                                                                 StringArgumentType.getString(context, "dimension"),
-                                                                IntegerArgumentType.getInteger(context, "colonyId")))))))
+                                                                IntegerArgumentType.getInteger(context, "colonyId"))))))))
                 .then(Commands.literal("politics")
                         .executes(context -> showPolitics(context.getSource())))
                 .then(Commands.literal("diplomacy")
