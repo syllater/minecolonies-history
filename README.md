@@ -82,6 +82,7 @@ Each real MineColonies colony can remain independent or join a multi-colony real
 - `/imperium empire defense priority` — issue an emergency defensive order to the highest-risk eligible province.
 - `/imperium empire routes`, `/imperium empire defenses` and `/imperium empire theatre` — inspect logistics and operations.
 - `/imperium empire map` — show a coordinate-grid map derived from loaded MineColonies hut centers in the capital's dimension. Other-dimension and currently unloaded colonies are listed separately.
+- `/imperium empire map <centerX> <centerZ> <blocksPerCell>` — show a fixed-coordinate viewport. Change X/Z to pan; use a smaller `blocksPerCell` to zoom in and a larger value to zoom out. Colonies outside the viewport are listed with their coordinates, so you can pan toward them.
 
 The shared reserve is separate from provincial treasuries. Enacted empire-wide tax law remits a portion of already-collected provincial tax receipts instead of taxing those citizens a second time.
 
