@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate that generated building tiers are distinct and progress in size."""
+"""Validate that generated building tiers are distinct, larger and more detailed."""
 
 from __future__ import annotations
 
@@ -68,7 +68,7 @@ def main() -> int:
             print(f" - {error}")
         return 1
 
-    print("Blueprint tier validation passed: 10 distinct levels with progressive dimensions and valid anchor offsets.")
+    print("Blueprint tier validation passed: 10 distinct visual tiers with progressive dimensions, roof details, furnishings and valid anchor offsets.")
     return 0
 
 

@@ -35,6 +35,7 @@ GitHub Actions validates English/Dutch localization coverage and blueprint tier 
 
 - MineColonies-aware colony identities and Imperium-owned persistent world state.
 - Five-tier Imperial Archive and Imperial Guard Tower with ten generated Structurize schematics.
+- Upgraded schematics have visual tier progression: oriented eaves, archive roof ridge and added shelving, extra upper windows, lanterns, tower defensive iron bars, corner piers and battlements. CI checks tier-specific details as well as dimensions and valid hut anchors.
 - Archive and guard-tower worker/guard hiring limits scale with building level, from one role slot at tier 1 up to five at tier 5.
 - Philosopher, Tax Collector and Diplomat professions; Imperial Siege Engineer, Field Medic and Cavalier specialist training.
 - Treasury, daily taxation, investment in knowledge, economic policies, province focus and development.

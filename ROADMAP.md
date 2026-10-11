@@ -35,8 +35,8 @@ Status: specialist training, delayed operations, three-front cap, military postu
 Remaining: balance checks and two-player tests in a real survival world.
 
 ## Milestone 7 — Buildings and progression
-Status: two registered MineColonies hut families with levels 1–5; all ten Structurize schematics load on the dedicated server. Worker capacity and unique progression tiers are checked in CI.
-Remaining: richer visual silhouettes and actual building placement/upgrades in-world.
+Status: two registered MineColonies hut families with levels 1–5; all ten Structurize schematics load on the dedicated server. Worker capacity is tier-dependent, and generated schematics now gain oriented eaves, shelving, roof ridge/lantern accents, corner piers, extra windows and tower battlements at defined levels. CI asserts the presence of tier-specific details.
+Remaining: inspect each level in a real survival world and verify physical placement/upgrades/save-reload.
 
 ## Milestone 8 — Empire and provincial simulation
 Status: multi-colony realm/capital, invitations, central treasury, laws, audit history, governors, regional events, cohesion/separatist pressure and route/defense logistics implemented. The strategic map has both a chat overview and a graphical Imperial Theatre with server-provided province data, pan/zoom and selection.

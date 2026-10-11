@@ -74,3 +74,23 @@ Commit `6ceed484e4ca0d567e9b81555351eae1abadd422` passed the complete GitHub Act
 ### Still pending
 - A human must open the BlockUI ledger and interact with the map in a real survival world.
 - Save/reload and two-player realm-permission tests remain required before release.
+
+
+## 2026-10-11 — Five-tier architectural detail progression (verified by CI)
+
+### Implemented
+- Extended the deterministic blueprint palette with oriented vanilla stair states, slabs, lanterns, bars, fences and chiseled masonry.
+- Tier 2+ adds oriented roof eaves.
+- Archive levels 3–5 add a ridge and progressively more shelving; levels 4–5 add lantern details; level 5 adds raised rooftop ornaments.
+- Guard Tower levels 3–5 add defensive barred window courses, structural corner piers, battlements/fence trim and tier-5 lanterns.
+- Higher levels also add extra window courses and materials rather than relying solely on exterior dimensions.
+- The generator now raises an error if expected tier-specific visual details are absent; the progression validator exercises all 10 tiers.
+
+### Verification
+- Commit: `139cfd5b70eda962c6c2e830d6e18049b77ef833`
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38119918288
+- English/Dutch keys, visual blueprint progression, Gradle tests/build/JAR, headless client startup and dedicated-server validation of all 10 schematics passed.
+
+### Still pending
+- Inspect the actual rendered schematics placed in Minecraft to tune proportions/material choices.
+- Verify in-world construction, upgrade placement and save/reload; automated NBT/schema validation cannot replace that playtest.
