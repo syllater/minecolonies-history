@@ -21,20 +21,23 @@ public record ColonyIdentity(String dimensionId, int colonyId) {
         // A colon alone is not enough to make a valid Minecraft identifier. Check
         // the resource-location grammar here so malformed NBT cannot create keys
         // that will never resolve through MineColonies' dimension lookup.
-        final ResourceLocation parsed;
-        try {
-            parsed = ResourceLocation.parse(dimensionId);
-        } catch (final RuntimeException invalidResourceLocation) {
-            throw new IllegalArgumentException(
-                    "dimensionId must be a valid namespaced dimension key: " + dimensionId,
-                    invalidResourceLocation);
-        }
+        final ResourceLocation parsed = parseDimensionId(dimensionId);
         if (!parsed.toString().equals(dimensionId)) {
             throw new IllegalArgumentException("dimensionId must be canonical: " + dimensionId);
         }
 
         if (colonyId < 0) {
             throw new IllegalArgumentException("colonyId must not be negative");
+        }
+    }
+
+    private static ResourceLocation parseDimensionId(final String dimensionId) {
+        try {
+            return ResourceLocation.parse(dimensionId);
+        } catch (final RuntimeException invalidResourceLocation) {
+            throw new IllegalArgumentException(
+                    "dimensionId must be a valid namespaced dimension key: " + dimensionId,
+                    invalidResourceLocation);
         }
     }
 
