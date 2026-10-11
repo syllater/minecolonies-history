@@ -311,6 +311,37 @@ final class EmpireStateSavedDataTest {
     }
 
     @Test
+    void treasuryTransfersRejectInvalidAmountsAndNonMemberProvincesWithoutMutation() {
+        final EmpireStateSavedData data = new EmpireStateSavedData();
+        final ColonyIdentity capital = new ColonyIdentity("minecraft:overworld", 1);
+        final ColonyIdentity independentProvince = new ColonyIdentity("minecraft:the_nether", 4);
+        assertTrue(data.observeColony(capital, "Capital", 0L));
+        assertTrue(data.observeColony(independentProvince, "Independent Province", 0L));
+
+        final EmpireState localState = data.get(independentProvince).orElseThrow();
+        assertTrue(localState.creditTreasury(125L));
+        final EmpireRealm realm = data.createRealm(
+                "North Sea Union", capital, "emperor-uuid", "Emperor", 0L).orElseThrow();
+
+        assertEquals(EmpireStateSavedData.TreasuryTransferResult.INVALID_AMOUNT,
+                data.depositIntoImperialTreasury(independentProvince, 0L, "Emperor", 1L));
+        assertEquals(EmpireStateSavedData.TreasuryTransferResult.INVALID_AMOUNT,
+                data.depositIntoImperialTreasury(independentProvince, 10L, "Emperor", -1L));
+        assertEquals(EmpireStateSavedData.TreasuryTransferResult.INVALID_AMOUNT,
+                data.withdrawFromImperialTreasury(independentProvince, -1L, "Emperor", 1L));
+
+        assertEquals(EmpireStateSavedData.TreasuryTransferResult.REALM_NOT_FOUND,
+                data.depositIntoImperialTreasury(independentProvince, 10L, "Emperor", 1L));
+        assertEquals(EmpireStateSavedData.TreasuryTransferResult.REALM_NOT_FOUND,
+                data.withdrawFromImperialTreasury(independentProvince, 10L, "Emperor", 1L));
+
+        assertEquals(125L, localState.treasuryCrowns());
+        assertEquals(0L, realm.imperialTreasuryCrowns());
+        assertTrue(realm.recentAuditEntries().isEmpty(),
+                "invalid or non-member transfer attempts must not create audit entries");
+    }
+
+    @Test
     void repeatedMixedTreasuryTransfersNeverCreateOrDestroyCrowns() {
         final TreasuryFixture fixture = treasuryFixture(500L, 800L);
         final long initialTotal = 1_300L;
