@@ -117,3 +117,21 @@ Commit `6ceed484e4ca0d567e9b81555351eae1abadd422` passed the complete GitHub Act
 
 ### Still pending
 - Human in-world test of worker behavior, actual tier upgrades, save/reload and multiplayer permissions; CI startup is not a substitute.
+
+
+## 2026-10-11 — Tier-scaled economy and military persistence test (verified)
+
+### Regression coverage
+- Added an `EmpireStateSavedDataTest` NBT round-trip that records tier-5 Philosopher, Tax Collector and Diplomat output plus tier-5 Field Medic training under Military province focus.
+- Confirms knowledge points, collection efficiency, diplomatic influence, discipline points, province focus and work interval timestamps survive serialization/deserialization.
+- Confirms loading does not permit the same game tick to generate duplicate work rewards.
+- Updated the test and project status to reflect the verified tier-scaled behavior.
+
+### Verification
+- Commit: `a647f1a9876aa83c386a023b5a2da078c06785be`
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38120649287
+- Translation checks, blueprint progression validation, Gradle build/unit tests, JAR upload, client startup and dedicated-server validation of all ten Structurize schematics passed.
+- Artifact: `imperium-realms-a647f1a9876aa83c386a023b5a2da078c06785be`.
+
+### Still pending
+- Human survival-world testing and two-player permission/concurrency/reconnect acceptance; automated startup and unit tests do not exercise a real multiplayer world.

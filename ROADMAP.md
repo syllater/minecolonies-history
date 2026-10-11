@@ -33,7 +33,7 @@ Status: daily taxes, policy multipliers, knowledge investment, worker progressio
 Remaining: deeper coupling to MineColonies resource production and industry.
 
 ## Milestone 6 — Military systems
-Status: specialist training (with Guard Tower tier-based training gain), delayed operations, three-front cap, military postures, supply routes, defensive orders and strategic-priority actions implemented.
+Status: specialist training (with Guard Tower tier-based training gain that doubles under Military province focus), delayed operations, three-front cap, military postures, supply routes, defensive orders and strategic-priority actions implemented.
 Remaining: balance checks and two-player tests in a real survival world.
 
 ## Milestone 7 — Buildings and progression

@@ -15,14 +15,14 @@
 - English and Dutch translation coverage checked in CI.
 
 ## Automated verification
-Commit `0030bd873678a812ee821601002535f58c61878c` passed:
+Commit `a647f1a9876aa83c386a023b5a2da078c06785be` passed:
 - EN/NL localization validation.
 - Blueprint progression validation.
 - `./gradlew --no-daemon test build` and JAR artifact upload.
 - Headless client startup smoke test.
 - Dedicated server startup and validation of all ten Structurize schematics.
 
-Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38120356669
+Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38120649287
 
 ## Required before calling the project release-ready
 - A real in-world test of hut placement, hiring, levels 1–5 and save/reload.
