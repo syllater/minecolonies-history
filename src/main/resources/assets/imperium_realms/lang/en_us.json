@@ -313,5 +313,13 @@
   "imperium_realms.gui.map.zoom_in": "Zoom +",
   "imperium_realms.gui.map.recenter": "Recenter",
   "imperium_realms.gui.map.refresh": "Refresh",
-  "imperium_realms.gui.map.close": "Close"
+  "imperium_realms.gui.map.close": "Close",
+  "imperium_realms.message.help_header": "§6Imperium — Quick help",
+  "imperium_realms.message.help_basics": "Stand inside a MineColonies colony. Start with /imperium status, /imperium province status and /imperium parliament status.",
+  "imperium_realms.message.help_economy": "Economy: /imperium tax <0-25>, /imperium policy <balanced|mercantile|welfare|austerity>, /imperium invest <crowns>. Tax and policy changes are proposals, not immediate changes.",
+  "imperium_realms.message.help_politics": "Parliament: /imperium parliament status, then /imperium parliament assent <id> or veto <id> to resolve an open bill as Emperor.",
+  "imperium_realms.message.help_realm": "Realm: /imperium empire found <name>, invite <colonyId>, join, leave, status. Each province owner accepts its own invitation.",
+  "imperium_realms.message.help_military": "Military: /imperium campaign status, launch <border_patrol|relief_expedition|war_campaign> <colonyId>, or posture <balanced|defensive|offensive>.",
+  "imperium_realms.message.help_map": "Map: /imperium empire map, or press I to open the Imperial Ledger and choose Empire Map.",
+  "imperium_realms.message.help_permissions": "Actions are checked on the server. Economy changes need colony hut-management permission or operator permission; realm-wide actions may be Emperor-only."
 }
