@@ -290,5 +290,8 @@
   "imperium_realms.message.empire_map_cross_dimension": "%1$s (kolonie %2$d) staat buiten deze kaart in dimensie %3$s op X %4$d, Z %5$d.",
   "imperium_realms.message.empire_map_unresolved": "%1$s (kolonie %2$d, %3$s) kan momenteel niet aan een geladen MineColonies-kolonie worden gekoppeld; de opgeslagen rijkgegevens blijven beschikbaar.",
   "imperium_realms.message.empire_map_no_centers": "Er zijn geen geladen MineColonies-koloniecentra om op de kaart te plaatsen. De kaart wordt gevuld zodra er minstens één rijkkolonie beschikbaar is.",
-  "imperium_realms.audit.action.regional-event": "Regionale gebeurtenis afgehandeld"
+  "imperium_realms.audit.action.regional-event": "Regionale gebeurtenis afgehandeld",
+  "imperium_realms.message.empire_map_viewport_header": "Strategische kaart van %1$s — middelpunt X %2$d, Z %3$d — schaal: één vak = %4$d blokken — zichtbare provincies: %5$d van %6$d.",
+  "imperium_realms.message.empire_map_viewport_help": "Verplaats de kaart door X/Z te wijzigen. Zoom in met minder blokken per vak of zoom uit met meer. Commando: /imperium empire map <centerX> <centerZ> <blocksPerCell>.",
+  "imperium_realms.message.empire_map_offscreen": "%1$s (kolonie %2$d) ligt buiten dit kaartvenster op X %3$d, Z %4$d."
 }
