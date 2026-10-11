@@ -314,5 +314,12 @@
   "imperium_realms.gui.map.recenter": "Centreren",
   "imperium_realms.gui.map.refresh": "Vernieuwen",
   "imperium_realms.gui.map.close": "Sluiten",
-  "imperium_realms.message.help_header": "§6Imperium — Snelstartgids"
+  "imperium_realms.message.help_header": "§6Imperium — Snelstartgids",
+  "imperium_realms.message.help_basics": "Sta binnen een MineColonies-kolonie. Begin met /imperium status, /imperium province status en /imperium parliament status.",
+  "imperium_realms.message.help_economy": "Economie: /imperium tax 10, /imperium policy welfare en /imperium invest 50. Belasting en beleid worden eerst als voorstel ingediend en veranderen niet direct.",
+  "imperium_realms.message.help_politics": "Parlement: /imperium parliament status. De keizer kan daarna met assent of veto en het voorstelnummer beslissen over een open voorstel.",
+  "imperium_realms.message.help_realm": "Rijk: /imperium empire found, invite, join, leave of status. Elke provincie-eigenaar accepteert de eigen uitnodiging.",
+  "imperium_realms.message.help_military": "Leger: /imperium campaign status, campaign launch border_patrol gevolgd door een kolonie-ID, of campaign posture defensive.",
+  "imperium_realms.message.help_map": "Kaart: /imperium empire map, of druk op I om het Keizerlijk Register te openen en kies Strategische kaart.",
+  "imperium_realms.message.help_permissions": "Acties worden op de server gecontroleerd. Economische wijzigingen vereisen koloniehutbeheerrechten of operatorrechten; rijkbrede acties kunnen alleen voor de keizer zijn."
 }
