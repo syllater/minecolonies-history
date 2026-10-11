@@ -37,6 +37,7 @@ Use a disposable Minecraft 1.21.1 world with the exact tested NeoForge and MineC
 - [ ] Issue a defensive order and confirm it expires on schedule.
 - [ ] Launch three distinct operations, confirm a fourth is rejected, then wait for each operation to resolve.
 - [ ] Confirm the strategic map shows loaded colony coordinates and explicitly lists unloaded/cross-dimension members.
+- [ ] Use `/imperium empire map <centerX> <centerZ> <blocksPerCell>` to pan and zoom; confirm coordinates remain fixed between viewports, off-screen provinces list their coordinates, and English/Dutch help strings match.
 
 ## Persistence and multiplayer
 - [ ] Save/reload while a parliamentary bill is open.
