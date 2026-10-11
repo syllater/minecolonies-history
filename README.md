@@ -29,7 +29,7 @@ To launch a development client:
 ./gradlew runClient
 ```
 
-GitHub Actions validates English/Dutch localization coverage and blueprint tier progression, builds/tests the mod, launches a dedicated server to validate the generated Structurize blueprints, and performs a headless client-startup smoke test. A green smoke test does not replace an in-world survival construction/save/reload playtest.
+GitHub Actions validates English/Dutch localization coverage and blueprint tier progression, builds/tests the mod, launches a dedicated server to validate the generated Structurize blueprints, and performs a headless client-startup smoke test. The downloadable build artifact contains the mod JAR plus `SHA256SUMS.txt`; after extracting the artifact, verify the JAR with `sha256sum -c SHA256SUMS.txt`. A green smoke test does not replace an in-world survival construction/save/reload playtest.
 
 ## Current systems
 

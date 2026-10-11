@@ -38,12 +38,34 @@ jobs:
         run: chmod +x ./gradlew
       - name: Run unit tests and build mod
         run: ./gradlew --no-daemon test build
-      - name: Upload mod JAR
+      - name: Generate JAR SHA-256 manifest
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          jars=(build/libs/*.jar)
+          if [ ${#jars[@]} -eq 0 ]; then
+            echo "No mod JAR was produced in build/libs/."
+            exit 1
+          fi
+          (
+            cd build/libs
+            sha256sum ./*.jar > SHA256SUMS.txt
+          )
+          {
+            echo '### Mod JAR SHA-256'
+            echo
+            echo 'This manifest is included alongside the built JAR in the downloadable artifact.'
+            echo
+            cat build/libs/SHA256SUMS.txt
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload mod JAR and checksum manifest
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: imperium-realms-${{ github.sha }}
-          path: build/libs/*.jar
+          path: build/libs/*
           if-no-files-found: error
           retention-days: 14
 

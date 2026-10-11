@@ -20,6 +20,7 @@ This file records user-visible changes. Entries are development notes until a re
 - Imperial Theatre dimension selector; clients may request a map projection only for a dimension that actually contains a province in their server-authoritative realm.
 - Per-player server-side cooldown for map snapshot requests, preventing request spam from repeatedly rebuilding colony snapshots.
 - CI validation for translations and generated blueprints, Gradle build/tests, client startup and dedicated-server schematic loading.
+- Downloadable CI artifacts include a SHA-256 manifest for verifying the built mod JAR.
 
 ### Fixed / hardened
 - Server-authoritative map snapshot construction; client requests cannot select arbitrary empire/province identifiers.
