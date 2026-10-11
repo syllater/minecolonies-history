@@ -57,7 +57,7 @@ public final class ImperialMapNetwork {
             return;
         }
         // PayloadRegistrar's default thread is the server main thread.
-        context.reply(createSnapshot(player));
+        context.reply(createSnapshot(player, request.dimensionId()));
     }
 
     private static void handleClientData(
@@ -68,7 +68,9 @@ public final class ImperialMapNetwork {
         clientReceiver.accept(payload);
     }
 
-    private static StrategicMapDataPayload createSnapshot(final ServerPlayer player) {
+    private static StrategicMapDataPayload createSnapshot(
+            final ServerPlayer player,
+            final String requestedDimension) {
         final ServerLevel currentLevel = player.serverLevel();
         final IColony currentColony = MineColoniesIntegration
                 .colonyAt(currentLevel, player.blockPosition()).orElse(null);
@@ -83,33 +85,39 @@ public final class ImperialMapNetwork {
             return unavailable("imperium_realms.message.empire_none");
         }
 
-        final String mapDimension = realm.capital().dimensionId();
+        final boolean requestedDimensionIsRealmMember = requestedDimension != null
+                && realm.provinces().stream()
+                        .anyMatch(identity -> identity.dimensionId().equals(requestedDimension));
+        // A requested view dimension is accepted only if the server's realm state
+        // includes a province in it. Empty/invalid requests default to the capital.
+        final String mapDimension = requestedDimensionIsRealmMember
+                ? requestedDimension : realm.capital().dimensionId();
         int centerX = 0;
         int centerZ = 0;
-        boolean foundMapCenter = false;
+        IColony mapCenter = null;
 
-        final IColony capital = MineColoniesIntegration
-                .colonyByIdentity(currentLevel.getServer(), realm.capital()).orElse(null);
-        if (capital != null) {
-            centerX = capital.getCenter().getX();
-            centerZ = capital.getCenter().getZ();
-            foundMapCenter = true;
-        } else {
+        if (mapDimension.equals(realm.capital().dimensionId())) {
+            mapCenter = MineColoniesIntegration
+                    .colonyByIdentity(currentLevel.getServer(), realm.capital()).orElse(null);
+        }
+        if (mapCenter == null) {
             for (final ColonyIdentity identity : realm.provinces()) {
                 if (!mapDimension.equals(identity.dimensionId())) {
                     continue;
                 }
-                final IColony province = MineColoniesIntegration
+                mapCenter = MineColoniesIntegration
                         .colonyByIdentity(currentLevel.getServer(), identity).orElse(null);
-                if (province != null) {
-                    centerX = province.getCenter().getX();
-                    centerZ = province.getCenter().getZ();
-                    foundMapCenter = true;
+                if (mapCenter != null) {
                     break;
                 }
             }
         }
-        if (!foundMapCenter && mapDimension.equals(currentLevel.dimension().location().toString())) {
+        if (mapCenter != null) {
+            centerX = mapCenter.getCenter().getX();
+            centerZ = mapCenter.getCenter().getZ();
+        } else if (mapDimension.equals(currentLevel.dimension().location().toString())) {
+            // Useful fallback if the member colony is already the active one but
+            // its ID lookup is temporarily unavailable during a lifecycle edge.
             final BlockPos position = currentColony.getCenter();
             centerX = position.getX();
             centerZ = position.getZ();
