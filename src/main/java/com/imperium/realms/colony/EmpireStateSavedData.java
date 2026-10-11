@@ -31,6 +31,18 @@ public final class EmpireStateSavedData extends SavedData {
     public enum DefensiveOrderIssueResult {
         ISSUED, REALM_NOT_FOUND, NOT_MEMBER, ALREADY_ACTIVE, INSUFFICIENT_TREASURY, INVALID_DAY
     }
+
+    /** Outcome of a server-thread transfer between a province and its imperial reserve. */
+    public enum TreasuryTransferResult {
+        TRANSFERRED,
+        PROVINCE_NOT_FOUND,
+        REALM_NOT_FOUND,
+        INVALID_AMOUNT,
+        INSUFFICIENT_PROVINCE_FUNDS,
+        IMPERIAL_TREASURY_FULL,
+        INSUFFICIENT_IMPERIAL_FUNDS,
+        PROVINCE_TREASURY_FULL
+    }
     private static final String TAG_SCHEMA_VERSION = "schema_version";
     private static final String TAG_COLONIES = "colonies";
 
@@ -702,6 +714,92 @@ public final class EmpireStateSavedData extends SavedData {
      * Whether two colony identities belong to the same realm, including when
      * their colonies are in different Minecraft dimensions.
      */
+    /**
+     * Transfers existing provincial crowns into the province's imperial reserve.
+     *
+     * <p>All checks and both balance changes run synchronously on the server
+     * thread. Failed transfers do not change balances or append audit entries.</p>
+     */
+    public TreasuryTransferResult depositIntoImperialTreasury(
+            final ColonyIdentity province,
+            final long amount,
+            final String actor,
+            final long dayIndex) {
+        if (amount <= 0L || amount > EmpireState.MAX_TREASURY || dayIndex < 0L) {
+            return TreasuryTransferResult.INVALID_AMOUNT;
+        }
+        final EmpireState state = colonies.get(province);
+        if (state == null) {
+            return TreasuryTransferResult.PROVINCE_NOT_FOUND;
+        }
+        final EmpireRealm realm = realmForProvince(province).orElse(null);
+        if (realm == null) {
+            return TreasuryTransferResult.REALM_NOT_FOUND;
+        }
+        if (state.treasuryCrowns() < amount) {
+            return TreasuryTransferResult.INSUFFICIENT_PROVINCE_FUNDS;
+        }
+        if (amount > EmpireRealm.MAX_IMPERIAL_TREASURY - realm.imperialTreasuryCrowns()) {
+            return TreasuryTransferResult.IMPERIAL_TREASURY_FULL;
+        }
+
+        // The checks above are intentionally repeated by each balance mutator.
+        // If an invariant changes in a future implementation, rollback leaves the
+        // world state unchanged rather than creating or losing money.
+        if (!state.debitTreasury(amount)) {
+            return TreasuryTransferResult.INSUFFICIENT_PROVINCE_FUNDS;
+        }
+        if (!realm.depositImperialTreasury(amount)) {
+            state.creditTreasury(amount);
+            return TreasuryTransferResult.IMPERIAL_TREASURY_FULL;
+        }
+
+        realm.recordAudit(dayIndex, actor, "deposit", province.storageKey(), amount);
+        setDirty();
+        return TreasuryTransferResult.TRANSFERRED;
+    }
+
+    /**
+     * Withdraws crowns from the imperial reserve into one member province.
+     * The method deliberately does not make authorization decisions; callers
+     * must confirm the Emperor/operator permission before invoking it.
+     */
+    public TreasuryTransferResult withdrawFromImperialTreasury(
+            final ColonyIdentity province,
+            final long amount,
+            final String actor,
+            final long dayIndex) {
+        if (amount <= 0L || amount > EmpireState.MAX_TREASURY || dayIndex < 0L) {
+            return TreasuryTransferResult.INVALID_AMOUNT;
+        }
+        final EmpireState state = colonies.get(province);
+        if (state == null) {
+            return TreasuryTransferResult.PROVINCE_NOT_FOUND;
+        }
+        final EmpireRealm realm = realmForProvince(province).orElse(null);
+        if (realm == null) {
+            return TreasuryTransferResult.REALM_NOT_FOUND;
+        }
+        if (realm.imperialTreasuryCrowns() < amount) {
+            return TreasuryTransferResult.INSUFFICIENT_IMPERIAL_FUNDS;
+        }
+        if (amount > EmpireState.MAX_TREASURY - state.treasuryCrowns()) {
+            return TreasuryTransferResult.PROVINCE_TREASURY_FULL;
+        }
+
+        if (!realm.withdrawImperialTreasury(amount)) {
+            return TreasuryTransferResult.INSUFFICIENT_IMPERIAL_FUNDS;
+        }
+        if (!state.creditTreasury(amount)) {
+            realm.depositImperialTreasury(amount);
+            return TreasuryTransferResult.PROVINCE_TREASURY_FULL;
+        }
+
+        realm.recordAudit(dayIndex, actor, "withdraw", province.storageKey(), amount);
+        setDirty();
+        return TreasuryTransferResult.TRANSFERRED;
+    }
+
     public boolean areProvincesInSameRealm(
             final ColonyIdentity first, final ColonyIdentity second) {
         if (first == null || second == null) {
