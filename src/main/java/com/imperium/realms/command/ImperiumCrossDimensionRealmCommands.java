@@ -36,41 +36,44 @@ public final class ImperiumCrossDimensionRealmCommands {
 
     @SubscribeEvent
     public static void registerCommands(final RegisterCommandsEvent event) {
-        event.getDispatcher().register(Commands.literal("imperium")
-                .then(Commands.literal("empire")
-                        .then(Commands.literal("route")
-                                .then(Commands.literal("build-at")
-                                        .then(Commands.argument("dimension", StringArgumentType.word())
-                                                .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
-                                                        .executes(context -> buildSupplyRouteAt(
-                                                                context.getSource(),
-                                                                StringArgumentType.getString(context, "dimension"),
-                                                                IntegerArgumentType.getInteger(context, "colonyId")))))))
-                        .then(Commands.literal("defense")
-                                .then(Commands.literal("at")
-                                        .then(Commands.argument("dimension", StringArgumentType.word())
-                                                .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
-                                                        .executes(context -> issueDefensiveOrderAt(
-                                                                context.getSource(),
-                                                                StringArgumentType.getString(context, "dimension"),
-                                                                IntegerArgumentType.getInteger(context, "colonyId"))))))))
-                .then(Commands.literal("governor")
-                        .then(Commands.literal("appoint-at")
-                                .then(Commands.argument("dimension", StringArgumentType.word())
-                                        .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
-                                                .then(Commands.argument("governor", EntityArgument.player())
-                                                        .executes(context -> appointGovernorAt(
-                                                                context.getSource(),
-                                                                StringArgumentType.getString(context, "dimension"),
-                                                                IntegerArgumentType.getInteger(context, "colonyId"),
-                                                                EntityArgument.getPlayer(context, "governor")))))))
-                        .then(Commands.literal("dismiss-at")
-                                .then(Commands.argument("dimension", StringArgumentType.word())
-                                        .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
-                                                .executes(context -> dismissGovernorAt(
-                                                        context.getSource(),
-                                                        StringArgumentType.getString(context, "dimension"),
-                                                        IntegerArgumentType.getInteger(context, "colonyId")))))));
+        final var buildAt = Commands.literal("build-at")
+                .then(Commands.argument("dimension", StringArgumentType.word())
+                        .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                .executes(context -> buildSupplyRouteAt(
+                                        context.getSource(),
+                                        StringArgumentType.getString(context, "dimension"),
+                                        IntegerArgumentType.getInteger(context, "colonyId")))));
+        final var route = Commands.literal("route").then(buildAt);
+
+        final var defenseAt = Commands.literal("at")
+                .then(Commands.argument("dimension", StringArgumentType.word())
+                        .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                .executes(context -> issueDefensiveOrderAt(
+                                        context.getSource(),
+                                        StringArgumentType.getString(context, "dimension"),
+                                        IntegerArgumentType.getInteger(context, "colonyId")))));
+        final var defense = Commands.literal("defense").then(defenseAt);
+        final var empire = Commands.literal("empire").then(route).then(defense);
+
+        final var appointAt = Commands.literal("appoint-at")
+                .then(Commands.argument("dimension", StringArgumentType.word())
+                        .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                .then(Commands.argument("governor", EntityArgument.player())
+                                        .executes(context -> appointGovernorAt(
+                                                context.getSource(),
+                                                StringArgumentType.getString(context, "dimension"),
+                                                IntegerArgumentType.getInteger(context, "colonyId"),
+                                                EntityArgument.getPlayer(context, "governor"))))));
+        final var dismissAt = Commands.literal("dismiss-at")
+                .then(Commands.argument("dimension", StringArgumentType.word())
+                        .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                .executes(context -> dismissGovernorAt(
+                                        context.getSource(),
+                                        StringArgumentType.getString(context, "dimension"),
+                                        IntegerArgumentType.getInteger(context, "colonyId")))));
+        final var governor = Commands.literal("governor").then(appointAt).then(dismissAt);
+
+        event.getDispatcher().register(Commands.literal("imperium").then(empire).then(governor));
     }
 
     private static int buildSupplyRouteAt(
