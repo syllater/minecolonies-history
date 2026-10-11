@@ -14,8 +14,9 @@ import com.minecolonies.core.entity.ai.workers.AbstractEntityAIInteract;
 
 /**
  * The Tax Collector works at the Imperial Archive and periodically files tax
- * records. Each successful filing improves the colony's collection efficiency,
- * up to the persisted cap; the daily economy applies that bonus on the server.
+ * records. Each citizen can file once per interval; its tier-scaled contribution
+ * improves the colony-wide collection efficiency up to the persisted cap. The
+ * daily economy applies the shared bonus on the server.
  */
 public final class EntityAIWorkTaxCollector
         extends AbstractEntityAIInteract<JobTaxCollector, BuildingImperialArchive> {
@@ -67,7 +68,7 @@ public final class EntityAIWorkTaxCollector
         if (job.getColony() != null && world != null) {
             final EmpireStateSavedData data = EmpireStateSavedData.get(world);
             final var state = MineColoniesIntegration.getOrCreateState(world, job.getColony());
-            if (state.recordTaxCollectorWork(world.getGameTime(), building.getBuildingLevel())) {
+            if (state.recordTaxCollectorWork(world.getGameTime(), building.getBuildingLevel(), worker.getUUID().toString())) {
                 data.markChanged();
             }
         }

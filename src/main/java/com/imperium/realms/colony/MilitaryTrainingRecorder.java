@@ -5,7 +5,12 @@ import net.minecraft.server.level.ServerLevel;
 
 import java.util.Objects;
 
-/** Bridges MineColonies guard level-ups into Imperium-owned persisted military records. */
+/**
+ * Bridges MineColonies guard level-ups into Imperium-owned persisted military
+ * records. Training yield depends on the assigned Guard Tower level (1/2/3 at
+ * tiers 1–2/3–4/5) and is doubled by the province's Military focus. Training
+ * remains server-side and each discipline is capped by EmpireState.
+ */
 public final class MilitaryTrainingRecorder {
     private MilitaryTrainingRecorder() {
     }

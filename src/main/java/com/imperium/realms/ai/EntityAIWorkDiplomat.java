@@ -14,8 +14,8 @@ import com.minecolonies.core.entity.ai.workers.AbstractEntityAIInteract;
 
 /**
  * A Diplomat works from the Imperial Archive and prepares dispatches. Each
- * successful work interval grants one diplomatic influence point, up to the
- * colony's persisted cap.
+ * citizen earns tier-scaled diplomatic influence once per interval, up to the
+ * colony's persisted cap; separate diplomats can contribute independently.
  */
 public final class EntityAIWorkDiplomat
         extends AbstractEntityAIInteract<JobDiplomat, BuildingImperialArchive> {
@@ -67,7 +67,7 @@ public final class EntityAIWorkDiplomat
         if (job.getColony() != null && world != null) {
             final EmpireStateSavedData data = EmpireStateSavedData.get(world);
             final var state = MineColoniesIntegration.getOrCreateState(world, job.getColony());
-            if (state.recordDiplomatWork(world.getGameTime(), building.getBuildingLevel())) {
+            if (state.recordDiplomatWork(world.getGameTime(), building.getBuildingLevel(), worker.getUUID().toString())) {
                 data.markChanged();
             }
         }

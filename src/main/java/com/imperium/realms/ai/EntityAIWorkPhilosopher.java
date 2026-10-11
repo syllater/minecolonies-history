@@ -13,8 +13,9 @@ import com.minecolonies.api.entity.ai.statemachine.tickratestatemachine.IStateSu
 import com.minecolonies.core.entity.ai.workers.AbstractEntityAIInteract;
 
 /**
- * The Philosopher works at the Imperial Archive during the day. A successful
- * work cycle produces one knowledge point at most once every 1,200 game ticks.
+ * The Philosopher works at the Imperial Archive during the day. Each citizen can
+ * generate tier-scaled knowledge once every 1,200 game ticks; separate workers
+ * can contribute independently during the same interval.
  */
 public final class EntityAIWorkPhilosopher
         extends AbstractEntityAIInteract<JobPhilosopher, BuildingImperialArchive> {
@@ -66,7 +67,7 @@ public final class EntityAIWorkPhilosopher
         if (job.getColony() != null && world != null) {
             final EmpireStateSavedData data = EmpireStateSavedData.get(world);
             final var state = MineColoniesIntegration.getOrCreateState(world, job.getColony());
-            if (state.recordScholarWork(world.getGameTime(), building.getBuildingLevel())) {
+            if (state.recordScholarWork(world.getGameTime(), building.getBuildingLevel(), worker.getUUID().toString())) {
                 data.markChanged();
             }
         }

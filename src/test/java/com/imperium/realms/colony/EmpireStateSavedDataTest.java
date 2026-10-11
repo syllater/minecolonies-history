@@ -93,7 +93,7 @@ final class EmpireStateSavedDataTest {
         assertTrue(loaded.recordDiplomatWork(2_400L, 5, "diplomat-b"));
         assertEquals(6L, loaded.knowledgePoints());
         assertEquals(6, loaded.taxCollectionEfficiencyPercent());
-        assertEquals(6L, loaded.diplomaticInfluence);
+        assertEquals(6L, loaded.diplomaticInfluence());
     }
 
     @Test
