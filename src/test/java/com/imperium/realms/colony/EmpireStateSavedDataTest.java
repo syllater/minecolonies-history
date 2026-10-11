@@ -310,6 +310,56 @@ final class EmpireStateSavedDataTest {
         assertTrue(fullProvince.realm().recentAuditEntries().isEmpty());
     }
 
+    @Test
+    void repeatedMixedTreasuryTransfersNeverCreateOrDestroyCrowns() {
+        final TreasuryFixture fixture = treasuryFixture(500L, 800L);
+        final long initialTotal = 1_300L;
+        int successfulTransfers = 0;
+
+        for (int index = 1; index <= 100; index++) {
+            final long amount = (index * 37L) % 600L + 1L;
+            final EmpireStateSavedData.TreasuryTransferResult result;
+            if ((index & 1) == 0) {
+                result = fixture.data().depositIntoImperialTreasury(
+                        fixture.province(), amount, "Emperor", 10L + index);
+                assertTrue(result == EmpireStateSavedData.TreasuryTransferResult.TRANSFERRED
+                                || result == EmpireStateSavedData.TreasuryTransferResult.INSUFFICIENT_PROVINCE_FUNDS,
+                        "Unexpected deposit result at step " + index + ": " + result);
+            } else {
+                result = fixture.data().withdrawFromImperialTreasury(
+                        fixture.province(), amount, "Emperor", 10L + index);
+                assertTrue(result == EmpireStateSavedData.TreasuryTransferResult.TRANSFERRED
+                                || result == EmpireStateSavedData.TreasuryTransferResult.INSUFFICIENT_IMPERIAL_FUNDS,
+                        "Unexpected withdrawal result at step " + index + ": " + result);
+            }
+
+            if (result == EmpireStateSavedData.TreasuryTransferResult.TRANSFERRED) {
+                successfulTransfers++;
+            }
+
+            assertEquals(initialTotal,
+                    fixture.provinceState().treasuryCrowns() + fixture.realm().imperialTreasuryCrowns(),
+                    "A treasury transfer must not create or destroy crowns at step " + index);
+            assertTrue(fixture.provinceState().treasuryCrowns() >= 0L);
+            assertTrue(fixture.realm().imperialTreasuryCrowns() >= 0L);
+            assertTrue(fixture.provinceState().treasuryCrowns() <= EmpireState.MAX_TREASURY);
+            assertTrue(fixture.realm().imperialTreasuryCrowns() <= EmpireRealm.MAX_IMPERIAL_TREASURY);
+            assertEquals(successfulTransfers, fixture.realm().recentAuditEntries().size(),
+                    "Only successful transfers should add an audit entry at step " + index);
+        }
+
+        final EmpireStateSavedData loaded = EmpireStateSavedData.load(
+                fixture.data().save(new CompoundTag(), null), null);
+        final long loadedProvince = loaded.get(fixture.province()).orElseThrow().treasuryCrowns();
+        final EmpireRealm loadedRealm = loaded.realmForProvince(fixture.province()).orElseThrow();
+
+        assertEquals(initialTotal, loadedProvince + loadedRealm.imperialTreasuryCrowns(),
+                "Save/load must preserve total funds after mixed transfers");
+        assertEquals(fixture.provinceState().treasuryCrowns(), loadedProvince);
+        assertEquals(fixture.realm().imperialTreasuryCrowns(), loadedRealm.imperialTreasuryCrowns());
+        assertEquals(fixture.realm().recentAuditEntries(), loadedRealm.recentAuditEntries());
+    }
+
     private static TreasuryFixture treasuryFixture(
             final long provinceTreasury,
             final long imperialTreasury) {
