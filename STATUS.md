@@ -5,25 +5,25 @@ Last updated: 2026-10-11 Europe/Amsterdam.
 ## Repository
 - Repository: https://github.com/syllater/minecolonies-history
 - Active branch: `milestone-2/colony-integration`
-- Latest fully verified commit: `adda424cc0e53ac36c15345815d772681ac682f4`
+- Latest fully verified code commit: `d5c987833ed49c7c3dc6e215d1506a008aec2147`
 - Estimated overall completion: about 75% (planning estimate, not a measured metric).
 
 ## Latest automated verification
-Commit `adda424cc0e53ac36c15345815d772681ac682f4` passed all jobs in GitHub Actions:
-- English and Dutch translation-key validation, including all eight new quick-help strings.
+Commit `d5c987833ed49c7c3dc6e215d1506a008aec2147` passed all GitHub Actions jobs:
+- English/Dutch translation-key validation, including quick-help strings.
 - Generated building-tier progression validation.
-- Gradle compile, unit tests and mod JAR upload.
+- Gradle compile, unit tests and JAR upload.
 - Headless Minecraft client startup smoke test.
 - Dedicated-server startup and validation of all ten generated Structurize schematics.
 
-Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38126511176
+Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38126846525
 
-The CI JAR artifact is named `imperium-realms-adda424cc0e53ac36c15345815d772681ac682f4` and is available from the workflow's Artifacts section until it expires.
+The CI artifact is named `imperium-realms-d5c987833ed49c7c3dc6e215d1506a008aec2147`; use the workflow's Artifacts section while it remains available.
 
-## Recent usability improvement
-- `/imperium` and `/imperium help` now display a localized quick-start guide.
-- The guide explains colony context, economy proposals, parliamentary assent/veto, realm membership, military operations, the map and server permission checks.
-- Both EN/NL quick-help keys are covered by the automated localization validator.
+## Recently added and hardened
+- `/imperium` and `/imperium help` display a localized quick-start guide.
+- Realm invitations accept a dimension ID and colony ID to invite a colony from another dimension.
+- Strategic war campaigns are rejected against member provinces in the same realm, even when no bilateral diplomacy score has been recorded.
 
 ## Implemented systems
 - MineColonies API integration and versioned Imperium-owned SavedData.
@@ -39,10 +39,10 @@ The CI JAR artifact is named `imperium-realms-adda424cc0e53ac36c15345815d772681a
 - English/Dutch localization and automated validation.
 
 ## Remaining release acceptance
-1. In a real survival world, build both huts, hire workers/guards, upgrade levels 1–5 and save/reload.
-2. Click through the graphical theatre with a real multi-province realm, including off-screen/unloaded provinces.
-3. Run dedicated-server two-player tests for permissions, invitations/membership, treasury concurrency and reconnect/save-reload.
+1. Build both huts in survival, hire workers/guards, upgrade levels 1–5 and save/reload.
+2. Click through the theatre with a real multi-province realm, including off-screen/unloaded and cross-dimension provinces.
+3. Run dedicated-server two-player tests for permissions, invitations/membership, treasury concurrency, allied-war restrictions, reconnect and save/reload.
 4. Complete in-world balance/usability review.
 5. Prepare release notes and final JAR/package review; make an explicit distribution/license decision.
 
-A green CI run proves compile/tests and client/server startup, but does not replace the in-game checks above. Do not mark the release milestone complete until those checks are performed and documented.
+Green CI verifies compile/tests and client/server startup, but does not replace the real in-game checks above. The release is not complete until those are performed and documented.
