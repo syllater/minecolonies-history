@@ -116,8 +116,11 @@ public final class EmpireRealm {
         }
         if (savedInvitations != null) {
             for (final Map.Entry<ColonyIdentity, Long> invitation : savedInvitations.entrySet()) {
-                if (invitation.getKey() != null && !realm.provinces.contains(invitation.getKey())) {
-                    realm.invitations.put(invitation.getKey(), Math.max(0L,
+                final ColonyIdentity invitee = invitation.getKey();
+                if (invitee != null && !realm.provinces.contains(invitee)
+                        && (realm.invitations.containsKey(invitee)
+                                || realm.invitations.size() < MAX_INVITATIONS)) {
+                    realm.invitations.put(invitee, Math.max(0L,
                             invitation.getValue() == null ? 0L : invitation.getValue()));
                 }
             }
