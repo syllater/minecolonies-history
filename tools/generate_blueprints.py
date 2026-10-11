@@ -32,7 +32,33 @@ PALETTE: list[tuple[str, dict[str, str]]] = [
     ("minecraft:bookshelf", {}),
     ("imperium_realms:blockhutimperialarchive", {"facing": "north"}),
     ("imperium_realms:blockhutimperialguardtower", {"facing": "north"}),
+    # Original vanilla roof and defence details used by upper building tiers.
+    ("minecraft:stone_brick_stairs", {"facing": "north", "half": "bottom", "shape": "straight", "waterlogged": "false"}),
+    ("minecraft:stone_brick_stairs", {"facing": "east", "half": "bottom", "shape": "straight", "waterlogged": "false"}),
+    ("minecraft:stone_brick_stairs", {"facing": "south", "half": "bottom", "shape": "straight", "waterlogged": "false"}),
+    ("minecraft:stone_brick_stairs", {"facing": "west", "half": "bottom", "shape": "straight", "waterlogged": "false"}),
+    ("minecraft:spruce_stairs", {"facing": "north", "half": "bottom", "shape": "straight", "waterlogged": "false"}),
+    ("minecraft:spruce_stairs", {"facing": "east", "half": "bottom", "shape": "straight", "waterlogged": "false"}),
+    ("minecraft:spruce_stairs", {"facing": "south", "half": "bottom", "shape": "straight", "waterlogged": "false"}),
+    ("minecraft:spruce_stairs", {"facing": "west", "half": "bottom", "shape": "straight", "waterlogged": "false"}),
+    ("minecraft:oak_stairs", {"facing": "north", "half": "bottom", "shape": "straight", "waterlogged": "false"}),
+    ("minecraft:oak_stairs", {"facing": "east", "half": "bottom", "shape": "straight", "waterlogged": "false"}),
+    ("minecraft:oak_stairs", {"facing": "south", "half": "bottom", "shape": "straight", "waterlogged": "false"}),
+    ("minecraft:oak_stairs", {"facing": "west", "half": "bottom", "shape": "straight", "waterlogged": "false"}),
+    ("minecraft:stone_brick_slab", {"type": "bottom", "waterlogged": "false"}),
+    ("minecraft:spruce_slab", {"type": "bottom", "waterlogged": "false"}),
+    ("minecraft:oak_slab", {"type": "bottom", "waterlogged": "false"}),
+    ("minecraft:lantern", {"hanging": "false", "waterlogged": "false"}),
+    ("minecraft:iron_bars", {"east": "false", "north": "false", "south": "false", "west": "false", "waterlogged": "false"}),
+    ("minecraft:oak_fence", {"east": "false", "north": "false", "south": "false", "west": "false", "waterlogged": "false"}),
+    ("minecraft:chiseled_stone_bricks", {}),
+    ("minecraft:mossy_stone_bricks", {}),
 ]
+
+STONE_STAIRS_NORTH, STONE_STAIRS_EAST, STONE_STAIRS_SOUTH, STONE_STAIRS_WEST = range(11, 15)
+SPRUCE_STAIRS_NORTH, SPRUCE_STAIRS_EAST, SPRUCE_STAIRS_SOUTH, SPRUCE_STAIRS_WEST = range(15, 19)
+OAK_STAIRS_NORTH, OAK_STAIRS_EAST, OAK_STAIRS_SOUTH, OAK_STAIRS_WEST = range(19, 23)
+STONE_SLAB, SPRUCE_SLAB, OAK_SLAB, LANTERN, IRON_BARS, OAK_FENCE, CHISELED_STONE = range(23, 30)
 
 ARCHIVE_SIZES = [(7, 5, 7), (7, 6, 7), (9, 7, 9), (9, 8, 9), (11, 9, 11)]
 TOWER_SIZES = [(7, 5, 7), (7, 7, 7), (9, 8, 9), (9, 9, 9), (11, 11, 11)]
@@ -133,16 +159,25 @@ def build_structure(kind: str, level: int, dimensions: tuple[int, int, int]) -> 
                     continue
 
                 corner = x in (0, size_x - 1) and z in (0, size_z - 1)
-                if y == 2 and not corner:
+
+                # Higher tiers gain a second window course; taller guard towers
+                # use iron bars in defensive slit windows from level 3 onward.
+                window_layer = y == 2 or (level >= 4 and y >= 2 and y % 3 == 2)
+                if window_layer and not corner:
+                    window_block = IRON_BARS if (is_tower and level >= 3) else 6
                     if z in (0, size_z - 1) and x in (1, size_x - 2):
-                        add_block(blocks, x, y, z, 6)
+                        add_block(blocks, x, y, z, window_block)
                         continue
                     if x in (0, size_x - 1) and z == center_z:
-                        add_block(blocks, x, y, z, 6)
+                        add_block(blocks, x, y, z, window_block)
                         continue
 
-                if corner or y == wall_top:
-                    value = 1 if (level % 2 == 1 or is_tower) else 5
+                if corner:
+                    value = CHISELED_STONE if level >= 4 else (1 if (level % 2 == 1 or is_tower) else 5)
+                elif y == wall_top:
+                    value = 7 if (is_tower and level >= 3) else (5 if level >= 3 else 1)
+                elif level >= 3 and (x + z + level) % 5 == 0:
+                    value = 2 if is_tower else 5
                 else:
                     value = 4 if (is_tower and (x + z + level) % 3 == 0) else 3
                 add_block(blocks, x, y, z, value)
@@ -152,13 +187,33 @@ def build_structure(kind: str, level: int, dimensions: tuple[int, int, int]) -> 
     # NBT is required) so builders can place every tier in an existing colony.
     back_z = size_z - 2
     if not is_tower:
-        add_block(blocks, center_x, 1, back_z, 8)
-        if size_x >= 9:
-            add_block(blocks, center_x - 1, 1, back_z, 8)
-            add_block(blocks, center_x + 1, 1, back_z, 8)
+        # More advanced archives receive more shelves and side-wall storage.
+        shelf_radius = min(2, level - 1)
+        for offset in range(-shelf_radius, shelf_radius + 1):
+            shelf_x = center_x + offset
+            if 1 <= shelf_x <= size_x - 2:
+                add_block(blocks, shelf_x, 1, back_z, 8)
+        if level >= 3:
+            for shelf_z in range(2, size_z - 1, 2):
+                add_block(blocks, 1, 1, shelf_z, 8)
+                add_block(blocks, size_x - 2, 1, shelf_z, 8)
+        if level >= 5:
+            add_block(blocks, center_x - 1, 1, back_z - 1, 8)
+            add_block(blocks, center_x + 1, 1, back_z - 1, 8)
     else:
+        # The tower gains a more substantial interior armory rack at level 3+.
         add_block(blocks, center_x - 1, 1, back_z, 2)
         add_block(blocks, center_x + 1, 1, back_z, 2)
+        if level >= 3:
+            add_block(blocks, center_x - 1, 1, back_z - 1, 2)
+            add_block(blocks, center_x + 1, 1, back_z - 1, 2)
+
+    if level >= 3:
+        pier_material = 7 if is_tower else 4
+        for pier_x in (1, size_x - 2):
+            for pier_z in (1, size_z - 2):
+                for y in range(1, wall_top + 1):
+                    add_block(blocks, pier_x, y, pier_z, pier_material)
 
     # A layered, flat-roofed medieval crown with a recessed upper parapet.
     roof_material = 7 if is_tower else (5 if level >= 3 else 1)
@@ -188,6 +243,52 @@ def build_structure(kind: str, level: int, dimensions: tuple[int, int, int]) -> 
     for z in range(size_z):
         add_block(blocks, 1, top_y, z, roof_material)
         add_block(blocks, size_x - 2, top_y, z, roof_material)
+
+    # Every upgrade after tier 1 adds oriented roof trim. Archives use timber
+    # eaves; towers use stone battlements and defensive ironwork.
+    if level >= 2:
+        if is_tower:
+            north_stair, east_stair, south_stair, west_stair = (
+                STONE_STAIRS_NORTH, STONE_STAIRS_EAST, STONE_STAIRS_SOUTH, STONE_STAIRS_WEST)
+        else:
+            north_stair, east_stair, south_stair, west_stair = (
+                SPRUCE_STAIRS_NORTH, SPRUCE_STAIRS_EAST, SPRUCE_STAIRS_SOUTH, SPRUCE_STAIRS_WEST)
+
+        for x in range(2, size_x - 2):
+            if (x + level) % 2 == 0 or not is_tower:
+                add_block(blocks, x, top_y, 1, north_stair)
+                add_block(blocks, x, top_y, size_z - 2, south_stair)
+        for z in range(2, size_z - 2):
+            if (z + level) % 2 == 0 or not is_tower:
+                add_block(blocks, 1, top_y, z, west_stair)
+                add_block(blocks, size_x - 2, top_y, z, east_stair)
+
+    if not is_tower and level >= 3:
+        # Advanced archives receive a timber-and-slab roof ridge.
+        add_block(blocks, center_x - 1, top_y, center_z, OAK_STAIRS_EAST)
+        add_block(blocks, center_x + 1, top_y, center_z, OAK_STAIRS_WEST)
+        add_block(blocks, center_x, top_y, center_z, OAK_SLAB)
+        if level >= 4:
+            add_block(blocks, center_x, top_y, 1, LANTERN)
+            add_block(blocks, center_x, top_y, size_z - 2, LANTERN)
+        if level >= 5:
+            for offset_x in (-1, 1):
+                for offset_z in (-1, 1):
+                    add_block(blocks, center_x + offset_x, top_y, center_z + offset_z, OAK_FENCE)
+            # Keep the ridge slab; place the crown lantern beside it.
+            add_block(blocks, center_x, top_y, center_z + 1, LANTERN)
+
+    if is_tower and level >= 3:
+        for corner_x in (1, size_x - 2):
+            for corner_z in (1, size_z - 2):
+                add_block(blocks, corner_x, top_y, corner_z, CHISELED_STONE)
+        if level >= 4:
+            for x in range(2, size_x - 2, 2):
+                add_block(blocks, x, top_y, 1, OAK_FENCE)
+                add_block(blocks, x, top_y, size_z - 2, OAK_FENCE)
+        if level >= 5:
+            add_block(blocks, center_x - 2, top_y, center_z, LANTERN)
+            add_block(blocks, center_x + 2, top_y, center_z, LANTERN)
 
     # Restore the hut anchor if any later decorative pass ever overlaps it.
     add_block(blocks, center_x, 0, 0, anchor_index)
@@ -241,12 +342,22 @@ def build_structure(kind: str, level: int, dimensions: tuple[int, int, int]) -> 
     if f"imperium_realms:blockhut{'imperialguardtower' if is_tower else 'imperialarchive'}".encode() not in decompressed:
         raise ValueError(f"{kind}{level}: missing hut anchor in palette")
 
-    # Verify every stored palette index is valid; the dimensions and serialized
-    # short-index stream are generated from the same in-memory grid.
-    if any(value < 0 or value >= len(PALETTE) for layer in blocks for row in layer for value in row):
+    # Verify every palette index and assert actual visual tier progression too.
+    used_indices = {value for layer in blocks for row in layer for value in row}
+    if any(value < 0 or value >= len(PALETTE) for value in used_indices):
         raise ValueError(f"{kind}{level}: block palette index out of range")
     if blocks[0][0][center_x] != anchor_index:
         raise ValueError(f"{kind}{level}: anchor missing at primary offset")
+    if level >= 2 and not used_indices.intersection(range(11, 23)):
+        raise ValueError(f"{kind}{level}: missing oriented roof-stair details")
+    if not is_tower and level >= 3 and OAK_SLAB not in used_indices:
+        raise ValueError(f"{kind}{level}: higher Archive tier is missing its roof ridge")
+    if not is_tower and level >= 4 and LANTERN not in used_indices:
+        raise ValueError(f"{kind}{level}: higher Archive tier is missing lantern details")
+    if is_tower and level >= 3 and IRON_BARS not in used_indices:
+        raise ValueError(f"{kind}{level}: higher Tower tier is missing barred defensive windows")
+    if level >= 5 and OAK_FENCE not in used_indices:
+        raise ValueError(f"{kind}{level}: top tier is missing raised rooftop details")
     return gzip.compress(root, mtime=0), (center_x, 0, 0)
 
 
