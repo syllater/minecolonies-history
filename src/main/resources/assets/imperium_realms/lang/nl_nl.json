@@ -62,7 +62,7 @@
   "imperium_realms.message.diplomacy_header": "§6Diplomatiek Bureau — %1$s §7| §eInvloed: §f%2$d",
   "imperium_realms.message.diplomacy_empty": "Er zijn nog geen diplomatieke betrekkingen vastgelegd.",
   "imperium_realms.message.diplomacy_relation": "§eKolonie %1$s #%2$d §7| Relatiescore: §f%3$d §7| Status: %4$s",
-  "imperium_realms.message.diplomacy_instructions": "Gebruik /imperium diplomacy improve <colonyId> om 10 invloed uit te geven en de relatie met 5 punten te verbeteren. Een diplomaat in het Keizerlijk Archief genereert invloed.",
+  "imperium_realms.message.diplomacy_instructions": "Gebruik /imperium diplomacy improve <kolonieId> voor een kolonie in deze dimensie, of /imperium diplomacy improve-at <dimensie> <kolonieId> om een doel in een andere dimensie te kiezen. Elke verbetering kost 10 invloed en verhoogt de relatie met 5 punten. Een diplomaat in het Keizerlijk Archief genereert invloed.",
   "imperium_realms.message.diplomacy_target_missing": "Er is geen MineColonies-kolonie met ID #%1$d gevonden in deze dimensie.",
   "imperium_realms.message.diplomacy_self_target": "Een kolonie kan haar diplomatieke relatie met zichzelf niet verbeteren.",
   "imperium_realms.message.diplomacy_influence_insufficient": "Je hebt minstens 10 diplomatieke invloed nodig om een relatie te verbeteren.",
@@ -128,7 +128,7 @@
   "imperium_realms.message.campaign_header": "Strategische operaties voor %1$s — Schatkist: %2$d kronen | Invloed: %3$d | Actief: %4$d",
   "imperium_realms.message.campaign_empty": "Er zijn nog geen strategische operaties vastgelegd.",
   "imperium_realms.message.campaign_entry": "#%1$d — %2$s tegen %3$s | Resultaat: %4$s | Gestart op dag %5$d | Eindigt op dag %6$d | Afgerond op dag %7$s",
-  "imperium_realms.message.campaign_help": "Gebruik /imperium campaign launch <border_patrol|relief_expedition|war_campaign> <colonyId>. Er kunnen maximaal drie operaties tegelijk lopen tegen verschillende doelen. Gebruik /imperium campaign posture <balanced|defensive|offensive> om de doctrine in te stellen. Operaties worden tijdens de dagelijkse serverbeurt afgehandeld; gebied wordt nooit automatisch overgedragen.",
+  "imperium_realms.message.campaign_help": "Gebruik /imperium campaign launch <border_patrol|relief_expedition|war_campaign> <kolonieId> voor deze dimensie, of /imperium campaign launch-at <type> <dimensie> <kolonieId> voor een andere dimensie. Er kunnen maximaal drie operaties tegelijk lopen tegen verschillende doelen. Gebruik /imperium campaign posture <balanced|defensive|offensive> om de doctrine in te stellen. Operaties worden tijdens de dagelijkse serverbeurt afgehandeld; gebied wordt nooit automatisch overgedragen.",
   "imperium_realms.message.campaign_type_unknown": "Onbekende operatie. Kies border_patrol, relief_expedition of war_campaign.",
   "imperium_realms.message.campaign_target_not_found": "Er bestaat geen MineColonies-kolonie met ID %1$d in deze dimensie.",
   "imperium_realms.message.campaign_self_target": "Een operatie moet een andere kolonie als doel hebben.",
@@ -319,7 +319,7 @@
   "imperium_realms.message.help_economy": "Economie: /imperium tax 10, /imperium policy welfare en /imperium invest 50. Belasting en beleid worden eerst als voorstel ingediend en veranderen niet direct.",
   "imperium_realms.message.help_politics": "Parlement: /imperium parliament status. De keizer kan daarna met assent of veto en het voorstelnummer beslissen over een open voorstel.",
   "imperium_realms.message.help_realm": "Rijk: /imperium empire found, invite, join, leave of status. Elke provincie-eigenaar accepteert de eigen uitnodiging.",
-  "imperium_realms.message.help_military": "Leger: /imperium campaign status, campaign launch border_patrol gevolgd door een kolonie-ID, of campaign posture defensive.",
+  "imperium_realms.message.help_military": "Leger: /imperium campaign status; launch <border_patrol|relief_expedition|war_campaign> <kolonieId> binnen deze dimensie, of launch-at <type> <dimensie> <kolonieId> voor een andere dimensie. Gebruik /imperium campaign posture <balanced|defensive|offensive>.",
   "imperium_realms.message.help_map": "Kaart: /imperium empire map, of druk op I om het Keizerlijk Register te openen en kies Strategische kaart.",
   "imperium_realms.message.help_permissions": "Acties worden op de server gecontroleerd. Economische wijzigingen vereisen koloniehutbeheerrechten of operatorrechten; rijkbrede acties kunnen alleen voor de keizer zijn."
 }
