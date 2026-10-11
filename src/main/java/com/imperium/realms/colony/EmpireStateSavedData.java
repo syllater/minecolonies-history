@@ -348,7 +348,7 @@ public final class EmpireStateSavedData extends SavedData {
                     if (realmTag.contains("invitations", Tag.TAG_LIST)) {
                         final ListTag savedInvitations = realmTag.getList("invitations", Tag.TAG_COMPOUND);
                         final int firstInvitation = Math.max(0,
-                                savedInvitations.size() - EmpireRealm.MAX_INVITATIONS);
+                                savedInvitations.size() - Math.toIntExact(EmpireRealm.MAX_INVITATIONS));
                         for (int invitationIndex = firstInvitation;
                                 invitationIndex < savedInvitations.size();
                                 invitationIndex++) {
