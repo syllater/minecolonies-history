@@ -21,8 +21,8 @@ public final class EmpireState {
     private static final int MAX_TAX_COLLECTION_EFFICIENCY_PERCENT = 25;
     private static final long DIPLOMAT_WORK_INTERVAL_TICKS = 2_400L;
     public static final long MAX_DIPLOMATIC_INFLUENCE = 1_000L;
-    private static final int MAX_DIPLOMATIC_RELATIONS = 256;
-    private static final int MAX_STORED_PROPOSALS = 20;
+    static final int MAX_DIPLOMATIC_RELATIONS = 256;
+    static final int MAX_STORED_PROPOSALS = 20;
     static final int MAX_WORKER_COOLDOWNS = 64;
     private static final int MAX_WORKER_KEY_LENGTH = 96;
 
@@ -95,7 +95,7 @@ public final class EmpireState {
 
     private long nextCampaignId = 1L;
     private final List<MilitaryCampaign> militaryCampaigns = new ArrayList<>();
-    private static final int MAX_STORED_CAMPAIGNS = 12;
+    static final int MAX_STORED_CAMPAIGNS = 12;
 
     private long nextProposalId = 1L;
     private final List<ParliamentProposal> parliamentProposals = new ArrayList<>();
