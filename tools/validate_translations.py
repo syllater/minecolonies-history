@@ -25,6 +25,10 @@ PLACEHOLDER = re.compile(r"%(?:(\d+)\$)?([dsf])")
 # Every value generated from an enum or persisted action ID needs a resource
 # key in both locales. Add suffixes here whenever a dynamic key family grows.
 DYNAMIC_SUFFIXES: dict[str, tuple[str, ...]] = {
+    "imperium_realms.message.": (
+        "help_header", "help_basics", "help_economy", "help_politics",
+        "help_realm", "help_military", "help_map", "help_permissions",
+    ),
     "imperium_realms.audit.action.": (
         "found", "province-invited", "province-joined", "province-left",
         "tax-law", "policy-law", "deposit", "withdraw", "tax-remittance",
