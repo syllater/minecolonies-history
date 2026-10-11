@@ -10,6 +10,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 JAVA = ROOT / "src/main/java/com/imperium/realms/command/ImperiumCommands.java"
 LEGACY_REALM_COMMANDS = ROOT / "src/main/java/com/imperium/realms/command/ImperiumCrossDimensionRealmCommands.java"
+OBSOLETE_DUPLICATE_COMMANDS = ROOT / "src/main/java/com/imperium/realms/command/ImperiumCrossDimensionCommands.java"
 EN = ROOT / "src/main/resources/assets/imperium_realms/lang/en_us.json"
 NL = ROOT / "src/main/resources/assets/imperium_realms/lang/nl_nl.json"
 
@@ -53,6 +54,8 @@ if "resolveTargetColony" not in source or "colonyByIdentity" not in source:
 
 if 'Commands.literal("build-at")' in legacy_source and 'Commands.literal("route")' in legacy_source:
     fail("route build-at must be registered only once; duplicate argument types can shadow namespaced dimension IDs")
+if OBSOLETE_DUPLICATE_COMMANDS.exists():
+    fail("obsolete duplicate diplomacy/campaign registrar must not coexist with the authoritative command tree")
 if "StringArgumentType.word()" in legacy_source:
     fail("cross-dimension aliases must use ResourceLocationArgument so namespaced dimensions are accepted")
 if legacy_source.count('Commands.argument("dimension", ResourceLocationArgument.id())') < 3:
