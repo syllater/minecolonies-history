@@ -322,5 +322,6 @@
   "imperium_realms.message.help_military": "Military: /imperium campaign status; launch <border_patrol|relief_expedition|war_campaign> <colonyId> in this dimension, or launch-at <type> <dimension> <colonyId> across dimensions. Use /imperium campaign posture <balanced|defensive|offensive>.",
   "imperium_realms.message.help_map": "Map: /imperium empire map, or press I to open the Imperial Ledger and choose Empire Map.",
   "imperium_realms.message.help_permissions": "Actions are checked on the server. Economy changes need colony hut-management permission or operator permission; realm-wide actions may be Emperor-only.",
-  "imperium_realms.gui.map.next_dimension": "Next dimension"
+  "imperium_realms.gui.map.next_dimension": "Next dimension",
+  "imperium_realms.message.empire_transfer_failed": "The treasury transfer failed; no crowns were moved."
 }
