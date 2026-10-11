@@ -8,7 +8,6 @@ import com.imperium.realms.colony.EmpireStateSavedData;
 import com.imperium.realms.colony.ImperialDefensiveOrder;
 import com.imperium.realms.colony.MineColoniesIntegration;
 import com.imperium.realms.colony.EmpireStateSavedData.DefensiveOrderIssueResult;
-import com.imperium.realms.colony.EmpireStateSavedData.SupplyRouteBuildResult;
 import com.minecolonies.api.colony.IColony;
 import com.minecolonies.api.colony.permissions.Action;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -36,15 +35,6 @@ public final class ImperiumCrossDimensionRealmCommands {
 
     @SubscribeEvent
     public static void registerCommands(final RegisterCommandsEvent event) {
-        final var buildAt = Commands.literal("build-at")
-                .then(Commands.argument("dimension", StringArgumentType.word())
-                        .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
-                                .executes(context -> buildSupplyRouteAt(
-                                        context.getSource(),
-                                        StringArgumentType.getString(context, "dimension"),
-                                        IntegerArgumentType.getInteger(context, "colonyId")))));
-        final var route = Commands.literal("route").then(buildAt);
-
         final var defenseAt = Commands.literal("at")
                 .then(Commands.argument("dimension", StringArgumentType.word())
                         .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
@@ -53,7 +43,7 @@ public final class ImperiumCrossDimensionRealmCommands {
                                         StringArgumentType.getString(context, "dimension"),
                                         IntegerArgumentType.getInteger(context, "colonyId")))));
         final var defense = Commands.literal("defense").then(defenseAt);
-        final var empire = Commands.literal("empire").then(route).then(defense);
+        final var empire = Commands.literal("empire").then(defense);
 
         final var appointAt = Commands.literal("appoint-at")
                 .then(Commands.argument("dimension", StringArgumentType.word())
@@ -74,47 +64,6 @@ public final class ImperiumCrossDimensionRealmCommands {
         final var governor = Commands.literal("governor").then(appointAt).then(dismissAt);
 
         event.getDispatcher().register(Commands.literal("imperium").then(empire).then(governor));
-    }
-
-    private static int buildSupplyRouteAt(
-            final CommandSourceStack source, final String dimension, final int colonyId) {
-        final EmpireContext context = resolveContext(source);
-        if (context == null) return 0;
-
-        final EmpireRealm realm = context.data().realmForProvince(context.identity()).orElse(null);
-        if (realm == null) {
-            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
-            return 0;
-        }
-        if (!mayManageRealm(context, realm)) {
-            source.sendFailure(Component.translatable("imperium_realms.message.supply_route_emperor_only"));
-            return 0;
-        }
-
-        final IColony target = findColony(source, dimension, colonyId);
-        if (target == null) return 0;
-
-        final ColonyIdentity destination = ColonyIdentity.from(target);
-        MineColoniesIntegration.getOrCreateState(context.level(), target);
-        final SupplyRouteBuildResult result = context.data().buildSupplyRoute(
-                realm.id(), destination, context.player().getGameProfile().getName(), currentDay(source));
-        switch (result) {
-            case BUILT -> {
-                source.sendSuccess(() -> Component.translatable(
-                        "imperium_realms.message.supply_route_built",
-                        target.getName(), EmpireRealm.SUPPLY_ROUTE_BUILD_COST,
-                        realm.imperialTreasuryCrowns()), true);
-                return 1;
-            }
-            case REALM_NOT_FOUND -> source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
-            case NOT_MEMBER -> source.sendFailure(Component.translatable("imperium_realms.message.supply_route_not_member"));
-            case CAPITAL_PROVINCE -> source.sendFailure(Component.translatable("imperium_realms.message.supply_route_capital"));
-            case ALREADY_EXISTS -> source.sendFailure(Component.translatable("imperium_realms.message.supply_route_exists"));
-            case INSUFFICIENT_TREASURY -> source.sendFailure(Component.translatable(
-                    "imperium_realms.message.supply_route_funds", EmpireRealm.SUPPLY_ROUTE_BUILD_COST));
-            case INVALID_DAY -> source.sendFailure(Component.translatable("imperium_realms.message.supply_route_build_failed"));
-        }
-        return 0;
     }
 
     private static int issueDefensiveOrderAt(
