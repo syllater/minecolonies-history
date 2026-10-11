@@ -28,6 +28,10 @@ This file records user-visible changes. Entries are development notes until a re
 - Downloadable CI artifacts include a SHA-256 manifest for verifying the built mod JAR.
 
 ### Fixed / hardened
+- Restored the persisted next-realm ID counter to prevent reusing realm IDs after a world reload; regression tests cover stale counters and active-realm collisions.
+- Bounded malformed SavedData realm membership/invitations and nested parliament, diplomacy, campaign and audit history parsing.
+- Removed the obsolete duplicate diplomacy/campaign command registrar so cross-dimension command paths have a single source of truth.
+- Standardized the remaining dimension-aware realm aliases on namespaced resource-location parsing and added CI checks against duplicate registrars and string-word dimension arguments.
 - Server-authoritative map snapshot construction; client requests cannot select arbitrary empire/province identifiers.
 - Bounded map payload fields/province count and bounded per-citizen work cooldown history.
 - Persisted work cooldowns prevent duplicate profession output immediately after a save/reload.

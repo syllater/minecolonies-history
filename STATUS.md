@@ -76,3 +76,20 @@ These require a person to interact with a real Minecraft world; headless CI cann
 - [Green RC verification workflow](https://github.com/syllater/minecolonies-history/actions/runs/38158411131)
 - [End-to-end survival and multiplayer checklist](docs/PLAYTEST_RELEASE_CHECKLIST.md)
 - [Release-candidate notes](docs/RELEASE_CANDIDATE_NOTES.md)
+
+
+## 2026-10-11 — Saved-state and command-registration hardening
+
+- Added a regression test and fix for restoring the monotonic realm ID counter across save/load, including a stale lower counter with active realms.
+- Bounded malformed saved realm membership/invitations and nested parliament, diplomatic-relation, campaign, and audit-history lists so oversized NBT does not cause unbounded parsing.
+- Removed the obsolete duplicate diplomacy/campaign registrar; the authoritative command tree remains the single registrar for those cross-dimension commands.
+- Standardized dimension inputs on the remaining cross-dimension realm aliases to use `ResourceLocationArgument`, preserving namespaced dimension IDs such as `minecraft:the_nether`.
+- Added CI validation that fails if the obsolete registrar or the duplicate route handler returns.
+
+The last full green workflow before this command-registration cleanup was [run 38161434615](https://github.com/syllater/minecolonies-history/actions/runs/38161434615), against source commit `9e02f41c8ca56288ad1bc76b021116a9ab0b51e5`. The latest command-registration fixes are committed on the active branch and require a completed run on that newer head before they can be marked fully verified.
+
+Useful artifacts from the last green run:
+- [JAR + SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38161434615/artifacts/11710407530)
+- [Self-checking RC ZIP](https://github.com/syllater/minecolonies-history/actions/runs/38161434615/artifacts/11710257739)
+- [Server schematic/registry smoke log](https://github.com/syllater/minecolonies-history/actions/runs/38161434615/artifacts/11710966853)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38161434615/artifacts/11709893984)

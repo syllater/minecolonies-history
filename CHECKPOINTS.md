@@ -415,3 +415,28 @@ Artifacts:
 - Explicit distribution-license choice and final package/legal review.
 
 Do not promote `0.1.0-rc1` to a final release until these gates are completed.
+
+
+## 2026-10-11 — Saved-state bounds and cross-dimension command cleanup
+
+### Changes
+- Restored the saved `next_realm_id` counter, keeping IDs monotonic after reload and after realm removals. Added a regression test for persisted counters and active-realm collision prevention.
+- Capped loaded realm membership and invitations, with malformed NBT coverage.
+- Bounded parsing of historical proposals, diplomatic relations, campaign records, audit history, and related per-province lists; a regression test verifies newest supported records are retained.
+- Removed the obsolete duplicate registrar for diplomacy and campaigns, so the authoritative command tree alone owns those two `*-at` command paths.
+- Switched remaining dimension-aware realm aliases to `ResourceLocationArgument.id()` / `getId(...).toString()`, avoiding namespace parsing ambiguity.
+- Hardened `tools/validate_cross_dimension_commands.py` to reject a restored duplicate registrar or an incorrect dimension parser.
+
+### Verification evidence
+- Saved-state hardening and nested-history tests passed in [workflow 38161434615](https://github.com/syllater/minecolonies-history/actions/runs/38161434615) on commit `9e02f41c8ca56288ad1bc76b021116a9ab0b51e5`.
+- That full workflow passed translation checks, blueprint/dependency/command validators, Gradle unit tests/build, checksum and RC packaging, headless client startup, and dedicated-server startup with 10/10 Structurize blueprints.
+- The subsequent command registrar cleanup is on a newer commit; its dedicated full workflow must complete before this cleanup is recorded as verified.
+
+Artifacts from the last completed green workflow:
+- [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38161434615/artifacts/11710257739)
+- [JAR + checksum](https://github.com/syllater/minecolonies-history/actions/runs/38161434615/artifacts/11710407530)
+- [Dedicated server validation](https://github.com/syllater/minecolonies-history/actions/runs/38161434615/artifacts/11710966853)
+- [Client smoke log](https://github.com/syllater/minecolonies-history/actions/runs/38161434615/artifacts/11709893984)
+
+### Still open
+Real survival-world hut construction/upgrades, worker hiring and work, interactive GUI use, save/reload, genuine two-player permissions/concurrency/reconnect, balance review, and a distribution-license decision.
