@@ -62,7 +62,7 @@
   "imperium_realms.message.diplomacy_header": "§6Diplomatic Office — %1$s §7| §eInfluence: §f%2$d",
   "imperium_realms.message.diplomacy_empty": "No diplomatic relations have been recorded yet.",
   "imperium_realms.message.diplomacy_relation": "§e%1$s colony #%2$d §7| Relation score: §f%3$d §7| Status: %4$s",
-  "imperium_realms.message.diplomacy_instructions": "Use /imperium diplomacy improve <colonyId> to spend 10 influence and improve that relation by 5 points. A Diplomat at the Imperial Archive generates influence.",
+  "imperium_realms.message.diplomacy_instructions": "Use /imperium diplomacy improve <colonyId> for a colony in this dimension, or /imperium diplomacy improve-at <dimension> <colonyId> to target another dimension. Each improvement costs 10 influence and raises the relation by 5 points. A Diplomat at the Imperial Archive generates influence.",
   "imperium_realms.message.diplomacy_target_missing": "No MineColonies colony with ID #%1$d was found in this dimension.",
   "imperium_realms.message.diplomacy_self_target": "A colony cannot improve diplomatic relations with itself.",
   "imperium_realms.message.diplomacy_influence_insufficient": "You need at least 10 diplomatic influence to improve a relation.",
@@ -128,7 +128,7 @@
   "imperium_realms.message.campaign_header": "Strategic operations for %1$s — Treasury: %2$d crowns | Influence: %3$d | Active: %4$d",
   "imperium_realms.message.campaign_empty": "No strategic operations have been recorded.",
   "imperium_realms.message.campaign_entry": "#%1$d — %2$s against %3$s | Result: %4$s | Started day %5$d | Due day %6$d | Resolved day %7$s",
-  "imperium_realms.message.campaign_help": "Use /imperium campaign launch <border_patrol|relief_expedition|war_campaign> <colonyId>. Up to three operations may run concurrently against distinct targets. Use /imperium campaign posture <balanced|defensive|offensive> to set doctrine. Operations resolve on the daily server turn; territory is never automatically transferred.",
+  "imperium_realms.message.campaign_help": "Use /imperium campaign launch <border_patrol|relief_expedition|war_campaign> <colonyId> for this dimension, or /imperium campaign launch-at <type> <dimension> <colonyId> across dimensions. Up to three operations may run concurrently against distinct targets. Use /imperium campaign posture <balanced|defensive|offensive> to set doctrine. Operations resolve on the daily server turn; territory is never automatically transferred.",
   "imperium_realms.message.campaign_type_unknown": "Unknown operation. Choose border_patrol, relief_expedition or war_campaign.",
   "imperium_realms.message.campaign_target_not_found": "No MineColonies colony with ID %1$d exists in this dimension.",
   "imperium_realms.message.campaign_self_target": "An operation must target another colony.",
@@ -319,7 +319,7 @@
   "imperium_realms.message.help_economy": "Economy: /imperium tax <0-25>, /imperium policy <balanced|mercantile|welfare|austerity>, /imperium invest <crowns>. Tax and policy changes are proposals, not immediate changes.",
   "imperium_realms.message.help_politics": "Parliament: /imperium parliament status, then /imperium parliament assent <id> or veto <id> to resolve an open bill as Emperor.",
   "imperium_realms.message.help_realm": "Realm: /imperium empire found <name>, invite <colonyId>, join, leave, status. Each province owner accepts its own invitation.",
-  "imperium_realms.message.help_military": "Military: /imperium campaign status, launch <border_patrol|relief_expedition|war_campaign> <colonyId>, or posture <balanced|defensive|offensive>.",
+  "imperium_realms.message.help_military": "Military: /imperium campaign status; launch <border_patrol|relief_expedition|war_campaign> <colonyId> in this dimension, or launch-at <type> <dimension> <colonyId> across dimensions. Use /imperium campaign posture <balanced|defensive|offensive>.",
   "imperium_realms.message.help_map": "Map: /imperium empire map, or press I to open the Imperial Ledger and choose Empire Map.",
   "imperium_realms.message.help_permissions": "Actions are checked on the server. Economy changes need colony hut-management permission or operator permission; realm-wide actions may be Emperor-only."
 }
