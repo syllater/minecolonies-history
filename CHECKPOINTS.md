@@ -440,3 +440,30 @@ Artifacts from the last completed green workflow:
 
 ### Still open
 Real survival-world hut construction/upgrades, worker hiring and work, interactive GUI use, save/reload, genuine two-player permissions/concurrency/reconnect, balance review, and a distribution-license decision.
+
+
+## 2026-10-11 — Latest full RC verification (all jobs green)
+
+### Source and fixes
+- Source head verified: `d5dc286d2e3e1e1b4ac30b5c7d6af48810fd0952`.
+- The SavedData invitation loader caps oversized records while retaining the latest `MAX_INVITATIONS` records.
+- The invitation regression test covers the first retained, first excluded, and final retained IDs from an oversized list.
+- The parser uses `Math.toIntExact(EmpireRealm.MAX_INVITATIONS)` for the bounded index calculation, avoiding a narrowing-conversion compile error.
+- Cross-dimension command cleanup removes the obsolete duplicate registrar and enforces namespaced dimension parsing through CI validation.
+
+### Verification
+- [Full green workflow 38162651747](https://github.com/syllater/minecolonies-history/actions/runs/38162651747).
+- Translation, blueprint-tier, release/dependency and cross-dimension command validators passed.
+- `./gradlew --no-daemon test build` passed.
+- JAR SHA-256 and self-checking RC packaging passed; JAR SHA-256 is `67ae860f656926b27a2fb30b2bf65d6e880a322629e44b0ce005060ca0e8fd26`.
+- Headless client startup passed.
+- Dedicated-server startup and all 10/10 Structurize schematics/hut anchors passed.
+
+Artifacts:
+- [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38162651747/artifacts/11710624257)
+- [JAR + checksum](https://github.com/syllater/minecolonies-history/actions/runs/38162651747/artifacts/11710779160)
+- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38162651747/artifacts/11710389689)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38162651747/artifacts/11710722865)
+
+### Still open
+Hands-on survival-world hut construction/upgrades, worker hiring/work, real in-world save/reload, interactive GUI use, two-player permissions/concurrency/reconnect, balance review, and a distribution-license decision.

@@ -9,32 +9,31 @@ Last updated: 2026-10-11 Europe/Amsterdam.
 - Active branch: `milestone-2/colony-integration`
 - Candidate version: `0.1.0-rc1`
 - Target: Minecraft Java 1.21.1, Java 21, NeoForge 21.1.x, required MineColonies dependency set.
-- Candidate source commit: `d483bd4a5ad9b89c468e917f2a4151ea41b8ad69`
+- Candidate source commit: `d5dc286d2e3e1e1b4ac30b5c7d6af48810fd0952`
 - Overall completion estimate: approximately **86%**. This is a planning estimate, not a measured metric.
 - Release status: **release candidate only**. No final public release has been published.
 
 ## Automated verification — green
 
-The RC workflow completed successfully in [GitHub Actions run 38158879498](https://github.com/syllater/minecolonies-history/actions/runs/38158411131) against the branch merged with `main` for CI:
+The latest full workflow passed at [GitHub Actions run 38162651747](https://github.com/syllater/minecolonies-history/actions/runs/38162651747), against source commit `d5dc286d2e3e1e1b4ac30b5c7d6af48810fd0952`.
 
-- English and Dutch translation-key/placeholder validation passed.
+- English/Dutch translation-key and placeholder validation passed.
 - Generated blueprint tier-progression validation passed.
-- Release metadata/dependency declaration validation passed.
-- Cross-dimension command registration and EN/NL help-contract validation passed for all seven new command variants.
-- `./gradlew --no-daemon test build` passed, including atomic treasury success/failure cases, a 100-step mixed-transfer conservation test, rejection of invalid amounts/days and non-member provinces, daily imperial tax-remittance conservation/rollback/audit tests, NBT round-trip persistence of balances/audit records, and isolation of malformed dimension identifiers.
-- The JAR SHA-256 manifest was generated and verified.
-- The 0.1.0-rc1 release bundle was assembled; ZIP contents and the embedded JAR checksum were verified.
-- Headless `runClient` startup smoke test passed.
-- Dedicated-server startup passed and validated the MineColonies registry plus all **10/10** generated Structurize schematics and hut anchors.
+- Release metadata and required-dependency validation passed.
+- Cross-dimension command/help-contract validation passed for all seven command variants; duplicate registrar and namespaced-dimension guards also passed.
+- `./gradlew --no-daemon test build` passed, including saved realm-ID counter recovery, bounded malformed NBT/history, preserving the newest invitations when excess invitation records are loaded, atomic treasury transactions, tax-remittance invariants, and map/network regression tests.
+- JAR SHA-256 generation/verification passed.
+- The self-checking `0.1.0-rc1` bundle assembled and its embedded checksum verified.
+- Headless `runClient` startup passed: Minecraft reached the `Sound engine started` marker.
+- Dedicated-server startup passed; MineColonies registration validated and all **10/10** Structurize schematics/hut anchors loaded.
 
-Artifacts from that green run (the RC package is retained for 30 days):
+Artifact links:
+- [Self-checking 0.1.0-rc1 release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38162651747/artifacts/11710624257)
+- [Mod JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38162651747/artifacts/11710779160)
+- [Dedicated-server blueprint/registry log](https://github.com/syllater/minecolonies-history/actions/runs/38162651747/artifacts/11710389689)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38162651747/artifacts/11710722865)
 
-- [Self-checking 0.1.0-rc1 release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709508222)
-- [Mod JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709238816)
-- [Dedicated-server blueprint/registry log](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709563184)
-- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709154307)
-
-The release-candidate bundle contains the JAR, checksum manifest, README, changelog, compatibility notes, candidate notes and the mandatory in-world playtest checklist.
+The built JAR SHA-256 is `67ae860f656926b27a2fb30b2bf65d6e880a322629e44b0ce005060ca0e8fd26`. The workflow artifact links are temporary GitHub Actions artifacts, not permanent release assets.
 
 ## Implemented systems
 
@@ -73,23 +72,16 @@ These require a person to interact with a real Minecraft world; headless CI cann
 ## Review links
 
 - [Draft release-candidate PR #2](https://github.com/syllater/minecolonies-history/pull/2)
-- [Green RC verification workflow](https://github.com/syllater/minecolonies-history/actions/runs/38158411131)
+- [Latest full green verification workflow](https://github.com/syllater/minecolonies-history/actions/runs/38162651747)
 - [End-to-end survival and multiplayer checklist](docs/PLAYTEST_RELEASE_CHECKLIST.md)
 - [Release-candidate notes](docs/RELEASE_CANDIDATE_NOTES.md)
 
 
-## 2026-10-11 — Saved-state and command-registration hardening
+## 2026-10-11 — Latest full verification checkpoint
 
-- Added a regression test and fix for restoring the monotonic realm ID counter across save/load, including a stale lower counter with active realms.
-- Bounded malformed saved realm membership/invitations and nested parliament, diplomatic-relation, campaign, and audit-history lists so oversized NBT does not cause unbounded parsing.
-- Removed the obsolete duplicate diplomacy/campaign registrar; the authoritative command tree remains the single registrar for those cross-dimension commands.
-- Standardized dimension inputs on the remaining cross-dimension realm aliases to use `ResourceLocationArgument`, preserving namespaced dimension IDs such as `minecraft:the_nether`.
-- Added CI validation that fails if the obsolete registrar or the duplicate route handler returns.
-
-The last full green workflow before this command-registration cleanup was [run 38161434615](https://github.com/syllater/minecolonies-history/actions/runs/38161434615), against source commit `9e02f41c8ca56288ad1bc76b021116a9ab0b51e5`. The latest command-registration fixes are committed on the active branch and require a completed run on that newer head before they can be marked fully verified.
-
-Useful artifacts from the last green run:
-- [JAR + SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38161434615/artifacts/11710407530)
-- [Self-checking RC ZIP](https://github.com/syllater/minecolonies-history/actions/runs/38161434615/artifacts/11710257739)
-- [Server schematic/registry smoke log](https://github.com/syllater/minecolonies-history/actions/runs/38161434615/artifacts/11710966853)
-- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38161434615/artifacts/11709893984)
+- Saved realm IDs remain monotonic after save/load; a stale lower counter is reconciled against active realm IDs.
+- Oversized saved membership, invitations, parliament/diplomacy/campaign history and audit lists are bounded.
+- For oversized invitation lists, the loader now retains the latest supported invitations rather than the oldest entries; the regression test passed in the latest build.
+- Cross-dimension commands use the namespaced resource-location parser, and the obsolete duplicate diplomacy/campaign registrar has been removed.
+- [Workflow 38162651747](https://github.com/syllater/minecolonies-history/actions/runs/38162651747) passed all three jobs: build/tests/checksum/RC package, headless client startup, and dedicated-server startup with 10/10 schematics.
+- Current candidate is still `0.1.0-rc1`. A final release remains blocked on genuine survival-world and two-player acceptance, balance review, and the owner's distribution-license decision.

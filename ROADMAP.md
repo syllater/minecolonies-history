@@ -33,13 +33,13 @@
 **Core implementation complete; interactive acceptance pending.** Multi-colony realms, capital/Emperor, invitations, central treasury, laws, audit history, governors, events, cohesion/separatist pressure, route/defense logistics, dimension-aware strategy commands and a graphical Imperial Theatre are implemented. Cross-dimension map projection is restricted to dimensions represented by realm provinces.
 
 ## Milestone 9 — Multiplayer and compatibility hardening
-**Automated hardening complete; true multiplayer tests pending.** Server-authoritative bounded map payloads, per-player request throttling, permissions/domain regression tests, seven-command cross-dimension EN/NL contract validation, dependency checks, full Gradle test/build, headless client start, dedicated-server registry/blueprint smoke and JAR/package checksum verification were green in [workflow 38161434615](https://github.com/syllater/minecolonies-history/actions/runs/38161434615) on source commit `9e02f41c8ca56288ad1bc76b021116a9ab0b51e5`. The subsequent command-registrar cleanup and namespaced dimension-parser validation require a fresh completed workflow before they can be marked verified. Real two-player permission races, treasury concurrency, reconnect and in-world save/load are not covered by headless CI.
+**Automated hardening complete; true multiplayer tests pending.** Server-authoritative bounded map payloads, per-player request throttling, treasury/permission regression tests, the seven-command cross-dimension EN/NL contract, malformed SavedData bounds, unique command registration, namespaced dimension parsing, Gradle tests/build, checksum packaging, headless client startup and dedicated-server startup with 10/10 Structurize schematics are green in [workflow 38162651747](https://github.com/syllater/minecolonies-history/actions/runs/38162651747) on commit `d5dc286d2e3e1e1b4ac30b5c7d6af48810fd0952`. Real two-player permission races, treasury concurrency, reconnect and in-world save/load are not covered by headless CI.
 
 ## Milestone 10 — Release
 **Release candidate assembled; final release is not complete.**
 - Version `0.1.0-rc1`.
 - A self-checking ZIP contains the mod JAR, its SHA-256 manifest, install/compatibility/release notes and the manual acceptance checklist.
-- [Download the last fully verified RC bundle from workflow 38161434615](https://github.com/syllater/minecolonies-history/actions/runs/38161434615/artifacts/11710257739).
+- [Download the latest fully verified RC bundle from workflow 38162651747](https://github.com/syllater/minecolonies-history/actions/runs/38162651747/artifacts/11710624257).
 - Before final release: complete the survival-world and two-player playtests, review balance/package/release notes, choose the distribution license and update the final version/license files.
 
 ## Current acceptance principle
