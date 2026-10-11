@@ -139,4 +139,27 @@ final class EmpireStateSavedDataTest {
         assertEquals(12, loadedProvince.taxRatePercent());
         assertEquals(EconomicPolicy.WELFARE, loadedProvince.economicPolicy());
     }
+
+    @Test
+    void realmMembershipComparisonIncludesDifferentDimensions() {
+        final EmpireStateSavedData data = new EmpireStateSavedData();
+        final ColonyIdentity capital = new ColonyIdentity("minecraft:overworld", 1);
+        final ColonyIdentity crossDimensionMember = new ColonyIdentity("minecraft:the_nether", 4);
+        final ColonyIdentity independent = new ColonyIdentity("minecraft:the_nether", 9);
+        assertTrue(data.observeColony(capital, "Capital", 0L));
+        assertTrue(data.observeColony(crossDimensionMember, "Border Province", 0L));
+        assertTrue(data.observeColony(independent, "Independent Province", 0L));
+
+        final EmpireRealm realm = data.createRealm(
+                "Cross-Dimension Union", capital, "emperor-uuid", "Emperor", 0L).orElseThrow();
+        assertTrue(data.inviteProvince(realm.id(), crossDimensionMember, 1L));
+        assertTrue(data.acceptRealmInvitation(crossDimensionMember, 1L).isPresent());
+
+        assertTrue(data.areProvincesInSameRealm(capital, crossDimensionMember));
+        assertTrue(data.areProvincesInSameRealm(crossDimensionMember, capital));
+        assertFalse(data.areProvincesInSameRealm(capital, independent));
+        assertFalse(data.areProvincesInSameRealm(independent, crossDimensionMember));
+        assertFalse(data.areProvincesInSameRealm(null, capital));
+        assertFalse(data.areProvincesInSameRealm(capital, null));
+    }
 }
