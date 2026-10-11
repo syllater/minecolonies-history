@@ -2,7 +2,7 @@
 
 This file records user-visible changes. Entries are development notes until a release is explicitly published.
 
-## Unreleased — 0.1.0 development
+## Unreleased — 0.1.0-rc1 candidate
 
 ### Added
 - MineColonies-backed provinces with Imperium-owned saved state keyed by dimension and colony ID.
@@ -16,6 +16,7 @@ This file records user-visible changes. Entries are development notes until a re
 - BlockUI Imperial Ledger and interactive Imperial Theatre with server-provided province snapshots, pan, zoom, recenter and selection.
 - English and Dutch translations.
 - Automated tests for state persistence, policy/economy bounds, realm membership, strategic map payloads, work cooldowns and tier progression.
+- Release-candidate metadata validation for the Minecraft/NeoForge line, required dependency declarations, version format and mandatory manual release gates.
 - Cross-dimension supply-route building, defensive orders and governor appointments/dismissals for realm-member provinces.
 - Imperial Theatre dimension selector; clients may request a map projection only for a dimension that actually contains a province in their server-authoritative realm.
 - Per-player server-side cooldown for map snapshot requests, preventing request spam from repeatedly rebuilding colony snapshots.
