@@ -29,3 +29,27 @@ Commit `6ceed484e4ca0d567e9b81555351eae1abadd422` passed the complete GitHub Act
 - Actual in-world building placement, worker hiring, level 1–5 upgrades and save/reload.
 - Actual two-player permissions/economy tests.
 - The map remains a chat grid rather than a full-screen interactive theatre map.
+
+
+## 2026-10-11 — Pan/Zoom Strategic Map Viewport (CI pending at edit time)
+
+### Repository
+- Repository: https://github.com/syllater/minecolonies-history
+- Branch: `milestone-2/colony-integration`
+
+### Change
+- Added `StrategicMapGrid.renderViewport` for a stable world-coordinate grid where X increases east and lower Z is north.
+- Added `isVisibleInViewport` so command output lists only visible map markers and reports off-screen same-dimension provinces with their coordinates.
+- Extended `/imperium empire map` with optional `<centerX> <centerZ> <blocksPerCell>` arguments.
+- Updated English and Dutch translations and README/acceptance instructions.
+- Added unit tests for direction, scale, panning, off-screen filtering and invalid viewport dimensions/scale.
+
+### How to use
+- `/imperium empire map`: auto-fitted overview.
+- `/imperium empire map 0 0 128`: stable viewport around world coordinate X=0, Z=0, where one cell represents 128 blocks.
+- Change the center X/Z to pan. Smaller scale values zoom in; larger values zoom out.
+
+### Verification state
+- Last previously fully verified commit: `bce773194c56d70cc3a659287dd7d83e438bd3af`, including localization, blueprint progression validation, Gradle tests/build, client startup and server blueprint checks.
+- This viewport implementation is not considered verified until its own GitHub Actions run passes.
+- This feature remains a text/chat map, not a graphical screen. Real survival-world and two-player acceptance remain pending.
