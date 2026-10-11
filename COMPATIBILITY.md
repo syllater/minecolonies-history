@@ -10,7 +10,7 @@ Last checked: 2026-10-09.
 | Java | `21` | Required by the pinned MineColonies 1.21.1 build line |
 | NeoForge | `21.1.256` | Pinned by this project |
 | ModDevGradle | `2.0.148` | Pinned by this project |
-| MineColonies | `com.ldtteam:minecolonies:1.1.1403-1.21.1` | Version derived from the official 1.21.1 release tag; Gradle resolution/build still pending |
+| MineColonies | `com.ldtteam:minecolonies:1.1.1403-1.21.1` | Version derived from the official 1.21.1 release tag; dependency resolution and build passed in CI |
 | Structurize | `com.ldtteam:structurize:1.0.832-1.21.1-snapshot` | Minimum version in MineColonies release metadata |
 | BlockUI | `com.ldtteam:blockui:1.0.199-1.21.1-snapshot` | Minimum version in MineColonies release metadata |
 | Domum Ornamentum | `com.ldtteam:domum-ornamentum:1.0.223-snapshot` | Required by MineColonies release metadata |
@@ -59,7 +59,7 @@ The selected 1.21.1 source tag is used for API inspection. Earlier notes that re
 
 ## Build verification
 
-The selected coordinates and source signatures have been inspected but this GitHub-only session cannot run Gradle locally. Actual dependency resolution, compilation, tests and `runClient` must be reported from GitHub Actions or a shell-enabled checkout. A successful metadata/source inspection is not proof of a working build.
+The dependency coordinates resolved and the mod compiled in GitHub Actions. The latest recorded green workflow on commit `117da4d4b97693902d90dd2b490d5a18cd4c8b01` passed Gradle tests/build, headless client startup, dedicated-server startup and all ten generated schematic checks: https://github.com/syllater/minecolonies-history/actions/runs/38121255613. Human in-world construction, upgrades, save/reload and two-player checks remain unverified.
 
 ## Licensing
 
