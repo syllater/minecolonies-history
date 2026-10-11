@@ -94,3 +94,26 @@ Commit `6ceed484e4ca0d567e9b81555351eae1abadd422` passed the complete GitHub Act
 ### Still pending
 - Inspect the actual rendered schematics placed in Minecraft to tune proportions/material choices.
 - Verify in-world construction, upgrade placement and save/reload; automated NBT/schema validation cannot replace that playtest.
+
+
+## 2026-10-11 — Tier-scaled Archive economy and Guard Tower training (verified by CI)
+
+### Implementation
+- Philosopher production uses the actual Archive level: tier 1–2 grants 1 knowledge point, tier 3–4 grants 2, and tier 5 grants 3 per successful 1,200-tick work interval.
+- Tax Collector efficiency uses the same 1/2/3 tier brackets, still capped at 25 percent and gated by the existing work interval.
+- Diplomat influence uses the same 1/2/3 tier brackets, with the existing influence cap and work interval.
+- Guard level-ups grant tier-based military training: tiers 1–2 add 1, tiers 3–4 add 2 and tier 5 adds 3 points to the corresponding discipline; Military province focus doubles the gain.
+- Siege Engineer, Field Medic and Cavalier pass the current Guard Tower level to the server-side training recorder.
+- The old no-tier method signatures remain as tier-1 compatibility overloads. Unbuilt huts return no work yield; discipline-specific and economy caps still apply.
+- Unit tests cover tiers 1, 3 and 5, level-zero rejection and Military-focus multiplication.
+
+### Verification
+- Commit: `0030bd873678a812ee821601002535f58c61878c`
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38120356669
+- Localization validation, blueprint progression validation, Gradle build/tests and JAR upload passed.
+- Headless client startup passed.
+- Dedicated-server startup and all ten Structurize schematic checks passed.
+- Artifact uploaded: `imperium-realms-0030bd873678a812ee821601002535f58c61878c`.
+
+### Still pending
+- Human in-world test of worker behavior, actual tier upgrades, save/reload and multiplayer permissions; CI startup is not a substitute.

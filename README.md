@@ -37,7 +37,8 @@ GitHub Actions validates English/Dutch localization coverage and blueprint tier 
 - Five-tier Imperial Archive and Imperial Guard Tower with ten generated Structurize schematics.
 - Upgraded schematics have visual tier progression: oriented eaves, archive roof ridge and added shelving, extra upper windows, lanterns, tower defensive iron bars, corner piers and battlements. CI checks tier-specific details as well as dimensions and valid hut anchors.
 - Archive and guard-tower worker/guard hiring limits scale with building level, from one role slot at tier 1 up to five at tier 5.
-- Philosopher, Tax Collector and Diplomat professions; Imperial Siege Engineer, Field Medic and Cavalier specialist training.
+- Archive profession output scales with the actual hut tier: Philosopher knowledge, Tax Collector efficiency and Diplomat influence yield 1 per work interval at tiers 1–2, 2 at tiers 3–4 and 3 at tier 5. Guard level-ups also yield tier-scaled Siege Engineering, Field Medicine or Cavalry Drill points; Military province focus doubles that training gain. Existing collection, influence and discipline caps remain enforced.
+- Philosopher, Tax Collector and Diplomat professions; Imperial Siege Engineer, Field Medic and Cavalier specialist training, with Guard Tower tier scaling.
 - Treasury, daily taxation, investment in knowledge, economic policies, province focus and development.
 - Parliament bills with faction votes, imperial assent/veto and expiry.
 - Faction approval, stability, legitimacy, strikes, revolts and separatist petitions driven by MineColonies citizen happiness and provincial conditions.
