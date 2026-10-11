@@ -153,3 +153,15 @@ Commit `6ceed484e4ca0d567e9b81555351eae1abadd422` passed the complete GitHub Act
 - Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38121078239
 - Translation validation, blueprint validation, Gradle build/tests/JAR, client start and dedicated-server validation all passed.
 - The schema bump and cooldown-cap test in the current commit are pending their own CI run.
+
+
+## 2026-10-11 — Verified Build and Release Gate Update
+
+- Verified code commit: `117da4d4b97693902d90dd2b490d5a18cd4c8b01`.
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38121255613.
+- Translation validation, blueprint tier validation, Gradle tests/build and JAR upload passed.
+- Headless client startup and dedicated-server startup with all ten generated Structurize schematics passed.
+- Latest code includes bounded persisted per-citizen Archive cooldown history and save-schema version 22.
+- Estimated overall completion: ~75% as a planning estimate, not a measured metric.
+- Still pending: survival-world construction/hiring/upgrades/save-reload, real graphical map playtest, dedicated-server two-player permission/concurrency/reconnect tests, balance review, release notes/package review and distribution-license decision.
+- JAR artifact name: `imperium-realms-117da4d4b97693902d90dd2b490d5a18cd4c8b01` (temporary CI artifact; regenerate when expired).
