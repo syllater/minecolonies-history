@@ -15,6 +15,8 @@ This file records user-visible changes. Entries are development notes until a re
 - Persistent military operations, postures, supply routes, defensive orders and strategic priority actions.
 - BlockUI Imperial Ledger and interactive Imperial Theatre with server-provided province snapshots, pan, zoom, recenter and selection.
 - English and Dutch translations.
+- Dimension-aware diplomacy, campaign, governor, supply-route, defensive-order and separatist-petition commands resolved against real MineColonies colonies by the server.
+- CI contract validation keeps the seven cross-dimension command variants synchronized with their English and Dutch help messages.
 - Automated tests for state persistence, policy/economy bounds, realm membership, strategic map payloads, work cooldowns and tier progression.
 - Release-candidate metadata validation for the Minecraft/NeoForge line, required dependency declarations, version format and mandatory manual release gates.
 - Cross-dimension supply-route building, defensive orders and governor appointments/dismissals for realm-member provinces.

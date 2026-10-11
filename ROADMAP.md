@@ -30,16 +30,16 @@
 **Automated checks complete; in-world validation pending.** Two registered MineColonies hut families at levels 1–5. CI checks all ten generated schematics, dimensions, anchors and tier-specific architectural detail; dedicated-server startup confirms they load. Actual placement/upgrade aesthetics, hiring and save/reload require a survival test.
 
 ## Milestone 8 — Empire and provincial simulation
-**Core implementation complete; interactive acceptance pending.** Multi-colony realms, capital/Emperor, invitations, central treasury, laws, audit history, governors, events, cohesion/separatist pressure, route/defense logistics and a graphical Imperial Theatre are implemented. Cross-dimension map projection is restricted to dimensions represented by realm provinces.
+**Core implementation complete; interactive acceptance pending.** Multi-colony realms, capital/Emperor, invitations, central treasury, laws, audit history, governors, events, cohesion/separatist pressure, route/defense logistics, dimension-aware strategy commands and a graphical Imperial Theatre are implemented. Cross-dimension map projection is restricted to dimensions represented by realm provinces.
 
 ## Milestone 9 — Multiplayer and compatibility hardening
-**Automated hardening complete; true multiplayer tests pending.** Server-authoritative bounded map payloads, per-player request throttling, permissions/domain regression tests, dependency checks, full Gradle test/build, headless client start, dedicated-server registry/blueprint smoke, and JAR/package checksum verification are green in [workflow 38154793458](https://github.com/syllater/minecolonies-history/actions/runs/38154793458). Real two-player permission races, treasury concurrency, reconnect and in-world save/load are not covered by headless CI.
+**Automated hardening complete; true multiplayer tests pending.** Server-authoritative bounded map payloads, per-player request throttling, permissions/domain regression tests, seven-command cross-dimension EN/NL contract validation, dependency checks, full Gradle test/build, headless client start, dedicated-server registry/blueprint smoke and JAR/package checksum verification are green in [workflow 38155865389](https://github.com/syllater/minecolonies-history/actions/runs/38155865389). Real two-player permission races, treasury concurrency, reconnect and in-world save/load are not covered by headless CI.
 
 ## Milestone 10 — Release
 **Release candidate assembled; final release is not complete.**
 - Version `0.1.0-rc1`.
 - A self-checking ZIP contains the mod JAR, its SHA-256 manifest, install/compatibility/release notes and the manual acceptance checklist.
-- [Download the RC bundle from green workflow 38154793458](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11708051777).
+- [Download the RC bundle from green workflow 38155865389](https://github.com/syllater/minecolonies-history/actions/runs/38155865389/artifacts/11707704528).
 - Before final release: complete the survival-world and two-player playtests, review balance/package/release notes, choose the distribution license and update the final version/license files.
 
 ## Current acceptance principle

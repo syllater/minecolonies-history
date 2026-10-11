@@ -37,9 +37,22 @@ sha256sum --check SHA256SUMS.txt
 
 The CI build verifies this manifest before packaging and verifies the checksum again inside the release-candidate bundle.
 
+## Cross-dimension command syntax
+
+Use these commands to target real MineColonies colonies in another server dimension; existing permission, realm-membership and cost checks still apply:
+
+- Diplomacy: `/imperium diplomacy improve-at <dimension> <colonyId>`
+- Campaign: `/imperium campaign launch-at <type> <dimension> <colonyId>`
+- Governor: `/imperium governor appoint-at <dimension> <colonyId> <player>` and `/imperium governor dismiss-at <dimension> <colonyId>`
+- Supply route: `/imperium empire route build-at <dimension> <colonyId>`
+- Defensive order: `/imperium empire defense-at <dimension> <colonyId>`
+- Separatist petition: `/imperium empire resolve-at <dimension> <colonyId> <reassure|crackdown>`
+
+Use namespaced dimension IDs such as `minecraft:the_nether`. The server resolves targets through MineColonies' public API and verifies the stored dimension + colony ID.
+
 ## Automated checks
 
-The GitHub Actions workflow runs the translation-key and generated-blueprint validators, release metadata validation, `./gradlew --no-daemon test build`, JAR checksum verification, a headless `runClient` startup check, and dedicated-server validation of MineColonies registries and all ten Structurize blueprints. Use the workflow linked from this repository's Actions tab for the exact candidate commit and logs.
+The GitHub Actions workflow runs EN/NL translation/placeholder validation, blueprint progression, dependency metadata validation, cross-dimension command/help validation, `./gradlew --no-daemon test build`, JAR checksum verification, a headless `runClient` startup check and dedicated-server validation of MineColonies registries/all ten Structurize blueprints. The latest full green run is [workflow 38155865389](https://github.com/syllater/minecolonies-history/actions/runs/38155865389).
 
 These automated checks are not a substitute for a hands-on survival-world or two-player dedicated-server test.
 
@@ -48,7 +61,7 @@ These automated checks are not a substitute for a hands-on survival-world or two
 - Confirm both huts build and upgrade at levels 1–5 in a real survival world.
 - Verify worker hiring, production, specialist training, and save/reload in-game.
 - Click through the Imperial Theatre and the ledger in a real client.
-- Perform a two-player test of permissions, cross-dimension membership, treasury concurrency, reconnect and save/reload.
+- Perform a two-player test of permissions, cross-dimension command variants, treasury concurrency, reconnect and save/reload.
 - Decide the project's distribution license and review the final package/license obligations.
 
 The project currently uses `All Rights Reserved` metadata for its own code and has no selected redistribution license. Do not treat this candidate as a license-cleared final release or redistribute it as a finished release before those decisions and tests are complete.

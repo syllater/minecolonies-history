@@ -36,7 +36,11 @@ This checklist is for the release gate that cannot be satisfied by a headless st
 - [ ] Confirm a non-capital owner may leave and the capital owner cannot leave.
 - [ ] Confirm only the Emperor or an operator may perform Emperor-only governance operations.
 - [ ] Improve cross-dimension diplomacy with `/imperium diplomacy improve-at minecraft:the_nether 4`.
+- [ ] Build a cross-dimension supply route to a member province with `/imperium empire route build-at minecraft:the_nether 4`; reject a colony outside the realm or in an invalid dimension.
+- [ ] Issue a cross-dimension defensive order with `/imperium empire defense-at minecraft:the_nether 4`; reject non-member targets and verify treasury limits.
+- [ ] Appoint/dismiss a governor across dimensions with `/imperium governor appoint-at minecraft:the_nether 4 <onlinePlayer>` and `/imperium governor dismiss-at minecraft:the_nether 4`; verify non-capital membership and Emperor/operator authorization.
 - [ ] Attempt a war campaign against a member province in the same realm; expect rejection. Verify an independent province in another dimension can be targeted using `/imperium campaign launch-at war_campaign minecraft:the_nether 4` when all costs/training requirements are met.
+- [ ] Resolve a pending separatist petition across dimensions using `/imperium empire resolve-at minecraft:the_nether 4 reassure` or `crackdown`; verify missing petitions/insufficient funds are rejected.
 - [ ] Confirm campaign resolution waits for the authoritative daily server turn and persists through reload.
 - [ ] Check the Imperial Theatre: pan, zoom, recenter, select province markers, check dimensions and unloaded provinces, and ensure data remains server-authoritative.
 
@@ -53,6 +57,7 @@ This checklist is for the release gate that cannot be satisfied by a headless st
 - [ ] Attach passing output from `./gradlew --no-daemon clean test build`.
 - [ ] Attach the successful headless `runClient` startup log.
 - [ ] Attach the dedicated-server schematic validation log showing all 10/10 blueprints loaded.
+- [ ] Attach the CI cross-dimension command-contract result and verify EN/NL help matches the actual command parser.
 - [ ] Attach this completed checklist and the actual in-world multiplayer report.
 - [ ] Update the mod version, changelog, compatibility notes, artifact hash and release notes.
 - [ ] Choose and apply an explicit distribution license before publishing.

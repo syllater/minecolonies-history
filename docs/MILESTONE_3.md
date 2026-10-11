@@ -12,13 +12,13 @@
 - Up to three concurrent military operations with postures, specialist training and deterministic priority actions.
 - BlockUI Imperial Ledger with shortcuts for politics, economy, development and realm systems.
 - Chat-based strategic overview plus graphical Imperial Theatre with server-authoritative province snapshots, pan/zoom/recenter, province selection and a server-validated dimension selector.
-- Cross-dimension commands for routes, defensive orders, governor appointment/dismissal, diplomacy and campaigns.
+- Cross-dimension commands for routes, defensive orders, governor appointment/dismissal, diplomacy, campaigns and separatist-petition resolution.
 - Per-player map-request throttling with stale limiter cleanup and regression coverage.
 - English and Dutch translation coverage checked in CI.
 
 ## Latest candidate verification
 
-Full workflow: https://github.com/syllater/minecolonies-history/actions/runs/38154793458
+Full workflow: https://github.com/syllater/minecolonies-history/actions/runs/38155865389
 
 The release candidate `0.1.0-rc1` passed:
 - EN/NL translation validation.
@@ -31,10 +31,10 @@ The release candidate `0.1.0-rc1` passed:
 - Dedicated-server registry validation and loading all 10/10 Structurize schematics.
 
 Artifacts:
-- [Release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11708051777)
-- [JAR + checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11708256448)
-- [Server log](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11708471103)
-- [Client log](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11707259036)
+- [Release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38155865389/artifacts/11707704528)
+- [JAR + checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38155865389/artifacts/11708735039)
+- [Server log](https://github.com/syllater/minecolonies-history/actions/runs/38155865389/artifacts/11708552679)
+- [Client log](https://github.com/syllater/minecolonies-history/actions/runs/38155865389/artifacts/11708263500)
 
 ## Required before calling the project release-ready
 - A real in-world test of hut placement, hiring, levels 1–5 and save/reload.

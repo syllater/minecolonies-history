@@ -290,3 +290,44 @@ Artifacts:
 - Explicit distribution-license choice and final release package/legal review.
 
 Do not promote `0.1.0-rc1` to a final release until these gates are completed.
+
+
+## 2026-10-11 — Cross-dimension strategy commands and RC1 workflow green
+
+### Implementation
+- Added dimension-aware variants while preserving dimension-local syntax:
+  - `/imperium diplomacy improve-at <dimension> <colonyId>`
+  - `/imperium campaign launch-at <type> <dimension> <colonyId>`
+  - `/imperium governor appoint-at <dimension> <colonyId> <player>`
+  - `/imperium governor dismiss-at <dimension> <colonyId>`
+  - `/imperium empire route build-at <dimension> <colonyId>`
+  - `/imperium empire defense-at <dimension> <colonyId>`
+  - `/imperium empire resolve-at <dimension> <colonyId> <reassure|crackdown>`
+- Shared target resolver validates the namespaced dimension, looks up a real colony through MineColonies' public API, and verifies dimension + colony ID identity.
+- Existing permission, realm membership, capital-protection and resource-cost checks remain in the common handler paths.
+- Updated English/Dutch help messages and added `tools/validate_cross_dimension_commands.py` so command registrations and help text cannot silently drift apart.
+
+### Verification evidence
+The full workflow passed at [run 38155865389](https://github.com/syllater/minecolonies-history/actions/runs/38155865389):
+- EN/NL translation/placeholder validation.
+- Blueprint tier progression validation.
+- Dependency/release metadata validation.
+- Cross-dimension command and localized help contract validation.
+- `./gradlew --no-daemon test build`.
+- JAR SHA-256 and self-checking RC bundle validation.
+- Headless client startup and dedicated-server startup.
+- Dedicated-server validation of MineColonies registration and all 10/10 Structurize blueprints.
+
+Artifacts:
+- [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38155865389/artifacts/11707704528)
+- [JAR + checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38155865389/artifacts/11708735039)
+- [Server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38155865389/artifacts/11708552679)
+- [Client smoke log](https://github.com/syllater/minecolonies-history/actions/runs/38155865389/artifacts/11708263500)
+
+### Still not certified by automation
+- Actual in-world hut placement/upgrades and worker hiring/work/save-reload.
+- In-client click-through of the Imperial Theatre and new cross-dimension command variants.
+- Real two-player permissions, treasury concurrency, reconnect and multiplayer save/reload.
+- Explicit distribution-license choice and final package/legal review.
+
+Do not promote `0.1.0-rc1` to a final release until these gates are completed.
