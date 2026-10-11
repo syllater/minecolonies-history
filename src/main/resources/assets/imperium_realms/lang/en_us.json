@@ -296,7 +296,7 @@
   "imperium_realms.message.empire_map_offscreen": "%1$s (colony %2$d) is outside this viewport at X %3$d, Z %4$d.",
   "imperium_realms.gui.map.title": "IMPERIAL THEATRE",
   "imperium_realms.gui.map.loading": "Loading imperial realm data…",
-  "imperium_realms.gui.map.navigation": "Arrow keys pan • mouse wheel zoom • click a province marker to inspect it • R recentres.",
+  "imperium_realms.gui.map.navigation": "Arrows pan • mouse wheel zooms • click a province • R recenters • Next dimension switches the map view.",
   "imperium_realms.gui.map.center": "Center X: %1$d | Z: %2$d | Zoom: %3$d blocks per cell",
   "imperium_realms.gui.map.realm": "Realm: %1$s",
   "imperium_realms.gui.map.dimension": "Map dimension: %1$s",
@@ -321,5 +321,6 @@
   "imperium_realms.message.help_realm": "Realm: /imperium empire found <name>, invite <colonyId> or invite <dimension> <colonyId>, join, leave or status. Each province owner accepts its own invitation. Routes, defensive orders and governor appointments can target another dimension.",
   "imperium_realms.message.help_military": "Military: /imperium campaign status; launch <border_patrol|relief_expedition|war_campaign> <colonyId> in this dimension, or launch-at <type> <dimension> <colonyId> across dimensions. Use /imperium campaign posture <balanced|defensive|offensive>.",
   "imperium_realms.message.help_map": "Map: /imperium empire map, or press I to open the Imperial Ledger and choose Empire Map.",
-  "imperium_realms.message.help_permissions": "Actions are checked on the server. Economy changes need colony hut-management permission or operator permission; realm-wide actions may be Emperor-only."
+  "imperium_realms.message.help_permissions": "Actions are checked on the server. Economy changes need colony hut-management permission or operator permission; realm-wide actions may be Emperor-only.",
+  "imperium_realms.gui.map.next_dimension": "Next dimension"
 }
