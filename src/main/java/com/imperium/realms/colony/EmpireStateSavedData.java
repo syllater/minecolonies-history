@@ -956,7 +956,7 @@ public final class EmpireStateSavedData extends SavedData {
             final ColonyIdentity province,
             final long collectedTaxReceipts,
             final long dayIndex) {
-        if (province == null || collectedTaxReceipts <= 0L) {
+        if (province == null || collectedTaxReceipts <= 0L || dayIndex < 0L) {
             return 0L;
         }
         final EmpireState state = colonies.get(province);
