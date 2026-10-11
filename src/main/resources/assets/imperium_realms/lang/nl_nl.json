@@ -322,5 +322,6 @@
   "imperium_realms.message.help_military": "Leger: /imperium campaign status; launch <border_patrol|relief_expedition|war_campaign> <kolonieId> binnen deze dimensie, of launch-at <type> <dimensie> <kolonieId> voor een andere dimensie. Gebruik /imperium campaign posture <balanced|defensive|offensive>.",
   "imperium_realms.message.help_map": "Kaart: /imperium empire map, of druk op I om het Keizerlijk Register te openen en kies Strategische kaart.",
   "imperium_realms.message.help_permissions": "Acties worden op de server gecontroleerd. Economische wijzigingen vereisen koloniehutbeheerrechten of operatorrechten; rijkbrede acties kunnen alleen voor de keizer zijn.",
-  "imperium_realms.gui.map.next_dimension": "Volgende dimensie"
+  "imperium_realms.gui.map.next_dimension": "Volgende dimensie",
+  "imperium_realms.message.empire_transfer_failed": "De schatkistoverdracht is mislukt; er zijn geen kronen verplaatst."
 }
