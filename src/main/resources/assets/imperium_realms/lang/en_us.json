@@ -143,7 +143,7 @@
   "imperium_realms.message.empire_found_help": "Use /imperium empire found <name> to establish a realm with this colony as its capital.",
   "imperium_realms.message.empire_status": "REALM: %1$s (#%2$d) | Emperor: %3$s | Capital: %4$s | Provinces: %5$d | Imperial reserve: %6$d crowns | Provincial treasury total: %7$d crowns | Knowledge: %8$d | Average stability: %9$d",
   "imperium_realms.message.empire_province": "Province: %1$s | Dimension: %2$s | Colony ID: %3$d | Capital: %4$s",
-  "imperium_realms.message.empire_help": "Use /imperium empire invite <colonyId> to invite a neighbour. The Emperor manages membership; each province owner accepts with /imperium empire join. Invitations expire after 7 in-game days. Non-capital provinces can leave.",
+  "imperium_realms.message.empire_help": "Invite a colony in this dimension with /imperium empire invite 12. For another dimension, use /imperium empire invite minecraft:the_nether 12. The Emperor manages membership; each province owner accepts with /imperium empire join. Invitations expire after 7 in-game days. Non-capital provinces can leave.",
   "imperium_realms.message.empire_already_member": "This colony already belongs to an imperial realm.",
   "imperium_realms.message.empire_found_failed": "Could not found this realm. Choose a unique name of 3–32 characters and ensure the colony is not already a member.",
   "imperium_realms.message.empire_founded": "The Realm of %1$s has been founded (#%2$d). This colony is its capital and you are its Emperor.",
