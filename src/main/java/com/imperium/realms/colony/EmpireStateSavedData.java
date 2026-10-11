@@ -347,8 +347,10 @@ public final class EmpireStateSavedData extends SavedData {
                     final Map<ColonyIdentity, Long> invitations = new LinkedHashMap<>();
                     if (realmTag.contains("invitations", Tag.TAG_LIST)) {
                         final ListTag savedInvitations = realmTag.getList("invitations", Tag.TAG_COMPOUND);
-                        for (int invitationIndex = 0;
-                                invitationIndex < Math.min(savedInvitations.size(), EmpireRealm.MAX_INVITATIONS);
+                        final int firstInvitation = Math.max(0,
+                                savedInvitations.size() - EmpireRealm.MAX_INVITATIONS);
+                        for (int invitationIndex = firstInvitation;
+                                invitationIndex < savedInvitations.size();
                                 invitationIndex++) {
                             final CompoundTag invitation = savedInvitations.getCompound(invitationIndex);
                             try {

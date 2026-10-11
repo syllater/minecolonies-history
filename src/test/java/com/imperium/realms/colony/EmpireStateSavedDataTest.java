@@ -563,6 +563,13 @@ final class EmpireStateSavedDataTest {
         final EmpireRealm restored = loaded.realmById(originalRealm.id()).orElseThrow();
         assertEquals(EmpireRealm.MAX_PROVINCES, restored.provinceCount());
         assertEquals((int) EmpireRealm.MAX_INVITATIONS, restored.invitations().size());
+        // When the save contains too many invitations, retain the newest records.
+        assertTrue(restored.invitations().containsKey(
+                new ColonyIdentity("minecraft:the_end", 4_040)));
+        assertFalse(restored.invitations().containsKey(
+                new ColonyIdentity("minecraft:the_end", 4_039)));
+        assertTrue(restored.invitations().containsKey(
+                new ColonyIdentity("minecraft:the_end", 4_167)));
     }
 
 
