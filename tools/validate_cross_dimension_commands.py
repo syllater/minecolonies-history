@@ -53,6 +53,12 @@ if "resolveTargetColony" not in source or "colonyByIdentity" not in source:
 
 if 'Commands.literal("build-at")' in legacy_source and 'Commands.literal("route")' in legacy_source:
     fail("route build-at must be registered only once; duplicate argument types can shadow namespaced dimension IDs")
+if "StringArgumentType.word()" in legacy_source:
+    fail("cross-dimension aliases must use ResourceLocationArgument so namespaced dimensions are accepted")
+if legacy_source.count('Commands.argument("dimension", ResourceLocationArgument.id())') < 3:
+    fail("defensive-order and governor aliases must all use the namespaced dimension argument parser")
+if legacy_source.count('ResourceLocationArgument.getId(context, "dimension").toString()') < 3:
+    fail("defensive-order and governor aliases must read dimension IDs through ResourceLocationArgument")
 
 if 'Commands.argument("dimension", ResourceLocationArgument.id())' not in source:
     fail("dimension arguments must use ResourceLocationArgument.id(), not Brigadier's unquoted-word parser")
