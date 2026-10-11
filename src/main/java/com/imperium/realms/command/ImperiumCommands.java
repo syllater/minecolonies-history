@@ -45,6 +45,9 @@ public final class ImperiumCommands {
     @SubscribeEvent
     public static void registerCommands(final RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("imperium")
+                .executes(context -> ImperiumHelp.show(context.getSource()))
+                .then(Commands.literal("help")
+                        .executes(context -> ImperiumHelp.show(context.getSource())))
                 .then(Commands.literal("status")
                         .executes(context -> showStatus(context.getSource())))
                 .then(Commands.literal("tax")
