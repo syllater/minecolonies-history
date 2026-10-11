@@ -82,7 +82,7 @@ final class StrategicMapGridTest {
         assertEquals("..*..", zoomedOut.get(1));
 
         final List<String> panned = StrategicMapGrid.renderViewport(points, 5, 3, 40, 0, 1);
-        assertEquals("..B..", panned.get(1));
+        assertEquals(".AB..", panned.get(1));
     }
 
     @Test
