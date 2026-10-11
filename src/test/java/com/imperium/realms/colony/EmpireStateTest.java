@@ -216,6 +216,21 @@ final class EmpireStateTest {
     }
 
     @Test
+    void perWorkerCooldownsExpireAndStorageRemainsBounded() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 309), "Archive", 0L);
+
+        assertTrue(state.recordScholarWork(100L, 1, "worker-a"));
+        assertFalse(state.recordScholarWork(101L, 1, "worker-a"));
+        assertTrue(state.recordScholarWork(1_300L, 1, "worker-a"));
+
+        for (int index = 0; index < EmpireState.MAX_WORKER_COOLDOWNS + 10; index++) {
+            assertTrue(state.recordScholarWork(2_000L, 1, "worker-" + index));
+        }
+        assertEquals(EmpireState.MAX_WORKER_COOLDOWNS, state.scholarWorkerCooldowns().size());
+    }
+
+    @Test
     void guardTowerTierImprovesSpecialistMilitaryTraining() {
         final EmpireState tierOne = EmpireState.create(
                 new ColonyIdentity("minecraft:overworld", 401), "Tier One", 0L);

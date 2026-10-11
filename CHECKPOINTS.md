@@ -135,3 +135,21 @@ Commit `6ceed484e4ca0d567e9b81555351eae1abadd422` passed the complete GitHub Act
 
 ### Still pending
 - Human survival-world testing and two-player permission/concurrency/reconnect acceptance; automated startup and unit tests do not exercise a real multiplayer world.
+
+
+## 2026-10-11 — Per-citizen Archive production (verified before cooldown-bound test)
+
+### Change
+- Philosopher, Tax Collector and Diplomat work now uses the worker UUID as a cooldown key.
+- Different workers can contribute within the same colony work interval; repeated work callbacks from the same citizen are throttled.
+- Per-citizen cooldown timestamps are serialized in three SavedData lists and restored independently on world load.
+- Existing saves without the new lists use their old colony-wide timestamps as a one-time migration safety guard.
+- Expired entries are pruned and stored cooldown history is bounded at 64 worker records per profession.
+- Incremented the SavedData schema version to 22.
+- Added unit coverage for per-worker output, same-worker duplicate blocking, a worker becoming due again after the interval and the bounded cooldown map.
+
+### Previously green verification
+- Commit: `eb0b9a9d4011e5abb63de424d76655f0395e8694`
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38121078239
+- Translation validation, blueprint validation, Gradle build/tests/JAR, client start and dedicated-server validation all passed.
+- The schema bump and cooldown-cap test in the current commit are pending their own CI run.

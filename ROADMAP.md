@@ -18,7 +18,7 @@ Status: substantial vertical slice implemented:
 - Five-tier Imperial Archive and Imperial Guard Tower with ten generated Structurize blueprints.
 - Philosopher, Tax Collector and Diplomat jobs plus specialist guard roles.
 - Treasury, taxation, knowledge investments, policies, development and BlockUI ledger.
-- Archive tier-scaled Philosopher, Tax Collector and Diplomat output with capped values.
+- Archive tier-scaled Philosopher, Tax Collector and Diplomat output with capped values and independent persisted per-citizen cooldowns; multiple workers contribute in the same interval without duplicate rewards.
 - Guard Tower tier-scaled specialist training on level-up, doubled by Military province focus.
 - Persistent save/load for complex province economy/profession state and realm state.
 - Worker capacity progression from one slot at tier 1 to five at tier 5, with unit coverage.

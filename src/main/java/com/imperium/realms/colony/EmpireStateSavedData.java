@@ -18,7 +18,7 @@ import java.util.Optional;
 /** Global Imperium registry stored in the server overworld. */
 public final class EmpireStateSavedData extends SavedData {
     public static final String DATA_NAME = "imperium_realms_empire_state";
-    private static final int SCHEMA_VERSION = 21;
+    private static final int SCHEMA_VERSION = 22; // Adds per-citizen Archive work cooldown lists.
 
     public enum PetitionResolutionResult {
         RESOLVED, REALM_NOT_FOUND, NOT_MEMBER, CAPITAL_PROVINCE, NO_PETITION, INSUFFICIENT_TREASURY
