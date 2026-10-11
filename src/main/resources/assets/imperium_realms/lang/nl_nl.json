@@ -143,7 +143,7 @@
   "imperium_realms.message.empire_found_help": "Gebruik /imperium empire found <naam> om met deze kolonie als hoofdstad een rijk te stichten.",
   "imperium_realms.message.empire_status": "RIJK: %1$s (#%2$d) | Keizer: %3$s | Hoofdstad: %4$s | Provincies: %5$d | Keizerlijke reserve: %6$d kronen | Provinciale schatkisten samen: %7$d kronen | Kennis: %8$d | Gemiddelde stabiliteit: %9$d",
   "imperium_realms.message.empire_province": "Provincie: %1$s | Dimensie: %2$s | Kolonie-ID: %3$d | Hoofdstad: %4$s",
-  "imperium_realms.message.empire_help": "Gebruik /imperium empire invite <kolonieId> om een buur uit te nodigen. De keizer beheert het lidmaatschap; de eigenaar van de provincie accepteert met /imperium empire join. Uitnodigingen verlopen na 7 speldagen. Niet-hoofdstadprovincies kunnen vertrekken.",
+  "imperium_realms.message.empire_help": "Nodig een kolonie in deze dimensie uit met /imperium empire invite 12. Voor een andere dimensie gebruik je /imperium empire invite minecraft:the_nether 12. De keizer beheert het lidmaatschap; elke provincie-eigenaar accepteert met /imperium empire join. Uitnodigingen verlopen na 7 speldagen. Niet-hoofdstedelijke provincies kunnen vertrekken.",
   "imperium_realms.message.empire_already_member": "Deze kolonie behoort al tot een keizerlijk rijk.",
   "imperium_realms.message.empire_found_failed": "Het rijk kon niet worden gesticht. Kies een unieke naam van 3–32 tekens en controleer of de kolonie nog geen lid is.",
   "imperium_realms.message.empire_founded": "Het Rijk van %1$s is gesticht (#%2$d). Deze kolonie is de hoofdstad en jij bent de keizer.",
