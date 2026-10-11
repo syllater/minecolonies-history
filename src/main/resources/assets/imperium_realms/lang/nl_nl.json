@@ -296,7 +296,7 @@
   "imperium_realms.message.empire_map_offscreen": "%1$s (kolonie %2$d) ligt buiten dit kaartvenster op X %3$d, Z %4$d.",
   "imperium_realms.gui.map.title": "KEIZERLIJK THEATER",
   "imperium_realms.gui.map.loading": "Keizerlijke rijkgegevens laden…",
-  "imperium_realms.gui.map.navigation": "Pijltjes verplaatsen • muiswiel zoomt • klik op een provincie • R centreert opnieuw.",
+  "imperium_realms.gui.map.navigation": "Pijlen verplaatsen • muiswiel zoomt • klik op een provincie • R centreert opnieuw • Volgende dimensie wisselt de kaartweergave.",
   "imperium_realms.gui.map.center": "Middelpunt X: %1$d | Z: %2$d | Zoom: %3$d blokken per vak",
   "imperium_realms.gui.map.realm": "Rijk: %1$s",
   "imperium_realms.gui.map.dimension": "Kaartdimensie: %1$s",
@@ -321,5 +321,6 @@
   "imperium_realms.message.help_realm": "Rijk: /imperium empire found <naam>, invite <colonyId> of invite <dimensie> <colonyId>, join, leave of status. Elke provincie-eigenaar accepteert de eigen uitnodiging. Routes, verdedigingsbevelen en gouverneurs kunnen ook een provincie in een andere dimensie beheren.",
   "imperium_realms.message.help_military": "Leger: /imperium campaign status; launch <border_patrol|relief_expedition|war_campaign> <kolonieId> binnen deze dimensie, of launch-at <type> <dimensie> <kolonieId> voor een andere dimensie. Gebruik /imperium campaign posture <balanced|defensive|offensive>.",
   "imperium_realms.message.help_map": "Kaart: /imperium empire map, of druk op I om het Keizerlijk Register te openen en kies Strategische kaart.",
-  "imperium_realms.message.help_permissions": "Acties worden op de server gecontroleerd. Economische wijzigingen vereisen koloniehutbeheerrechten of operatorrechten; rijkbrede acties kunnen alleen voor de keizer zijn."
+  "imperium_realms.message.help_permissions": "Acties worden op de server gecontroleerd. Economische wijzigingen vereisen koloniehutbeheerrechten of operatorrechten; rijkbrede acties kunnen alleen voor de keizer zijn.",
+  "imperium_realms.gui.map.next_dimension": "Volgende dimensie"
 }
