@@ -324,7 +324,10 @@ public final class EmpireStateSavedData extends SavedData {
                             try {
                                 final ColonyIdentity identity = new ColonyIdentity(
                                         member.getString("dimension"), member.getInt("colony_id"));
-                                if (!data.realmForProvince(identity).isPresent()) {
+                                if (!capital.equals(identity)
+                                        && !memberProvinces.contains(identity)
+                                        && memberProvinces.size() < EmpireRealm.MAX_PROVINCES - 1
+                                        && !data.realmForProvince(identity).isPresent()) {
                                     memberProvinces.add(identity);
                                 }
                             } catch (IllegalArgumentException ignored) {
@@ -341,7 +344,9 @@ public final class EmpireStateSavedData extends SavedData {
                             try {
                                 final ColonyIdentity identity = new ColonyIdentity(
                                         invitation.getString("dimension"), invitation.getInt("colony_id"));
-                                if (!memberProvinces.contains(identity) && !capital.equals(identity)) {
+                                if (!memberProvinces.contains(identity) && !capital.equals(identity)
+                                        && (invitations.containsKey(identity)
+                                                || invitations.size() < EmpireRealm.MAX_INVITATIONS)) {
                                     invitations.put(identity, Math.max(0L, invitation.getLong("expires_day")));
                                 }
                             } catch (IllegalArgumentException ignored) {
