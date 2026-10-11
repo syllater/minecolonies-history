@@ -16,22 +16,25 @@
 - Per-player map-request throttling with stale limiter cleanup and regression coverage.
 - English and Dutch translation coverage checked in CI.
 
-## Automated verification
-Latest fully verified branch head `eb6b790ebf5f58ef6ea52a36ae7ba5ca33a8f4ab` passed:
-- EN/NL localization validation.
-- Blueprint progression validation.
-- `./gradlew --no-daemon test build` and JAR artifact upload.
-- SHA-256 manifest generation and `sha256sum --check SHA256SUMS.txt`.
-- Headless client startup smoke test.
-- Dedicated server startup and validation of all ten Structurize schematics.
+## Latest candidate verification
 
-Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38133948650
+Full workflow: https://github.com/syllater/minecolonies-history/actions/runs/38154793458
 
-Mod JAR + `SHA256SUMS.txt` bundle: https://github.com/syllater/minecolonies-history/actions/runs/38133948650/artifacts/11700525650
+The release candidate `0.1.0-rc1` passed:
+- EN/NL translation validation.
+- Generated blueprint progression validation.
+- Release metadata/dependency validation.
+- `./gradlew --no-daemon test build`.
+- JAR SHA-256 generation/verification.
+- Self-checking release ZIP build and embedded checksum validation.
+- Headless client startup.
+- Dedicated-server registry validation and loading all 10/10 Structurize schematics.
 
-Artifact ZIP SHA-256: `0eb6d4c0393ffa072ad10ae711d4860161fd9565b2bca7e8cfa5f9eccb327fd3`
-
-The checksum file inside the bundle records the JAR SHA-256, and CI verified the JAR against it before uploading.
+Artifacts:
+- [Release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11708051777)
+- [JAR + checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11708256448)
+- [Server log](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11708471103)
+- [Client log](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11707259036)
 
 ## Required before calling the project release-ready
 - A real in-world test of hut placement, hiring, levels 1–5 and save/reload.

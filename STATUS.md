@@ -2,60 +2,71 @@
 
 Last updated: 2026-10-11 Europe/Amsterdam.
 
-## Repository and verification
+## Current release candidate
 
+- Project: **Imperium: European Realms**
 - Repository: https://github.com/syllater/minecolonies-history
 - Active branch: `milestone-2/colony-integration`
-- Latest fully verified branch head: `eb6b790ebf5f58ef6ea52a36ae7ba5ca33a8f4ab`.
-- Latest feature-code commit (source unchanged by the later CI/docs-only commits): `329c6ccde562bcfd8fb9b18c2cb372373e0d0c43`.
-- Overall completion estimate: approximately **80%** (planning estimate, not a measured metric).
-- Current development artifact version: `0.1.0-milestone2`; final release versioning remains open.
+- Candidate version: `0.1.0-rc1`
+- Target: Minecraft Java 1.21.1, Java 21, NeoForge 21.1.x, required MineColonies dependency set.
+- Candidate source commit: `e9a58c1a071cc54178a806c855726ed60c533ce2`
+- Overall completion estimate: approximately **85%**. This is a planning estimate, not a measured metric.
+- Release status: **release candidate only**. No final public release has been published.
 
-All jobs passed in [GitHub Actions run 38133948650](https://github.com/syllater/minecolonies-history/actions/runs/38133948650):
-- English/Dutch translation-key and placeholder validation.
-- Generated building-tier progression validation.
-- `./gradlew --no-daemon test build`.
-- SHA-256 manifest generation and `sha256sum --check SHA256SUMS.txt`; the built JAR verified successfully before upload.
-- Headless `runClient` startup smoke test.
-- Dedicated-server startup and validation of all ten generated Structurize schematics.
+## Automated verification — green
 
-Artifacts from this run are retained until 2026-10-25:
-- [Mod JAR + SHA256SUMS.txt bundle](https://github.com/syllater/minecolonies-history/actions/runs/38133948650/artifacts/11700525650)
-  - Artifact ZIP SHA-256: `0eb6d4c0393ffa072ad10ae711d4860161fd9565b2bca7e8cfa5f9eccb327fd3`.
-  - The separate `SHA256SUMS.txt` inside the bundle records the JAR checksum; CI verified it with `sha256sum --check`.
-- [Dedicated-server blueprint log](https://github.com/syllater/minecolonies-history/actions/runs/38133948650/artifacts/11700520830)
-- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38133948650/artifacts/11700421184)
+The RC workflow completed successfully in [GitHub Actions run 38154793458](https://github.com/syllater/minecolonies-history/actions/runs/38154793458) against the branch merged with `main` for CI:
+
+- English and Dutch translation-key/placeholder validation passed.
+- Generated blueprint tier-progression validation passed.
+- Release metadata/dependency declaration validation passed.
+- `./gradlew --no-daemon test build` passed.
+- The JAR SHA-256 manifest was generated and verified.
+- The 0.1.0-rc1 release bundle was assembled; ZIP contents and the embedded JAR checksum were verified.
+- Headless `runClient` startup smoke test passed.
+- Dedicated-server startup passed and validated the MineColonies registry plus all **10/10** generated Structurize schematics and hut anchors.
+
+Artifacts from that green run (the RC package is retained for 30 days):
+
+- [Self-checking 0.1.0-rc1 release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11708051777)
+- [Mod JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11708256448)
+- [Dedicated-server blueprint/registry log](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11708471103)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11707259036)
+
+The release-candidate bundle contains the JAR, checksum manifest, README, changelog, compatibility notes, candidate notes and the mandatory in-world playtest checklist.
 
 ## Implemented systems
 
-- MineColonies public API integration and versioned Imperium-owned SavedData keyed by dimension and colony ID.
-- Imperial Archive and Imperial Guard Tower at levels 1–5, with ten generated Structurize schematics.
-- Philosopher, Tax Collector and Diplomat jobs, plus Siege Engineer, Field Medic and Cavalier specialist roles.
-- Tier-scaled worker/guard capacity, production and training, with persisted per-citizen work cooldowns.
-- Treasury, daily taxes, economic policies, knowledge investments and province development.
-- Parliament, faction votes, Emperor assent/veto, legitimacy, stability, unrest, strikes, revolts and separatist petitions.
-- Diplomacy, multi-colony realms, same- and cross-dimension invitations, shared treasury/laws, audit history, governors and regional events.
-- Military campaigns, postures, supply routes, defensive orders, strategic-priority actions and protection against targeting a province in the same realm.
-- Cross-dimension realm-management commands for routes, defensive orders and governor appointments/dismissals; the server resolves targets and checks realm membership and permissions.
-- BlockUI Imperial Ledger and server-authoritative Imperial Theatre with pan, zoom, selection and a **Next dimension** control. The server only permits map projections for dimensions represented by actual provinces in the current realm.
-- Per-player map-snapshot cooldown of 10 overworld ticks, with stale limiter entries pruned at elapsed intervals and across server clock resets.
-- English and Dutch quick-start/help and command guidance.
-- Regression tests for map-request bounds, realm dimension allowlisting, request throttling and stale-entry pruning.
-- CI release-artifact hardening: the JAR checksum manifest is generated, verified, and uploaded alongside the JAR.
+- Real MineColonies colony lookup and Imperium-owned, versioned SavedData, including safe defaults, schema migration and malformed-record isolation.
+- Imperial Archive and Imperial Guard Tower, each with five tiers and ten generated Structurize schematics.
+- Philosopher, Tax Collector and Diplomat jobs; Siege Engineer, Imperial Field Medic and Imperial Cavalier specialist roles.
+- Tier-scaled worker/guard capacity, worker production and guard training, persisted per-citizen work cooldowns.
+- Treasury, taxes, economy policies, knowledge investment and provincial focus/development.
+- Parliament proposals, faction voting, Emperor assent/veto, legitimacy, stability, unrest, strikes, revolts and separatist petitions.
+- Diplomacy, cross-dimension multi-colony realms, invitations, shared treasury/laws, audit history, governors and regional events.
+- Military campaigns, postures, supply routes, defensive orders, strategic-priority actions and allied-province targeting protection.
+- BlockUI Imperial Ledger and server-authoritative Imperial Theatre with province selection, pan/zoom/recenter and a validated dimension selector.
+- Bounded/rate-limited map payloads, English/Dutch help and commands, automated regression tests and CI artifact checksum verification.
+
+## Remaining final-release gates
+
+These require a person to interact with a real Minecraft world; headless CI cannot honestly satisfy them:
+
+1. Build both huts in a survival world, hire the relevant workers/guards, upgrade levels 1–5, and confirm physical placement plus save/reload.
+2. Observe real worker behavior, tax/economy outputs and specialist training at each tier.
+3. Open the BlockUI ledger and interact with the graphical Imperial Theatre for a realm with multiple provinces, including a dimension containing an unloaded province.
+4. Run a two-player dedicated-server session covering realm invitations, permissions, concurrent treasury operations, reconnect and save/reload.
+5. Review balance/usability, finalize release notes and decide the distribution license before publishing a final package.
 
 ## Deferred, non-blocking maintenance
 
-- NeoForge emits deprecation warnings for `EventBusSubscriber.bus()` usage in existing event subscribers. This does not prevent compilation or client/server startup on the pinned baseline; migrate these subscribers as a dedicated compatibility task before upgrading NeoForge.
-- Gradle and some GitHub Actions dependencies emit future-compatibility/deprecation warnings. They are tracked as maintenance items and are not current build failures.
+- The pinned NeoForge line emits deprecation warnings for `EventBusSubscriber.bus()`; migrate before the next platform upgrade.
+- Gradle and some GitHub Actions components emit future-compatibility warnings. They do not currently prevent a successful candidate build or startup.
+- These warnings are intentionally deferred in favor of the core release acceptance work.
 
-## Remaining release acceptance
+## Review links
 
-Use [the end-to-end survival and multiplayer checklist](docs/PLAYTEST_RELEASE_CHECKLIST.md).
-
-1. In a real survival world, build both huts, hire workers/guards, upgrade levels 1–5, then save/reload.
-2. Click through the graphical theatre with a real multi-province realm; test the dimension selector with loaded and unloaded provinces.
-3. Run a two-player dedicated-server test covering permissions, cross-dimension membership, treasury concurrency, allied-campaign restrictions, reconnect and save/reload.
-4. Perform an in-world balance/usability review.
-5. Prepare release notes and final package review, decide the distribution license, and change the development version before publishing.
-
-Green CI verifies compilation, automated tests, client/server startup, schematic loading and artifact checksums. It does not replace an actual survival-world or multiplayer playtest, so the project is not yet a final release.
+- [Draft release-candidate PR #2](https://github.com/syllater/minecolonies-history/pull/2)
+- [Green RC verification workflow](https://github.com/syllater/minecolonies-history/actions/runs/38154793458)
+- [End-to-end survival and multiplayer checklist](docs/PLAYTEST_RELEASE_CHECKLIST.md)
+- [Release-candidate notes](docs/RELEASE_CANDIDATE_NOTES.md)

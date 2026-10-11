@@ -244,3 +244,49 @@ The compiler currently reports the pinned NeoForge line's deprecation warnings f
 ### Remaining acceptance
 
 Actual survival-world building/hiring/upgrade/save-reload testing, real interactive GUI usage, two-player multiplayer permissions/concurrency/reconnect tests, balance review and the distribution-license decision remain open.
+
+
+## 2026-10-11 — 0.1.0-rc1 package assembled and CI green
+
+### Branch and candidate
+
+- Repository: https://github.com/syllater/minecolonies-history
+- Branch: `milestone-2/colony-integration`
+- Candidate version: `0.1.0-rc1`
+- Candidate source head: `e9a58c1a071cc54178a806c855726ed60c533ce2`
+- Review PR: [#2 — WIP: Imperium European Realms 0.1.0-rc1](https://github.com/syllater/minecolonies-history/pull/2)
+
+### Verification evidence
+
+The full workflow passed at [run 38154793458](https://github.com/syllater/minecolonies-history/actions/runs/38154793458), including:
+- EN/NL translation coverage validation.
+- Generated blueprint progression validation.
+- Release/dependency metadata validation.
+- `./gradlew --no-daemon test build`.
+- JAR checksum manifest generation and verification.
+- Deterministic RC bundle packaging and embedded JAR checksum verification.
+- Headless client startup smoke.
+- Dedicated server registry/blueprint smoke: 10/10 Structurize schematics with valid dimensions/hut anchors.
+
+Artifacts:
+- [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11708051777)
+- [JAR + checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11708256448)
+- [Server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11708471103)
+- [Client smoke log](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11707259036)
+
+### New RC packaging
+
+- Added `docs/RELEASE_CANDIDATE_NOTES.md`.
+- Added `tools/package_release_candidate.py`, which validates the RC version, required documents, JAR filename, manifest digest and complete package contents. It creates a deterministic ZIP, checks ZIP integrity and verifies that the bundled JAR matches its bundled checksum.
+- Added CI steps to assemble the candidate bundle after checksum verification and upload it as a separate 30-day artifact.
+- Added a release metadata validator for dependency declarations and stale milestone versions.
+- Added regression tests for legacy SavedData with missing fields and malformed colony records.
+
+### Still not certified by automation
+
+- Actual survival-world placement/upgrades and worker hiring/work/save-reload.
+- In-client interaction with the Imperial Theatre.
+- Real two-player realm permissions, concurrent treasury operations, reconnect and multiplayer save/reload.
+- Explicit distribution-license choice and final release package/legal review.
+
+Do not promote `0.1.0-rc1` to a final release until these gates are completed.
