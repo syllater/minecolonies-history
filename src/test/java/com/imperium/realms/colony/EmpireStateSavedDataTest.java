@@ -2,6 +2,7 @@ package com.imperium.realms.colony;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -519,6 +520,49 @@ final class EmpireStateSavedDataTest {
                 "Third Realm", thirdCapital, "emperor-3", "Emperor Three", 0L).orElseThrow().id());
         assertEquals(44L, restoredAgain.createRealm(
                 "Fourth Realm", fourthCapital, "emperor-4", "Emperor Four", 0L).orElseThrow().id());
+    }
+
+ 
+    @Test
+    void malformedOversizedRealmMembershipAndInvitationsAreCappedOnLoad() {
+        final EmpireStateSavedData original = new EmpireStateSavedData();
+        final ColonyIdentity capital = new ColonyIdentity("minecraft:overworld", 41);
+        assertTrue(original.observeColony(capital, "Capital", 0L));
+        final EmpireRealm originalRealm = original.createRealm(
+                "Bounded Realm", capital, "emperor-uuid", "Emperor", 0L).orElseThrow();
+
+        final CompoundTag saved = original.save(new CompoundTag(), null);
+        final ListTag savedRealms = saved.getList("realms", Tag.TAG_COMPOUND);
+        final CompoundTag realmTag = savedRealms.getCompound(0);
+
+        final ListTag oversizedMembers = new ListTag();
+        final CompoundTag capitalTag = new CompoundTag();
+        capitalTag.putString("dimension", capital.dimensionId());
+        capitalTag.putInt("colony_id", capital.colonyId());
+        oversizedMembers.add(capitalTag);
+        for (int index = 0; index < EmpireRealm.MAX_PROVINCES + 40; index++) {
+            final CompoundTag member = new CompoundTag();
+            member.putString("dimension", "minecraft:the_nether");
+            member.putInt("colony_id", 2_000 + index);
+            oversizedMembers.add(member);
+        }
+        realmTag.put("provinces", oversizedMembers);
+
+        final ListTag oversizedInvitations = new ListTag();
+        for (int index = 0; index < EmpireRealm.MAX_INVITATIONS + 40; index++) {
+            final CompoundTag invitation = new CompoundTag();
+            invitation.putString("dimension", "minecraft:the_end");
+            invitation.putInt("colony_id", 4_000 + index);
+            invitation.putLong("expires_day", 20L);
+            oversizedInvitations.add(invitation);
+        }
+        realmTag.put("invitations", oversizedInvitations);
+        saved.put("realms", savedRealms);
+
+        final EmpireStateSavedData loaded = EmpireStateSavedData.load(saved, null);
+        final EmpireRealm restored = loaded.realmById(originalRealm.id()).orElseThrow();
+        assertEquals(EmpireRealm.MAX_PROVINCES, restored.provinceCount());
+        assertEquals((int) EmpireRealm.MAX_INVITATIONS, restored.invitations().size());
     }
 
 }
