@@ -26,6 +26,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -103,11 +104,11 @@ public final class ImperiumCommands {
                                 .then(Commands.literal("priority")
                                         .executes(context -> issuePriorityDefensiveOrder(context.getSource()))))
                         .then(Commands.literal("defense-at")
-                                .then(Commands.argument("dimension", StringArgumentType.word())
+                                .then(Commands.argument("dimension", ResourceLocationArgument.id())
                                         .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                                 .executes(context -> issueDefensiveOrder(
                                                         context.getSource(),
-                                                        StringArgumentType.getString(context, "dimension"),
+                                                        ResourceLocationArgument.getId(context, "dimension").toString(),
                                                         IntegerArgumentType.getInteger(context, "colonyId"))))))
                         .then(Commands.literal("route")
                                 .then(Commands.literal("build")
@@ -116,11 +117,11 @@ public final class ImperiumCommands {
                                                         context.getSource(),
                                                         IntegerArgumentType.getInteger(context, "colonyId")))))
                                 .then(Commands.literal("build-at")
-                                        .then(Commands.argument("dimension", StringArgumentType.word())
+                                        .then(Commands.argument("dimension", ResourceLocationArgument.id())
                                                 .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                                         .executes(context -> buildSupplyRoute(
                                                                 context.getSource(),
-                                                                StringArgumentType.getString(context, "dimension"),
+                                                                ResourceLocationArgument.getId(context, "dimension").toString(),
                                                                 IntegerArgumentType.getInteger(context, "colonyId"))))))
                                 .then(Commands.literal("build-priority")
                                         .executes(context -> buildPrioritySupplyRoute(context.getSource()))))
@@ -136,14 +137,14 @@ public final class ImperiumCommands {
                                                         IntegerArgumentType.getInteger(context, "colonyId"),
                                                         StringArgumentType.getString(context, "response"))))))
                         .then(Commands.literal("resolve-at")
-                                .then(Commands.argument("dimension", StringArgumentType.word())
+                                .then(Commands.argument("dimension", ResourceLocationArgument.id())
                                         .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                                 .then(Commands.argument("response", StringArgumentType.word())
                                                         .suggests((context, builder) -> SharedSuggestionProvider.suggest(
                                                                 List.of("reassure", "crackdown"), builder))
                                                         .executes(context -> resolveSeparatistPetition(
                                                                 context.getSource(),
-                                                                StringArgumentType.getString(context, "dimension"),
+                                                                ResourceLocationArgument.getId(context, "dimension").toString(),
                                                                 IntegerArgumentType.getInteger(context, "colonyId"),
                                                                 StringArgumentType.getString(context, "response")))))))
                         .then(Commands.literal("found")
@@ -156,11 +157,11 @@ public final class ImperiumCommands {
                                         .executes(context -> inviteEmpireProvince(
                                                 context.getSource(),
                                                 IntegerArgumentType.getInteger(context, "colonyId"))))
-                                .then(Commands.argument("dimension", StringArgumentType.word())
+                                .then(Commands.argument("dimension", ResourceLocationArgument.id())
                                         .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                                 .executes(context -> inviteEmpireProvince(
                                                         context.getSource(),
-                                                        StringArgumentType.getString(context, "dimension"),
+                                                        ResourceLocationArgument.getId(context, "dimension").toString(),
                                                         IntegerArgumentType.getInteger(context, "colonyId"))))))
                         .then(Commands.literal("join")
                                 .executes(context -> joinEmpire(context.getSource())))
@@ -189,12 +190,12 @@ public final class ImperiumCommands {
                                                         IntegerArgumentType.getInteger(context, "colonyId"),
                                                         EntityArgument.getPlayer(context, "governor"))))))
                         .then(Commands.literal("appoint-at")
-                                .then(Commands.argument("dimension", StringArgumentType.word())
+                                .then(Commands.argument("dimension", ResourceLocationArgument.id())
                                         .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                                 .then(Commands.argument("governor", EntityArgument.player())
                                                         .executes(context -> appointGovernor(
                                                                 context.getSource(),
-                                                                StringArgumentType.getString(context, "dimension"),
+                                                                ResourceLocationArgument.getId(context, "dimension").toString(),
                                                                 IntegerArgumentType.getInteger(context, "colonyId"),
                                                                 EntityArgument.getPlayer(context, "governor")))))))
                         .then(Commands.literal("dismiss")
@@ -203,11 +204,11 @@ public final class ImperiumCommands {
                                                 context.getSource(),
                                                 IntegerArgumentType.getInteger(context, "colonyId")))))
                         .then(Commands.literal("dismiss-at")
-                                .then(Commands.argument("dimension", StringArgumentType.word())
+                                .then(Commands.argument("dimension", ResourceLocationArgument.id())
                                         .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                                 .executes(context -> dismissGovernor(
                                                         context.getSource(),
-                                                        StringArgumentType.getString(context, "dimension"),
+                                                        ResourceLocationArgument.getId(context, "dimension").toString(),
                                                         IntegerArgumentType.getInteger(context, "colonyId")))))))
                 .then(Commands.literal("campaign")
                         .then(Commands.literal("status")
@@ -232,12 +233,12 @@ public final class ImperiumCommands {
                                 .then(Commands.argument("type", StringArgumentType.word())
                                         .suggests((context, builder) -> SharedSuggestionProvider.suggest(
                                                 new String[]{"border_patrol", "relief_expedition", "war_campaign"}, builder))
-                                        .then(Commands.argument("dimension", StringArgumentType.word())
+                                        .then(Commands.argument("dimension", ResourceLocationArgument.id())
                                                 .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                                         .executes(context -> launchCampaign(
                                                                 context.getSource(),
                                                                 StringArgumentType.getString(context, "type"),
-                                                                StringArgumentType.getString(context, "dimension"),
+                                                                ResourceLocationArgument.getId(context, "dimension").toString(),
                                                                 IntegerArgumentType.getInteger(context, "colonyId"))))))))
                 .then(Commands.literal("politics")
                         .executes(context -> showPolitics(context.getSource())))
@@ -250,11 +251,11 @@ public final class ImperiumCommands {
                                                 context.getSource(),
                                                 IntegerArgumentType.getInteger(context, "colonyId")))))
                         .then(Commands.literal("improve-at")
-                                .then(Commands.argument("dimension", StringArgumentType.word())
+                                .then(Commands.argument("dimension", ResourceLocationArgument.id())
                                         .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                                 .executes(context -> improveDiplomacy(
                                                         context.getSource(),
-                                                        StringArgumentType.getString(context, "dimension"),
+                                                        ResourceLocationArgument.getId(context, "dimension").toString(),
                                                         IntegerArgumentType.getInteger(context, "colonyId")))))))
                 .then(Commands.literal("province")
                         .then(Commands.literal("status")

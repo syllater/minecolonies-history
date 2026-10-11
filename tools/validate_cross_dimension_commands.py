@@ -49,4 +49,11 @@ for command, help_keys in COMMANDS.items():
 if "resolveTargetColony" not in source or "colonyByIdentity" not in source:
     fail("dimension-aware targets must resolve via the server-side MineColonies identity adapter")
 
+if 'Commands.argument("dimension", ResourceLocationArgument.id())' not in source:
+    fail("dimension arguments must use ResourceLocationArgument.id(), not Brigadier's unquoted-word parser")
+if 'ResourceLocationArgument.getId(context, "dimension").toString()' not in source:
+    fail("dimension argument values must be read as namespaced ResourceLocation IDs")
+if 'StringArgumentType.getString(context, "dimension")' in source:
+    fail("generic string parsing remains for a dimension argument and can reject namespace separators")
+
 print("CROSS-DIMENSION COMMAND VALIDATION PASS: all seven command variants are registered and documented in EN/NL.")
