@@ -60,6 +60,12 @@ jobs:
             echo
             cat build/libs/SHA256SUMS.txt
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify generated JAR checksum manifest
+        if: success()
+        run: |
+          set -euo pipefail
+          cd build/libs
+          sha256sum --check SHA256SUMS.txt
       - name: Upload mod JAR and checksum manifest
         if: success()
         uses: actions/upload-artifact@v4
