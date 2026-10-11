@@ -425,14 +425,31 @@ public final class EmpireState {
     }
 
     /**
-     * Records one guard level-up as specialist military training. Each discipline
-     * has its own persistent cap and is credited only on the logical server.
+     * Compatibility overload for callers without a linked guard-tower level.
+     * The legacy behavior is treated as tier 1.
+     */
+    public boolean recordMilitaryTraining(final MilitaryDiscipline discipline) {
+        return recordMilitaryTraining(discipline, 1);
+    }
+
+    /**
+     * Records a specialist guard level-up as tower-tier-scaled military training.
+     * A tier-1/2 tower gives one point, tier 3/4 two points and tier 5 three;
+     * the Military province focus doubles that gain. Each discipline has an
+     * independent persisted cap.
      *
      * @return true if the score changed.
      */
-    public boolean recordMilitaryTraining(final MilitaryDiscipline discipline) {
+    public boolean recordMilitaryTraining(
+            final MilitaryDiscipline discipline,
+            final int guardTowerLevel) {
         Objects.requireNonNull(discipline, "discipline");
-        final long trainingGain = provinceFocus == ProvinceFocus.MILITARY ? 2L : 1L;
+        final int tierYield = workYieldForBuildingLevel(guardTowerLevel);
+        if (tierYield == 0) {
+            return false;
+        }
+        final long trainingGain = (long) tierYield
+                * (provinceFocus == ProvinceFocus.MILITARY ? 2L : 1L);
         return switch (discipline) {
             case SIEGE_ENGINEERING -> {
                 if (siegeEngineeringPoints >= MAX_MILITARY_TRAINING_POINTS) {

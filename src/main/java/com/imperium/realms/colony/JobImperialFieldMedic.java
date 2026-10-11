@@ -16,6 +16,8 @@ public final class JobImperialFieldMedic extends JobDruid {
     public void onLevelUp() {
         super.onLevelUp();
         MilitaryTrainingRecorder.record(
-                getColony(), EmpireState.MilitaryDiscipline.FIELD_MEDICINE);
+                getColony(), EmpireState.MilitaryDiscipline.FIELD_MEDICINE,
+                getCitizen() == null || getCitizen().getWorkBuilding() == null
+                        ? 1 : getCitizen().getWorkBuilding().getBuildingLevel());
     }
 }

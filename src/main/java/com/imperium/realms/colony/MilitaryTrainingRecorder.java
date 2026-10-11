@@ -13,6 +13,13 @@ public final class MilitaryTrainingRecorder {
     public static void record(
             final IColony colony,
             final EmpireState.MilitaryDiscipline discipline) {
+        record(colony, discipline, 1);
+    }
+
+    public static void record(
+            final IColony colony,
+            final EmpireState.MilitaryDiscipline discipline,
+            final int guardTowerLevel) {
         if (colony == null) {
             return;
         }
@@ -23,7 +30,7 @@ public final class MilitaryTrainingRecorder {
 
         final EmpireStateSavedData data = EmpireStateSavedData.get(level);
         final EmpireState state = MineColoniesIntegration.getOrCreateState(level, colony);
-        if (state.recordMilitaryTraining(discipline)) {
+        if (state.recordMilitaryTraining(discipline, guardTowerLevel)) {
             data.markChanged();
         }
     }

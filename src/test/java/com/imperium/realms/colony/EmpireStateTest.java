@@ -195,6 +195,27 @@ final class EmpireStateTest {
     }
 
     @Test
+    void guardTowerTierImprovesSpecialistMilitaryTraining() {
+        final EmpireState tierOne = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 401), "Tier One", 0L);
+        final EmpireState tierFive = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 402), "Tier Five", 0L);
+        final EmpireState focusedTierThree = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 403), "Military Province", 0L);
+
+        assertFalse(tierOne.recordMilitaryTraining(EmpireState.MilitaryDiscipline.SIEGE_ENGINEERING, 0));
+        assertTrue(tierOne.recordMilitaryTraining(EmpireState.MilitaryDiscipline.SIEGE_ENGINEERING, 1));
+        assertEquals(1L, tierOne.siegeEngineeringPoints());
+        assertTrue(tierFive.recordMilitaryTraining(EmpireState.MilitaryDiscipline.FIELD_MEDICINE, 5));
+        assertEquals(3L, tierFive.fieldMedicinePoints());
+
+        focusedTierThree.setProvinceFocus(ProvinceFocus.MILITARY);
+        assertTrue(focusedTierThree.recordMilitaryTraining(
+                EmpireState.MilitaryDiscipline.CAVALRY_DRILL, 3));
+        assertEquals(4L, focusedTierThree.cavalryDrillPoints());
+    }
+
+    @Test
     void treasuryCannotBeOverdrawnOrOverflowItsCap() {
         final EmpireState state = EmpireState.create(
                 new ColonyIdentity("minecraft:overworld", 6), "Capital", 0L);

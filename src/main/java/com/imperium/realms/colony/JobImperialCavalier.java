@@ -16,6 +16,8 @@ public final class JobImperialCavalier extends JobCavalry {
     public void onLevelUp() {
         super.onLevelUp();
         MilitaryTrainingRecorder.record(
-                getColony(), EmpireState.MilitaryDiscipline.CAVALRY_DRILL);
+                getColony(), EmpireState.MilitaryDiscipline.CAVALRY_DRILL,
+                getCitizen() == null || getCitizen().getWorkBuilding() == null
+                        ? 1 : getCitizen().getWorkBuilding().getBuildingLevel());
     }
 }

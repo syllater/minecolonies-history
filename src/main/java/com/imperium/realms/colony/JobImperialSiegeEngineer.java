@@ -16,6 +16,8 @@ public final class JobImperialSiegeEngineer extends JobKnight {
     public void onLevelUp() {
         super.onLevelUp();
         MilitaryTrainingRecorder.record(
-                getColony(), EmpireState.MilitaryDiscipline.SIEGE_ENGINEERING);
+                getColony(), EmpireState.MilitaryDiscipline.SIEGE_ENGINEERING,
+                getCitizen() == null || getCitizen().getWorkBuilding() == null
+                        ? 1 : getCitizen().getWorkBuilding().getBuildingLevel());
     }
 }
