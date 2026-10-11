@@ -57,7 +57,7 @@ public final class ImperiumCrossDimensionCommands {
                                                                 context.getSource(),
                                                                 StringArgumentType.getString(context, "type"),
                                                                 StringArgumentType.getString(context, "dimension"),
-                                                                IntegerArgumentType.getInteger(context, "colonyId"))))))));
+                                                                IntegerArgumentType.getInteger(context, "colonyId")))))))));
     }
 
     private static int improveDiplomacyAt(
