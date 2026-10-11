@@ -10,6 +10,7 @@ This file records user-visible changes. Entries are development notes until a re
 - Philosopher, Tax Collector and Diplomat jobs, plus Siege Engineer, Field Medic and Cavalier specialist roles.
 - Tier-scaled worker/guard capacity, Archive output and specialist military training.
 - Treasury, daily tax collection, economic policies, knowledge investments and province development.
+- Atomic transfers between provincial treasuries and the imperial reserve, with funds/cap validation and success-only auditing.
 - Faction votes, parliamentary tax/policy bills, imperial assent/veto, stability, legitimacy, unrest, strikes, revolts and separatist petitions.
 - Diplomacy, federated realms, invitations, a shared imperial treasury, shared laws, audit history, governors and regional events.
 - Persistent military operations, postures, supply routes, defensive orders and strategic priority actions.
@@ -29,6 +30,7 @@ This file records user-visible changes. Entries are development notes until a re
 - Server-authoritative map snapshot construction; client requests cannot select arbitrary empire/province identifiers.
 - Bounded map payload fields/province count and bounded per-citizen work cooldown history.
 - Persisted work cooldowns prevent duplicate profession output immediately after a save/reload.
+- Imperial treasury transfers validate both balances before mutation; failed cap/insufficient-funds cases leave both balances and audit history unchanged.
 - Dedicated-server class loading is isolated from client-only map UI code.
 
 ### Known acceptance gaps

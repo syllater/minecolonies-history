@@ -1,5 +1,38 @@
 # Checkpoints
 
+## 2026-10-11 — Atomic treasury transfers and stricter identity validation (fully verified)
+
+### Change
+- Added server-side transfer operations to `EmpireStateSavedData` for moving crowns from a provincial treasury to the imperial reserve and back.
+- Preflight checks validate positive amount, province/realm membership, source balance and destination capacity before mutating either balance.
+- Defensive rollback guards preserve money if the second balance mutation unexpectedly fails.
+- Audit entries are added only after successful transfers; failed transactions leave balances and audit history untouched.
+- Command handlers now route through the transaction service instead of implementing debit/credit/rollback separately.
+- Added EN/NL fallback text for the unexpected transaction-failure path.
+- Extended unit tests for success, insufficient local/imperial funds, full reserve/province caps, audit behavior and treasury/audit NBT round trip.
+- Strengthened dimension identity parsing; malformed SavedData records with empty paths, invalid characters or non-canonical IDs are isolated without discarding neighboring valid records.
+
+### Verification
+- Source commit: `a22d79f64c4a41601feaf7608f12d86950b75698`
+- Full GitHub Actions run: https://github.com/syllater/minecolonies-history/actions/runs/38157810821
+- Translation, blueprint, release metadata and cross-dimension command validators passed.
+- `./gradlew --no-daemon test build` passed.
+- JAR checksum and self-checking RC bundle validation passed.
+- Headless client startup passed.
+- Dedicated-server startup/blueprint validation passed, including all 10/10 Structurize schematics.
+
+Artifacts:
+- [Release candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38157810821/artifacts/11709157384)
+- [Mod JAR + SHA-256 manifest](https://github.com/syllater/minecolonies-history/actions/runs/38157810821/artifacts/11709232110)
+- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38157810821/artifacts/11709785938)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38157810821/artifacts/11709161486)
+
+### Still pending
+- Real survival-world hut building/hiring/upgrades and in-world save/reload.
+- Interactive GUI click-through with a real realm.
+- Real two-player permissions, concurrent treasury actions, reconnect and multiplayer save/reload.
+- Distribution-license decision and final release approval.
+
 ## 2026-10-10 — Five-tier worker capacity and blueprint progression validation
 
 ### Repository

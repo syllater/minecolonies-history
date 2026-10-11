@@ -52,7 +52,9 @@ Use namespaced dimension IDs such as `minecraft:the_nether`. The server resolves
 
 ## Automated checks
 
-The GitHub Actions workflow runs EN/NL translation/placeholder validation, blueprint progression, dependency metadata validation, cross-dimension command/help validation, `./gradlew --no-daemon test build`, JAR checksum verification, a headless `runClient` startup check and dedicated-server validation of MineColonies registries/all ten Structurize blueprints. The latest full green run is [workflow 38155865389](https://github.com/syllater/minecolonies-history/actions/runs/38155865389).
+The GitHub Actions workflow runs EN/NL translation/placeholder validation, blueprint progression, dependency metadata validation, cross-dimension command/help validation, `./gradlew --no-daemon test build`, JAR checksum verification, a headless `runClient` startup check and dedicated-server validation of MineColonies registries/all ten Structurize blueprints. The latest full green run is [workflow 38157810821](https://github.com/syllater/minecolonies-history/actions/runs/38157810821).
+
+Additional integrity checks now cover atomic provincial ↔ imperial treasury transfers: successful transfers update both balances and the audit trail; insufficient-funds or destination-cap failures leave balances unchanged; a save/load cycle preserves the resulting balances and audit record.
 
 These automated checks are not a substitute for a hands-on survival-world or two-player dedicated-server test.
 
