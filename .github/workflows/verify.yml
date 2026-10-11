@@ -1,9 +1,12 @@
 name: Verify mod
 
 on:
+  # Feature branches with an open PR are validated by the pull_request event.
+  # Restrict push validation to main to avoid running identical Gradle + Minecraft
+  # smoke jobs twice for every commit on a PR branch.
   push:
     branches:
-      - "**"
+      - main
   pull_request:
     branches:
       - main
