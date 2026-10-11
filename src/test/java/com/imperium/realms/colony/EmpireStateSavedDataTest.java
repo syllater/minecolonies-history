@@ -565,4 +565,105 @@ final class EmpireStateSavedDataTest {
         assertEquals((int) EmpireRealm.MAX_INVITATIONS, restored.invitations().size());
     }
 
+
+    @Test
+    void oversizedNestedHistoryListsKeepNewestSupportedRecords() {
+        final EmpireStateSavedData original = new EmpireStateSavedData();
+        final ColonyIdentity identity = new ColonyIdentity("minecraft:overworld", 51);
+        assertTrue(original.observeColony(identity, "History Test Province", 0L));
+        final EmpireRealm realm = original.createRealm(
+                "History Test Realm", identity, "emperor-history", "History Emperor", 0L).orElseThrow();
+
+        final CompoundTag saved = original.save(new CompoundTag(), null);
+        final ListTag colonies = saved.getList("colonies", Tag.TAG_COMPOUND);
+        final CompoundTag colonyTag = colonies.getCompound(0);
+
+        final ListTag proposals = new ListTag();
+        for (int index = 0; index < EmpireState.MAX_STORED_PROPOSALS + 10; index++) {
+            final CompoundTag proposal = new CompoundTag();
+            proposal.putLong("id", index + 1L);
+            proposal.putString("proposal_type", "TAX_RATE");
+            proposal.putString("proposer", "Tester");
+            proposal.putInt("previous_tax", 5);
+            proposal.putInt("proposed_tax", index % 26);
+            proposal.putLong("created_day", index);
+            proposal.putLong("expires_day", index + 3L);
+            proposal.putString("status", "OPEN");
+            proposal.putString("resolved_by", "");
+            proposal.putLong("resolved_day", -1L);
+            proposals.add(proposal);
+        }
+        colonyTag.put("parliament_proposals", proposals);
+        colonyTag.putLong("next_proposal_id", 1L);
+
+        final ListTag relations = new ListTag();
+        for (int index = 0; index < EmpireState.MAX_DIPLOMATIC_RELATIONS + 44; index++) {
+            final CompoundTag relation = new CompoundTag();
+            relation.putString("dimension", "test:realm_" + index);
+            relation.putInt("colony_id", 1_000 + index);
+            relation.putInt("score", index % 201 - 100);
+            relations.add(relation);
+        }
+        colonyTag.put("diplomatic_relations", relations);
+
+        final ListTag campaigns = new ListTag();
+        for (int index = 0; index < EmpireState.MAX_STORED_CAMPAIGNS + 8; index++) {
+            final CompoundTag campaign = new CompoundTag();
+            campaign.putLong("id", index + 1L);
+            campaign.putString("type", MilitaryCampaign.Type.BORDER_PATROL.id());
+            campaign.putString("target_dimension", "test:target_" + index);
+            campaign.putInt("target_colony_id", 6_000 + index);
+            campaign.putString("target_name", "Target " + index);
+            campaign.putString("commander", "Tester");
+            campaign.putLong("started_day", index);
+            campaign.putLong("resolves_day", index + 1L);
+            campaign.putInt("launch_readiness", 25);
+            campaign.putString("outcome", "PENDING");
+            campaign.putLong("resolved_day", -1L);
+            campaigns.add(campaign);
+        }
+        colonyTag.put("military_campaigns", campaigns);
+        saved.put("colonies", colonies);
+
+        final ListTag realmTags = saved.getList("realms", Tag.TAG_COMPOUND);
+        final CompoundTag realmTag = realmTags.getCompound(0);
+        final ListTag auditEntries = new ListTag();
+        for (int index = 0; index < EmpireRealm.MAX_AUDIT_ENTRIES + 50; index++) {
+            final CompoundTag audit = new CompoundTag();
+            audit.putLong("day", index);
+            audit.putString("actor", "Tester");
+            audit.putString("action", "action-" + index);
+            audit.putString("subject", "subject-" + index);
+            audit.putLong("amount", index);
+            auditEntries.add(audit);
+        }
+        realmTag.put("audit_entries", auditEntries);
+        saved.put("realms", realmTags);
+
+        final EmpireStateSavedData loaded = EmpireStateSavedData.load(saved, null);
+        final EmpireState loadedState = loaded.get(identity).orElseThrow();
+        final var restoredProposals = loadedState.recentParliamentProposals();
+        assertEquals(EmpireState.MAX_STORED_PROPOSALS, restoredProposals.size());
+        assertEquals(30L, restoredProposals.get(0).id());
+        assertEquals(11L, restoredProposals.get(restoredProposals.size() - 1).id());
+        assertEquals(31L, loadedState.nextProposalId());
+
+        assertEquals(EmpireState.MAX_DIPLOMATIC_RELATIONS, loadedState.diplomaticRelations().size());
+        assertTrue(loadedState.diplomaticRelations().containsKey(
+                new ColonyIdentity("test:realm_299", 1_299)));
+        assertFalse(loadedState.diplomaticRelations().containsKey(
+                new ColonyIdentity("test:realm_43", 1_043)));
+
+        final var restoredCampaigns = loadedState.recentMilitaryCampaigns();
+        assertEquals(EmpireState.MAX_STORED_CAMPAIGNS, restoredCampaigns.size());
+        assertEquals(20L, restoredCampaigns.get(0).id());
+        assertEquals(9L, restoredCampaigns.get(restoredCampaigns.size() - 1).id());
+
+        final EmpireRealm loadedRealm = loaded.realmById(realm.id()).orElseThrow();
+        final var recentAudit = loadedRealm.recentAuditEntries();
+        assertEquals(EmpireRealm.MAX_AUDIT_ENTRIES, recentAudit.size());
+        assertEquals("action-149", recentAudit.get(0).actionId());
+        assertEquals("action-50", recentAudit.get(recentAudit.size() - 1).actionId());
+    }
+
 }
