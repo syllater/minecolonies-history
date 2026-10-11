@@ -1,6 +1,6 @@
 # Imperium: European Realms
 
-A Minecraft Java Edition 1.21.1 NeoForge addon that extends MineColonies into a historical-fantasy European empire simulator.
+A Minecraft Java Edition 1.21.1 NeoForge addon that extends MineColonies into a historical-fantasy European empire simulator. The current development build is a **0.1.0-rc1 candidate**, not a final published release.
 
 ## Requirements
 
