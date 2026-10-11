@@ -38,7 +38,7 @@ Remaining: richer tier silhouettes/modules and actual building playtesting.
 
 ## Milestone 8 — Empire and provincial simulation
 Status: multi-colony realm/capital, invitations, central treasury, laws, audited flows, governors, regional events, cohesion and separatist pressure implemented. Coordinate-based chat map uses colony centers.
-Remaining: event balance and map UX.
+Added: fixed-coordinate strategic map viewports with pan/zoom command arguments; tests cover direction, scale, off-screen filtering and panning. Remaining: validate in-game text readability and consider a dedicated graphical theatre screen later.
 
 ## Milestone 9 — Multiplayer and compatibility hardening
 Status: server-authoritative commands, permission checks, dynamic EN/NL localization validation, NBT round-trip coverage, and full CI build/client/server smoke checks.
