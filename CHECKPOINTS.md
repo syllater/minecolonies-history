@@ -1,5 +1,32 @@
 # Checkpoints
 
+## 2026-10-11 — Treasury conservation and membership guards (fully verified)
+
+### Change
+- Added a deterministic 100-step alternating transfer test (province ⇄ imperial reserve) that asserts the combined total never changes, balances stay within limits, only successful transfers append audit entries, and the post-transfer SavedData round trip preserves both balances and audit history.
+- Added direct coverage that zero/negative amounts, negative day indices and provinces outside a realm are rejected without moving crowns or writing audit entries.
+- Existing transfer tests continue to cover insufficient source funds, full destination treasuries and success-only audit history.
+
+### Verification
+- Source commit: `fe9284d0faa098b27cb02b1cf904ab0d38af3f7d`
+- Full green Actions run: https://github.com/syllater/minecolonies-history/actions/runs/38158411131
+- English/Dutch translations, generated tier progression, release/dependency metadata and cross-dimension command contracts passed.
+- `./gradlew --no-daemon test build`, JAR checksum verification and self-checking RC packaging passed.
+- Headless client startup passed.
+- Dedicated-server startup and all 10/10 Structurize blueprint/anchor validations passed.
+
+Artifacts:
+- [Release candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709477514)
+- [JAR + SHA-256 manifest](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709796642)
+- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709226976)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11708867734)
+
+### Release gates still open
+- Physical hut placement/upgrades and worker behavior in a real survival world.
+- Interactive GUI click-through in a real client.
+- Two-player permission/concurrency/reconnect/save-reload testing.
+- Final balance/package review and an explicit distribution-license decision.
+
 ## 2026-10-11 — Atomic treasury transfers and stricter identity validation (fully verified)
 
 ### Change

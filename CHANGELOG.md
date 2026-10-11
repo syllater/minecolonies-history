@@ -31,6 +31,7 @@ This file records user-visible changes. Entries are development notes until a re
 - Bounded map payload fields/province count and bounded per-citizen work cooldown history.
 - Persisted work cooldowns prevent duplicate profession output immediately after a save/reload.
 - Imperial treasury transfers validate both balances before mutation; failed cap/insufficient-funds cases leave both balances and audit history unchanged.
+- Regression tests verify that 100 mixed transfers conserve total crowns, invalid amounts/day indexes do not mutate balances, and independent provinces cannot exchange funds with a realm treasury.
 - Dedicated-server class loading is isolated from client-only map UI code.
 
 ### Known acceptance gaps
