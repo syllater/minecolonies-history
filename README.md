@@ -75,6 +75,7 @@ Each real MineColonies colony can remain independent or join a multi-colony real
 - `/imperium empire status` — view Emperor, capital, member provinces and the central reserve.
 - `/imperium empire found <name>` — found a realm using the current colony as capital.
 - `/imperium empire invite <colonyId>` — invite a real MineColonies colony in the current dimension.
+- `/imperium empire invite <dimension> <colonyId>` — invite a real MineColonies colony by dimension ID and colony ID, including colonies in another dimension.
 - `/imperium empire join` — accept an invitation while in the invited colony.
 - `/imperium empire leave` — leave from a non-capital province.
 - `/imperium empire deposit <crowns>` — move crowns from local treasury to the shared imperial reserve.
