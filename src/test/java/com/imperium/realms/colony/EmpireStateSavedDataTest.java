@@ -223,4 +223,97 @@ final class EmpireStateSavedDataTest {
                 new ColonyIdentity("minecraft:overworld", 22)).orElseThrow().colonyName());
     }
 
+
+    @Test
+    void treasuryDepositTransfersFundsAtomicallyAndAuditsOnlySuccess() {
+        final TreasuryFixture fixture = treasuryFixture(250L, 20L);
+
+        assertEquals(EmpireStateSavedData.TreasuryTransferResult.TRANSFERRED,
+                fixture.data().depositIntoImperialTreasury(
+                        fixture.province(), 100L, "Emperor", 3L));
+        assertEquals(150L, fixture.provinceState().treasuryCrowns());
+        assertEquals(120L, fixture.realm().imperialTreasuryCrowns());
+        assertEquals("deposit", fixture.realm().recentAuditEntries().get(0).actionId());
+
+        assertEquals(EmpireStateSavedData.TreasuryTransferResult.INSUFFICIENT_PROVINCE_FUNDS,
+                fixture.data().depositIntoImperialTreasury(
+                        fixture.province(), 200L, "Emperor", 4L));
+        assertEquals(150L, fixture.provinceState().treasuryCrowns());
+        assertEquals(120L, fixture.realm().imperialTreasuryCrowns());
+        assertEquals(1, fixture.realm().recentAuditEntries().size(),
+                "failed transfers must not create misleading audit entries");
+    }
+
+    @Test
+    void treasuryDepositDoesNotDebitProvinceWhenImperialReserveIsFull() {
+        final TreasuryFixture fixture = treasuryFixture(
+                50L, EmpireRealm.MAX_IMPERIAL_TREASURY - 5L);
+
+        assertEquals(EmpireStateSavedData.TreasuryTransferResult.IMPERIAL_TREASURY_FULL,
+                fixture.data().depositIntoImperialTreasury(
+                        fixture.province(), 10L, "Emperor", 5L));
+        assertEquals(50L, fixture.provinceState().treasuryCrowns());
+        assertEquals(EmpireRealm.MAX_IMPERIAL_TREASURY - 5L,
+                fixture.realm().imperialTreasuryCrowns());
+        assertTrue(fixture.realm().recentAuditEntries().isEmpty());
+    }
+
+    @Test
+    void treasuryWithdrawalIsAtomicForSuccessInsufficientReserveAndProvinceCap() {
+        final TreasuryFixture success = treasuryFixture(100L, 120L);
+        assertEquals(EmpireStateSavedData.TreasuryTransferResult.TRANSFERRED,
+                success.data().withdrawFromImperialTreasury(
+                        success.province(), 40L, "Emperor", 6L));
+        assertEquals(140L, success.provinceState().treasuryCrowns());
+        assertEquals(80L, success.realm().imperialTreasuryCrowns());
+        assertEquals("withdraw", success.realm().recentAuditEntries().get(0).actionId());
+
+        final TreasuryFixture insufficient = treasuryFixture(0L, 5L);
+        assertEquals(EmpireStateSavedData.TreasuryTransferResult.INSUFFICIENT_IMPERIAL_FUNDS,
+                insufficient.data().withdrawFromImperialTreasury(
+                        insufficient.province(), 10L, "Emperor", 6L));
+        assertEquals(0L, insufficient.provinceState().treasuryCrowns());
+        assertEquals(5L, insufficient.realm().imperialTreasuryCrowns());
+        assertTrue(insufficient.realm().recentAuditEntries().isEmpty());
+
+        final TreasuryFixture fullProvince = treasuryFixture(EmpireState.MAX_TREASURY - 5L, 20L);
+        assertEquals(EmpireStateSavedData.TreasuryTransferResult.PROVINCE_TREASURY_FULL,
+                fullProvince.data().withdrawFromImperialTreasury(
+                        fullProvince.province(), 10L, "Emperor", 6L));
+        assertEquals(EmpireState.MAX_TREASURY - 5L, fullProvince.provinceState().treasuryCrowns());
+        assertEquals(20L, fullProvince.realm().imperialTreasuryCrowns());
+        assertTrue(fullProvince.realm().recentAuditEntries().isEmpty());
+    }
+
+    private static TreasuryFixture treasuryFixture(
+            final long provinceTreasury,
+            final long imperialTreasury) {
+        final EmpireStateSavedData data = new EmpireStateSavedData();
+        final ColonyIdentity capital = new ColonyIdentity("minecraft:overworld", 1);
+        final ColonyIdentity province = new ColonyIdentity("minecraft:the_nether", 4);
+        assertTrue(data.observeColony(capital, "Capital", 0L));
+        assertTrue(data.observeColony(province, "Border Province", 0L));
+
+        final EmpireState state = data.get(province).orElseThrow();
+        if (provinceTreasury > 0L) {
+            assertTrue(state.creditTreasury(provinceTreasury));
+        }
+
+        final EmpireRealm realm = data.createRealm(
+                "North Sea Union", capital, "emperor-uuid", "Emperor", 0L).orElseThrow();
+        assertTrue(data.inviteProvince(realm.id(), province, 1L));
+        assertTrue(data.acceptRealmInvitation(province, 1L).isPresent());
+        if (imperialTreasury > 0L) {
+            assertTrue(realm.depositImperialTreasury(imperialTreasury));
+        }
+        return new TreasuryFixture(data, state, realm, province);
+    }
+
+    private record TreasuryFixture(
+            EmpireStateSavedData data,
+            EmpireState provinceState,
+            EmpireRealm realm,
+            ColonyIdentity province) {
+    }
+
 }
