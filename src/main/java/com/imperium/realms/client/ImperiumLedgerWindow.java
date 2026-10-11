@@ -1,11 +1,12 @@
 package com.imperium.realms.client;
 
-import com.imperium.realms.ImperiumRealms;
 import com.ldtteam.blockui.controls.Button;
 import com.ldtteam.blockui.controls.ButtonHandler;
 import com.ldtteam.blockui.views.BOWindow;
+import com.imperium.realms.network.StrategicMapRequestPayload;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -28,7 +29,6 @@ public final class ImperiumLedgerWindow extends BOWindow implements ButtonHandle
             Map.entry("empire_routes", "imperium empire routes"),
             Map.entry("empire_defenses", "imperium empire defenses"),
             Map.entry("empire_theatre", "imperium empire theatre"),
-            Map.entry("empire_map", "imperium empire map"),
             Map.entry("priority_route", "imperium empire route build-priority"),
             Map.entry("priority_defense", "imperium empire defense priority"),
             Map.entry("posture_balanced", "imperium campaign posture balanced"),
@@ -63,8 +63,19 @@ public final class ImperiumLedgerWindow extends BOWindow implements ButtonHandle
 
     @Override
     public void onButtonClicked(@NotNull final Button button) {
+        final Minecraft minecraft = Minecraft.getInstance();
         if ("close".equals(button.getID())) {
-            Minecraft.getInstance().setScreen(null);
+            minecraft.setScreen(null);
+            return;
+        }
+        if (minecraft.player == null || minecraft.player.connection == null) {
+            return;
+        }
+
+        if ("empire_map".equals(button.getID())) {
+            // Server selects the realm from the player's real MineColonies province.
+            minecraft.setScreen(new ImperialMapScreen());
+            PacketDistributor.sendToServer(new StrategicMapRequestPayload());
             return;
         }
 
@@ -73,12 +84,7 @@ public final class ImperiumLedgerWindow extends BOWindow implements ButtonHandle
             return;
         }
 
-        final Minecraft minecraft = Minecraft.getInstance();
-        if (minecraft.player == null || minecraft.player.connection == null) {
-            return;
-        }
-
-        // The server performs colony resolution, permission checks and mutations.
+        // All state-changing controls still submit permission-checked server commands.
         minecraft.player.connection.sendCommand(command);
         minecraft.setScreen(null);
     }
