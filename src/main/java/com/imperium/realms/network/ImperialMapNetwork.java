@@ -85,13 +85,10 @@ public final class ImperialMapNetwork {
             return unavailable("imperium_realms.message.empire_none");
         }
 
-        final boolean requestedDimensionIsRealmMember = requestedDimension != null
-                && realm.provinces().stream()
-                        .anyMatch(identity -> identity.dimensionId().equals(requestedDimension));
         // A requested view dimension is accepted only if the server's realm state
         // includes a province in it. Empty/invalid requests default to the capital.
-        final String mapDimension = requestedDimensionIsRealmMember
-                ? requestedDimension : realm.capital().dimensionId();
+        final String mapDimension = resolveMapDimension(
+                requestedDimension, realm.capital(), realm.provinces());
         int centerX = 0;
         int centerZ = 0;
         IColony mapCenter = null;
@@ -153,6 +150,29 @@ public final class ImperialMapNetwork {
 
         return new StrategicMapDataPayload(
                 true, "", realm.name(), mapDimension, centerX, centerZ, provinces);
+    }
+
+    /**
+     * Resolve the client's map-view preference against server-owned membership.
+     * This method selects only a projection dimension; it never adds provinces
+     * or changes realm state.
+     */
+    static String resolveMapDimension(
+            final String requestedDimension,
+            final ColonyIdentity capital,
+            final List<ColonyIdentity> realmProvinces) {
+        Objects.requireNonNull(capital, "capital");
+        Objects.requireNonNull(realmProvinces, "realmProvinces");
+        if (requestedDimension == null || requestedDimension.isBlank()) {
+            return capital.dimensionId();
+        }
+        final String requested = requestedDimension.strip();
+        return realmProvinces.stream()
+                .filter(Objects::nonNull)
+                .map(ColonyIdentity::dimensionId)
+                .filter(requested::equals)
+                .findFirst()
+                .orElse(capital.dimensionId());
     }
 
     private static StrategicMapDataPayload unavailable(final String messageKey) {
