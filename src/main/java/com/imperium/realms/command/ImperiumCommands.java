@@ -1458,32 +1458,35 @@ public final class ImperiumCommands {
         final ColonyContext context = resolveColony(source);
         if (context == null) return 0;
         if (!mayManageEconomy(context)) return denyPermission(source);
-        final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
-        if (realm == null) {
-            source.sendFailure(Component.translatable("imperium_realms.message.empire_none"));
-            return 0;
+
+        final EmpireStateSavedData.TreasuryTransferResult result =
+                context.data().depositIntoImperialTreasury(
+                        context.state().identity(),
+                        amount,
+                        context.player().getGameProfile().getName(),
+                        currentDay(source));
+        switch (result) {
+            case TRANSFERRED -> {
+                final EmpireRealm realm = context.data()
+                        .realmForProvince(context.state().identity()).orElseThrow();
+                source.sendSuccess(() -> Component.translatable(
+                        "imperium_realms.message.empire_deposited",
+                        amount, realm.imperialTreasuryCrowns()), true);
+                return 1;
+            }
+            case REALM_NOT_FOUND -> source.sendFailure(
+                    Component.translatable("imperium_realms.message.empire_none"));
+            case PROVINCE_NOT_FOUND -> source.sendFailure(
+                    Component.translatable("imperium_realms.message.ledger_missing"));
+            case INVALID_AMOUNT, INSUFFICIENT_PROVINCE_FUNDS -> source.sendFailure(
+                    Component.translatable("imperium_realms.message.empire_deposit_province_funds", amount));
+            case IMPERIAL_TREASURY_FULL -> source.sendFailure(
+                    Component.translatable("imperium_realms.message.empire_treasury_full",
+                            EmpireRealm.MAX_IMPERIAL_TREASURY));
+            case INSUFFICIENT_IMPERIAL_FUNDS, PROVINCE_TREASURY_FULL -> source.sendFailure(
+                    Component.translatable("imperium_realms.message.empire_transfer_failed"));
         }
-        if (amount <= 0L || amount > EmpireState.MAX_TREASURY
-                || !context.state().debitTreasury(amount)) {
-            source.sendFailure(Component.translatable(
-                    "imperium_realms.message.empire_deposit_province_funds", amount));
-            return 0;
-        }
-        if (!realm.depositImperialTreasury(amount)) {
-            context.state().creditTreasury(amount);
-            source.sendFailure(Component.translatable(
-                    "imperium_realms.message.empire_treasury_full",
-                    EmpireRealm.MAX_IMPERIAL_TREASURY));
-            return 0;
-        }
-        context.data().markChanged();
-        context.data().recordImperialAudit(realm.id(), currentDay(source),
-                context.player().getGameProfile().getName(), "deposit",
-                context.state().identity().storageKey(), amount);
-        source.sendSuccess(() -> Component.translatable(
-                "imperium_realms.message.empire_deposited", amount,
-                realm.imperialTreasuryCrowns()), true);
-        return 1;
+        return 0;
     }
 
     private static int withdrawEmpireTreasury(
@@ -1496,27 +1499,35 @@ public final class ImperiumCommands {
             return 0;
         }
         if (!mayManageRealm(context, realm)) return denyPermission(source);
-        if (amount <= 0L || amount > EmpireState.MAX_TREASURY
-                || !realm.withdrawImperialTreasury(amount)) {
-            source.sendFailure(Component.translatable(
-                    "imperium_realms.message.empire_treasury_insufficient", amount));
-            return 0;
+
+        final EmpireStateSavedData.TreasuryTransferResult result =
+                context.data().withdrawFromImperialTreasury(
+                        context.state().identity(),
+                        amount,
+                        context.player().getGameProfile().getName(),
+                        currentDay(source));
+        switch (result) {
+            case TRANSFERRED -> {
+                final EmpireRealm updatedRealm = context.data()
+                        .realmForProvince(context.state().identity()).orElseThrow();
+                source.sendSuccess(() -> Component.translatable(
+                        "imperium_realms.message.empire_withdrawn",
+                        amount, updatedRealm.imperialTreasuryCrowns()), true);
+                return 1;
+            }
+            case REALM_NOT_FOUND -> source.sendFailure(
+                    Component.translatable("imperium_realms.message.empire_none"));
+            case PROVINCE_NOT_FOUND -> source.sendFailure(
+                    Component.translatable("imperium_realms.message.ledger_missing"));
+            case INVALID_AMOUNT, INSUFFICIENT_IMPERIAL_FUNDS -> source.sendFailure(
+                    Component.translatable("imperium_realms.message.empire_treasury_insufficient", amount));
+            case PROVINCE_TREASURY_FULL -> source.sendFailure(
+                    Component.translatable("imperium_realms.message.empire_province_treasury_full",
+                            EmpireState.MAX_TREASURY));
+            case INSUFFICIENT_PROVINCE_FUNDS, IMPERIAL_TREASURY_FULL -> source.sendFailure(
+                    Component.translatable("imperium_realms.message.empire_transfer_failed"));
         }
-        if (!context.state().creditTreasury(amount)) {
-            realm.depositImperialTreasury(amount);
-            source.sendFailure(Component.translatable(
-                    "imperium_realms.message.empire_province_treasury_full",
-                    EmpireState.MAX_TREASURY));
-            return 0;
-        }
-        context.data().markChanged();
-        context.data().recordImperialAudit(realm.id(), currentDay(source),
-                context.player().getGameProfile().getName(), "withdraw",
-                context.state().identity().storageKey(), amount);
-        source.sendSuccess(() -> Component.translatable(
-                "imperium_realms.message.empire_withdrawn", amount,
-                realm.imperialTreasuryCrowns()), true);
-        return 1;
+        return 0;
     }
 
     private static int showGovernors(final CommandSourceStack source) {
