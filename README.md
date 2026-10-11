@@ -64,7 +64,9 @@ Province development costs 10 knowledge points. Focus changes daily economic/pol
 - `/imperium campaign launch border_patrol <colonyId>` costs 25 crowns and resolves after one in-game day.
 - `/imperium campaign launch relief_expedition <colonyId>` costs 75 crowns and 5 diplomatic influence and resolves after two days.
 - `/imperium campaign launch war_campaign <colonyId>` costs 150 crowns and 10 influence, requires at least 3 specialist military training points, and resolves after three days.
-- A colony cannot target itself; the selected MineColonies colony must be resolvable in the current dimension for the campaign commands.
+- A colony cannot target itself. The short campaign command resolves the target in the current dimension; use `/imperium campaign launch-at <type> <dimension> <colonyId>` to target a real colony in another dimension.
+- `/imperium diplomacy improve-at <dimension> <colonyId>` improves relations with a real colony in another dimension; the existing `improve <colonyId>` form still uses the current dimension.
+- War campaigns against a member province of the same realm are rejected, even when no separate bilateral relation score is set.
 - Up to three operations may run concurrently, but each target may only be used by one active operation from that colony.
 - Outcomes affect stability, legitimacy, training, treasury and relations; they do not automatically transfer territory.
 
