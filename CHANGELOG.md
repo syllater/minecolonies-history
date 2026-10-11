@@ -16,7 +16,8 @@ This file records user-visible changes. Entries are development notes until a re
 - BlockUI Imperial Ledger and interactive Imperial Theatre with server-provided province snapshots, pan, zoom, recenter and selection.
 - English and Dutch translations.
 - Automated tests for state persistence, policy/economy bounds, realm membership, strategic map payloads, work cooldowns and tier progression.
-- Cross-dimension supply-route building, defensive orders and governor appointments/dismissals for member provinces.
+- Cross-dimension supply-route building, defensive orders and governor appointments/dismissals for realm-member provinces.
+- Imperial Theatre dimension selector; clients may request a map projection only for a dimension that actually contains a province in their server-authoritative realm.
 - CI validation for translations and generated blueprints, Gradle build/tests, client startup and dedicated-server schematic loading.
 
 ### Fixed / hardened

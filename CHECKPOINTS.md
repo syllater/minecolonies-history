@@ -165,3 +165,27 @@ Commit `6ceed484e4ca0d567e9b81555351eae1abadd422` passed the complete GitHub Act
 - Estimated overall completion: ~75% as a planning estimate, not a measured metric.
 - Still pending: survival-world construction/hiring/upgrades/save-reload, real graphical map playtest, dedicated-server two-player permission/concurrency/reconnect tests, balance review, release notes/package review and distribution-license decision.
 - JAR artifact name: `imperium-realms-117da4d4b97693902d90dd2b490d5a18cd4c8b01` (temporary CI artifact; regenerate when expired).
+
+
+## 2026-10-11 — Cross-dimension management and Imperial Theatre view
+
+### Changes
+
+- Added cross-dimension commands for supply routes, defensive orders and governor appointment/dismissal.
+- Added a map dimension selector that cycles through dimensions represented by provinces in the player's current realm.
+- Changed the map request payload to carry only a bounded display-dimension preference.
+- Server-side dimension selection checks the realm's own province list; invalid/unrelated dimensions default to the capital dimension.
+- Added unit tests for dimension request bounds and server-side map-dimension allowlisting.
+- Updated English and Dutch translations and the end-to-end playtest checklist.
+
+### Verification evidence
+
+The complete CI workflow passed on code commit `12a748d92b8cc648ce3b954a0d3b801d107c9e48`:
+- [Build, tests, client smoke and dedicated-server blueprint smoke](https://github.com/syllater/minecolonies-history/actions/runs/38132956614)
+- [Built mod JAR artifact](https://github.com/syllater/minecolonies-history/actions/runs/38132956614/artifacts/11700370329)
+
+This verifies compilation, unit tests, startup and loading of the ten generated schematics. It does not verify in-world placement/upgrades or two-player multiplayer interaction.
+
+### Remaining acceptance gates
+
+Follow `docs/PLAYTEST_RELEASE_CHECKLIST.md` for the real-world hut upgrade/save-load, interactive Theatre map, two-player permission/concurrency, balance, final packaging and license checks.

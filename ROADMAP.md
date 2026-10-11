@@ -42,11 +42,13 @@ Remaining: inspect each level in a real survival world, test that tier-scaled wo
 
 ## Milestone 8 — Empire and provincial simulation
 Status: multi-colony realm/capital, invitations, central treasury, laws, audit history, governors, regional events, cohesion/separatist pressure and route/defense logistics implemented. The strategic map has both a chat overview and a graphical Imperial Theatre with server-provided province data, pan/zoom and selection.
-Remaining: interactively validate the GUI in a real client and add a clearer view when a realm spans multiple dimensions.
+Implemented: the Imperial Theatre has a server-validated Next dimension control that cycles among dimensions represented by member provinces; unit tests reject dimensions outside realm membership.
+Remaining: interactively validate the map in a real client, including dimensions with unloaded provinces.
 
 ## Milestone 9 — Multiplayer and compatibility hardening
 Status: green automated build/unit/client/server-blueprint workflow; custom map payload is bounded, read-only and answered from server state.
-Remaining: real two-player permissions, realm invitations/membership races, concurrent treasury operations and reconnect/save-load tests.
+Implemented: automated permission/domain tests and read-only server-authoritative map payload validation; cross-dimension route, defense and governor commands compile and the dedicated server starts cleanly.
+Remaining: real two-player permissions, realm invitation/membership races, concurrent treasury operations and reconnect/save-load tests.
 
 ## Milestone 10 — Release
 Not complete. Requires in-world acceptance, release notes, final artifact/package review and an explicit distribution/license decision.

@@ -58,3 +58,18 @@ Rationale:
 Decision: Give the Emperor a timed defensive-order mechanism, distinct from standing military posture. One active order is allowed per province; it costs 50 central crowns, lasts seven in-game days and adds +20 readiness when the province is targeted.
 
 Rationale: Strategic defense should be an explicit command choice, not just an automatic passive score. Orders are persistent, server-authoritative and expire during the daily turn.
+
+
+## 2026-10-11 — Imperial Theatre dimension selection
+
+Decision: The map client may request a display dimension, but the server resolves it only when at least one province in the player's current realm exists in that dimension. Empty or invalid requests fall back to the realm capital's dimension.
+
+Rationale:
+- A realm can span multiple Minecraft dimensions, while a single X/Z projection cannot meaningfully combine coordinates from unrelated dimension spaces.
+- The client request is a presentation preference only and never contains a realm ID or membership list.
+- Province names, membership, coordinates and metrics remain sourced from server state.
+- A regression test covers a valid member dimension, empty/blank requests and rejection of a dimension absent from the realm.
+
+## 2026-10-11 — Cross-dimension realm administration
+
+Decision: Supply-route construction, temporary defensive orders, and governor appointment/dismissal use explicit dimension + colony ID variants. Those variants resolve the target with the server's MineColonies API and re-check that the target is a member province and the caller is the Emperor or a server operator.
