@@ -1,5 +1,6 @@
 package com.imperium.realms.client;
 
+import com.imperium.realms.ImperiumRealms;
 import com.ldtteam.blockui.controls.Button;
 import com.ldtteam.blockui.controls.ButtonHandler;
 import com.ldtteam.blockui.views.BOWindow;
