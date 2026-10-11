@@ -102,12 +102,26 @@ public final class ImperiumCommands {
                                                 IntegerArgumentType.getInteger(context, "colonyId"))))
                                 .then(Commands.literal("priority")
                                         .executes(context -> issuePriorityDefensiveOrder(context.getSource()))))
+                        .then(Commands.literal("defense-at")
+                                .then(Commands.argument("dimension", StringArgumentType.word())
+                                        .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                                .executes(context -> issueDefensiveOrder(
+                                                        context.getSource(),
+                                                        StringArgumentType.getString(context, "dimension"),
+                                                        IntegerArgumentType.getInteger(context, "colonyId"))))))
                         .then(Commands.literal("route")
                                 .then(Commands.literal("build")
                                         .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                                 .executes(context -> buildSupplyRoute(
                                                         context.getSource(),
                                                         IntegerArgumentType.getInteger(context, "colonyId")))))
+                                .then(Commands.literal("build-at")
+                                        .then(Commands.argument("dimension", StringArgumentType.word())
+                                                .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                                        .executes(context -> buildSupplyRoute(
+                                                                context.getSource(),
+                                                                StringArgumentType.getString(context, "dimension"),
+                                                                IntegerArgumentType.getInteger(context, "colonyId"))))))
                                 .then(Commands.literal("build-priority")
                                         .executes(context -> buildPrioritySupplyRoute(context.getSource()))))
                         .then(Commands.literal("petitions")
@@ -121,6 +135,17 @@ public final class ImperiumCommands {
                                                         context.getSource(),
                                                         IntegerArgumentType.getInteger(context, "colonyId"),
                                                         StringArgumentType.getString(context, "response"))))))
+                        .then(Commands.literal("resolve-at")
+                                .then(Commands.argument("dimension", StringArgumentType.word())
+                                        .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                                .then(Commands.argument("response", StringArgumentType.word())
+                                                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(
+                                                                List.of("reassure", "crackdown"), builder))
+                                                        .executes(context -> resolveSeparatistPetition(
+                                                                context.getSource(),
+                                                                StringArgumentType.getString(context, "dimension"),
+                                                                IntegerArgumentType.getInteger(context, "colonyId"),
+                                                                StringArgumentType.getString(context, "response")))))))
                         .then(Commands.literal("found")
                                 .then(Commands.argument("name", StringArgumentType.greedyString())
                                         .executes(context -> foundEmpire(
@@ -163,11 +188,27 @@ public final class ImperiumCommands {
                                                         context.getSource(),
                                                         IntegerArgumentType.getInteger(context, "colonyId"),
                                                         EntityArgument.getPlayer(context, "governor"))))))
+                        .then(Commands.literal("appoint-at")
+                                .then(Commands.argument("dimension", StringArgumentType.word())
+                                        .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                                .then(Commands.argument("governor", EntityArgument.player())
+                                                        .executes(context -> appointGovernor(
+                                                                context.getSource(),
+                                                                StringArgumentType.getString(context, "dimension"),
+                                                                IntegerArgumentType.getInteger(context, "colonyId"),
+                                                                EntityArgument.getPlayer(context, "governor")))))))
                         .then(Commands.literal("dismiss")
                                 .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                         .executes(context -> dismissGovernor(
                                                 context.getSource(),
-                                                IntegerArgumentType.getInteger(context, "colonyId"))))))
+                                                IntegerArgumentType.getInteger(context, "colonyId")))))
+                        .then(Commands.literal("dismiss-at")
+                                .then(Commands.argument("dimension", StringArgumentType.word())
+                                        .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                                .executes(context -> dismissGovernor(
+                                                        context.getSource(),
+                                                        StringArgumentType.getString(context, "dimension"),
+                                                        IntegerArgumentType.getInteger(context, "colonyId"))))))
                 .then(Commands.literal("campaign")
                         .then(Commands.literal("status")
                                 .executes(context -> showCampaigns(context.getSource())))
@@ -186,7 +227,18 @@ public final class ImperiumCommands {
                                                 .executes(context -> launchCampaign(
                                                         context.getSource(),
                                                         StringArgumentType.getString(context, "type"),
-                                                        IntegerArgumentType.getInteger(context, "colonyId")))))))
+                                                        IntegerArgumentType.getInteger(context, "colonyId"))))))
+                        .then(Commands.literal("launch-at")
+                                .then(Commands.argument("type", StringArgumentType.word())
+                                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(
+                                                new String[]{"border_patrol", "relief_expedition", "war_campaign"}, builder))
+                                        .then(Commands.argument("dimension", StringArgumentType.word())
+                                                .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                                        .executes(context -> launchCampaign(
+                                                                context.getSource(),
+                                                                StringArgumentType.getString(context, "type"),
+                                                                StringArgumentType.getString(context, "dimension"),
+                                                                IntegerArgumentType.getInteger(context, "colonyId")))))))
                 .then(Commands.literal("politics")
                         .executes(context -> showPolitics(context.getSource())))
                 .then(Commands.literal("diplomacy")
@@ -196,7 +248,14 @@ public final class ImperiumCommands {
                                 .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                         .executes(context -> improveDiplomacy(
                                                 context.getSource(),
-                                                IntegerArgumentType.getInteger(context, "colonyId"))))))
+                                                IntegerArgumentType.getInteger(context, "colonyId")))))
+                        .then(Commands.literal("improve-at")
+                                .then(Commands.argument("dimension", StringArgumentType.word())
+                                        .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                                .executes(context -> improveDiplomacy(
+                                                        context.getSource(),
+                                                        StringArgumentType.getString(context, "dimension"),
+                                                        IntegerArgumentType.getInteger(context, "colonyId"))))))
                 .then(Commands.literal("province")
                         .then(Commands.literal("status")
                                 .executes(context -> showProvince(context.getSource())))
@@ -668,6 +727,12 @@ public final class ImperiumCommands {
 
     private static int resolveSeparatistPetition(
             final CommandSourceStack source, final int targetColonyId, final String requestedResponse) {
+        return resolveSeparatistPetition(source, null, targetColonyId, requestedResponse);
+    }
+
+    private static int resolveSeparatistPetition(
+            final CommandSourceStack source, final String targetDimension,
+            final int targetColonyId, final String requestedResponse) {
         final ColonyContext context = resolveColony(source);
         if (context == null) return 0;
         final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
@@ -684,8 +749,7 @@ public final class ImperiumCommands {
             source.sendFailure(Component.translatable("imperium_realms.message.empire_petition_invalid_response"));
             return 0;
         }
-        final IColony target = MineColoniesIntegration
-                .colonyById(context.player().serverLevel(), targetColonyId).orElse(null);
+        final IColony target = resolveTargetColony(context.player(), targetDimension, targetColonyId);
         if (target == null) {
             source.sendFailure(Component.translatable("imperium_realms.message.governor_target_not_found", targetColonyId));
             return 0;
@@ -960,6 +1024,11 @@ public final class ImperiumCommands {
     }
 
     private static int issueDefensiveOrder(final CommandSourceStack source, final int targetColonyId) {
+        return issueDefensiveOrder(source, null, targetColonyId);
+    }
+
+    private static int issueDefensiveOrder(
+            final CommandSourceStack source, final String targetDimension, final int targetColonyId) {
         final ColonyContext context = resolveColony(source);
         if (context == null) return 0;
         final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
@@ -971,8 +1040,7 @@ public final class ImperiumCommands {
             source.sendFailure(Component.translatable("imperium_realms.message.defensive_orders_emperor_only"));
             return 0;
         }
-        final IColony target = MineColoniesIntegration
-                .colonyById(context.player().serverLevel(), targetColonyId).orElse(null);
+        final IColony target = resolveTargetColony(context.player(), targetDimension, targetColonyId);
         if (target == null) {
             source.sendFailure(Component.translatable(
                     "imperium_realms.message.empire_target_not_found", targetColonyId));
@@ -1040,6 +1108,11 @@ public final class ImperiumCommands {
 
     private static int buildSupplyRoute(
             final CommandSourceStack source, final int destinationColonyId) {
+        return buildSupplyRoute(source, null, destinationColonyId);
+    }
+
+    private static int buildSupplyRoute(
+            final CommandSourceStack source, final String targetDimension, final int destinationColonyId) {
         final ColonyContext context = resolveColony(source);
         if (context == null) return 0;
         final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
@@ -1052,8 +1125,7 @@ public final class ImperiumCommands {
             return 0;
         }
 
-        final IColony destination = MineColoniesIntegration
-                .colonyById(context.player().serverLevel(), destinationColonyId).orElse(null);
+        final IColony destination = resolveTargetColony(context.player(), targetDimension, destinationColonyId);
         if (destination == null) {
             source.sendFailure(Component.translatable(
                     "imperium_realms.message.empire_target_not_found", destinationColonyId));
@@ -1477,6 +1549,12 @@ public final class ImperiumCommands {
 
     private static int appointGovernor(
             final CommandSourceStack source, final int targetColonyId, final ServerPlayer governorPlayer) {
+        return appointGovernor(source, null, targetColonyId, governorPlayer);
+    }
+
+    private static int appointGovernor(
+            final CommandSourceStack source, final String targetDimension,
+            final int targetColonyId, final ServerPlayer governorPlayer) {
         final ColonyContext context = resolveColony(source);
         if (context == null) return 0;
         final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
@@ -1488,8 +1566,7 @@ public final class ImperiumCommands {
             source.sendFailure(Component.translatable("imperium_realms.message.governor_emperor_only"));
             return 0;
         }
-        final IColony target = MineColoniesIntegration
-                .colonyById(context.player().serverLevel(), targetColonyId).orElse(null);
+        final IColony target = resolveTargetColony(context.player(), targetDimension, targetColonyId);
         if (target == null) {
             source.sendFailure(Component.translatable(
                     "imperium_realms.message.governor_target_not_found", targetColonyId));
@@ -1518,6 +1595,11 @@ public final class ImperiumCommands {
     }
 
     private static int dismissGovernor(final CommandSourceStack source, final int targetColonyId) {
+        return dismissGovernor(source, null, targetColonyId);
+    }
+
+    private static int dismissGovernor(
+            final CommandSourceStack source, final String targetDimension, final int targetColonyId) {
         final ColonyContext context = resolveColony(source);
         if (context == null) return 0;
         final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
@@ -1529,8 +1611,7 @@ public final class ImperiumCommands {
             source.sendFailure(Component.translatable("imperium_realms.message.governor_emperor_only"));
             return 0;
         }
-        final IColony target = MineColoniesIntegration
-                .colonyById(context.player().serverLevel(), targetColonyId).orElse(null);
+        final IColony target = resolveTargetColony(context.player(), targetDimension, targetColonyId);
         if (target == null) {
             source.sendFailure(Component.translatable(
                     "imperium_realms.message.governor_target_not_found", targetColonyId));
@@ -1618,6 +1699,12 @@ public final class ImperiumCommands {
 
     private static int launchCampaign(
             final CommandSourceStack source, final String requestedType, final int targetColonyId) {
+        return launchCampaign(source, requestedType, null, targetColonyId);
+    }
+
+    private static int launchCampaign(
+            final CommandSourceStack source, final String requestedType,
+            final String targetDimension, final int targetColonyId) {
         final ColonyContext context = resolveColony(source);
         if (context == null) return 0;
         if (!mayManageEconomy(context)) return denyPermission(source);
@@ -1627,8 +1714,7 @@ public final class ImperiumCommands {
             source.sendFailure(Component.translatable("imperium_realms.message.campaign_type_unknown"));
             return 0;
         }
-        final IColony target = MineColoniesIntegration
-                .colonyById(context.player().serverLevel(), targetColonyId).orElse(null);
+        final IColony target = resolveTargetColony(context.player(), targetDimension, targetColonyId);
         if (target == null) {
             source.sendFailure(Component.translatable("imperium_realms.message.campaign_target_not_found", targetColonyId));
             return 0;
@@ -1772,6 +1858,11 @@ public final class ImperiumCommands {
     }
 
     private static int improveDiplomacy(final CommandSourceStack source, final int targetColonyId) {
+        return improveDiplomacy(source, null, targetColonyId);
+    }
+
+    private static int improveDiplomacy(
+            final CommandSourceStack source, final String targetDimension, final int targetColonyId) {
         final ColonyContext context = resolveColony(source);
         if (context == null) {
             return 0;
@@ -1780,8 +1871,7 @@ public final class ImperiumCommands {
             return denyPermission(source);
         }
 
-        final IColony target = MineColoniesIntegration
-                .colonyById(context.player().serverLevel(), targetColonyId).orElse(null);
+        final IColony target = resolveTargetColony(context.player(), targetDimension, targetColonyId);
         if (target == null) {
             source.sendFailure(Component.translatable(
                     "imperium_realms.message.diplomacy_target_missing", targetColonyId));
@@ -1821,6 +1911,23 @@ public final class ImperiumCommands {
                 score,
                 context.state().diplomaticInfluence()), true);
         return 1;
+    }
+
+    private static IColony resolveTargetColony(
+            final ServerPlayer player, final String targetDimension, final int colonyId) {
+        if (player == null || colonyId < 0) {
+            return null;
+        }
+        if (targetDimension == null || targetDimension.isBlank()) {
+            return MineColoniesIntegration.colonyById(player.serverLevel(), colonyId).orElse(null);
+        }
+        try {
+            return MineColoniesIntegration.colonyByIdentity(
+                    player.serverLevel().getServer(),
+                    new ColonyIdentity(targetDimension, colonyId)).orElse(null);
+        } catch (IllegalArgumentException invalidDimension) {
+            return null;
+        }
     }
 
     private static long currentDay(final CommandSourceStack source) {
