@@ -698,6 +698,24 @@ public final class EmpireStateSavedData extends SavedData {
         return realms.values().stream().filter(realm -> realm.containsProvince(identity)).findFirst();
     }
 
+    /**
+     * Whether two colony identities belong to the same realm, including when
+     * their colonies are in different Minecraft dimensions.
+     */
+    public boolean areProvincesInSameRealm(
+            final ColonyIdentity first, final ColonyIdentity second) {
+        if (first == null || second == null) {
+            return false;
+        }
+        final EmpireRealm firstRealm = realmForProvince(first).orElse(null);
+        if (firstRealm == null) {
+            return false;
+        }
+        return realmForProvince(second)
+                .map(secondRealm -> secondRealm.id() == firstRealm.id())
+                .orElse(false);
+    }
+
     public Optional<EmpireRealm> createRealm(
             final String name,
             final ColonyIdentity capital,
