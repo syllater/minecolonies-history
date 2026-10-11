@@ -107,16 +107,17 @@ jobs:
           reached=0
 
           for attempt in $(seq 1 180); do
-            if grep -Fq "IMPERIUM_BLUEPRINT_VALIDATION_FAIL" "$log" 2>/dev/null; then
+            if grep -Eq "IMPERIUM_BLUEPRINT_VALIDATION_FAIL|IMPERIUM_REGISTRY_VALIDATION_FAIL" "$log" 2>/dev/null; then
               cat "$log"
-              echo "The dedicated server reported a Structurize pack/blueprint validation failure."
+              echo "The dedicated server reported a MineColonies registry or Structurize blueprint validation failure."
               kill -TERM -- "-$pid" 2>/dev/null || true
               sleep 2
               wait "$pid" 2>/dev/null || true
               exit 1
             fi
 
-            if grep -Fq "IMPERIUM_BLUEPRINT_VALIDATION_PASS: 10/10" "$log" 2>/dev/null; then
+            if grep -Fq "IMPERIUM_REGISTRY_VALIDATION_PASS: jobs=6 buildings=2 guardTypes=3 modules=6." "$log" 2>/dev/null && \
+               grep -Fq "IMPERIUM_BLUEPRINT_VALIDATION_PASS: 10/10" "$log" 2>/dev/null; then
               reached=1
               break
             fi
@@ -125,7 +126,7 @@ jobs:
               wait "$pid"
               result=$?
               cat "$log"
-              echo "runServer exited before validating the 10 Structurize blueprints (exit code $result)."
+              echo "runServer exited before validating the MineColonies registrations and 10 Structurize blueprints (exit code $result)."
               exit 1
             fi
             sleep 2
@@ -140,7 +141,7 @@ jobs:
             exit 0
           fi
 
-          echo "FAIL: dedicated server did not validate all 10 Structurize blueprints within 360 seconds."
+          echo "FAIL: dedicated server did not validate MineColonies registrations and all 10 Structurize blueprints within 360 seconds."
           kill -TERM -- "-$pid" 2>/dev/null || true
           sleep 2
           wait "$pid" 2>/dev/null || true
