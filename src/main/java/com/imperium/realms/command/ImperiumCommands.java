@@ -255,7 +255,7 @@ public final class ImperiumCommands {
                                                 .executes(context -> improveDiplomacy(
                                                         context.getSource(),
                                                         StringArgumentType.getString(context, "dimension"),
-                                                        IntegerArgumentType.getInteger(context, "colonyId"))))))
+                                                        IntegerArgumentType.getInteger(context, "colonyId")))))))
                 .then(Commands.literal("province")
                         .then(Commands.literal("status")
                                 .executes(context -> showProvince(context.getSource())))
