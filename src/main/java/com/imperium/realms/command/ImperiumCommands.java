@@ -130,7 +130,13 @@ public final class ImperiumCommands {
                                 .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                         .executes(context -> inviteEmpireProvince(
                                                 context.getSource(),
-                                                IntegerArgumentType.getInteger(context, "colonyId")))))
+                                                IntegerArgumentType.getInteger(context, "colonyId"))))
+                                .then(Commands.argument("dimension", StringArgumentType.word())
+                                        .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
+                                                .executes(context -> inviteEmpireProvince(
+                                                        context.getSource(),
+                                                        StringArgumentType.getString(context, "dimension"),
+                                                        IntegerArgumentType.getInteger(context, "colonyId"))))))
                         .then(Commands.literal("join")
                                 .executes(context -> joinEmpire(context.getSource())))
                         .then(Commands.literal("leave")
@@ -1259,6 +1265,15 @@ public final class ImperiumCommands {
     }
 
     private static int inviteEmpireProvince(final CommandSourceStack source, final int targetColonyId) {
+        return inviteEmpireProvince(source, null, targetColonyId);
+    }
+
+    /**
+     * Invite a colony by ID in the current dimension, or by explicit dimension
+     * and ID for a multi-dimensional realm.
+     */
+    private static int inviteEmpireProvince(
+            final CommandSourceStack source, final String targetDimension, final int targetColonyId) {
         final ColonyContext context = resolveColony(source);
         if (context == null) return 0;
         final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
@@ -1268,8 +1283,21 @@ public final class ImperiumCommands {
         }
         if (!mayManageRealm(context, realm)) return denyPermission(source);
 
-        final IColony target = MineColoniesIntegration
-                .colonyById(context.player().serverLevel(), targetColonyId).orElse(null);
+        final IColony target;
+        if (targetDimension == null) {
+            target = MineColoniesIntegration
+                    .colonyById(context.player().serverLevel(), targetColonyId).orElse(null);
+        } else {
+            try {
+                target = MineColoniesIntegration.colonyByIdentity(
+                        context.player().serverLevel().getServer(),
+                        new ColonyIdentity(targetDimension, targetColonyId)).orElse(null);
+            } catch (IllegalArgumentException invalidDimension) {
+                source.sendFailure(Component.translatable(
+                        "imperium_realms.message.empire_target_not_found", targetColonyId));
+                return 0;
+            }
+        }
         if (target == null) {
             source.sendFailure(Component.translatable(
                     "imperium_realms.message.empire_target_not_found", targetColonyId));
