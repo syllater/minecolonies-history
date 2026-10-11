@@ -8,6 +8,7 @@ Use a disposable Minecraft 1.21.1 world with the exact tested NeoForge and MineC
 - [ ] Create a MineColonies colony, wait at least 200 ticks, and confirm `/imperium status` recognizes it.
 - [ ] Load a world with an existing MineColonies colony and confirm its state is initialized without changing the MineColonies colony.
 - [ ] Open the BlockUI Imperial Ledger and verify the English and Dutch UI strings.
+- [ ] From the ledger, click Empire Map and verify the full-screen Imperial Theatre receives the server snapshot and draws markers for member provinces.
 
 ## Buildings and professions
 - [ ] Build the Imperial Archive level 1 hut through the MineColonies builder.
@@ -38,6 +39,7 @@ Use a disposable Minecraft 1.21.1 world with the exact tested NeoForge and MineC
 - [ ] Launch three distinct operations, confirm a fourth is rejected, then wait for each operation to resolve.
 - [ ] Confirm the strategic map shows loaded colony coordinates and explicitly lists unloaded/cross-dimension members.
 - [ ] Use `/imperium empire map <centerX> <centerZ> <blocksPerCell>` to pan and zoom; confirm coordinates remain fixed between viewports, off-screen provinces list their coordinates, and English/Dutch help strings match.
+- [ ] In the graphical theatre, pan with arrow keys, zoom with the wheel/buttons, press R to recenter, select several province markers and verify their stability, unrest and loyalty match server state.
 
 ## Persistence and multiplayer
 - [ ] Save/reload while a parliamentary bill is open.

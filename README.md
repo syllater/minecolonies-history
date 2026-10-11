@@ -43,7 +43,7 @@ GitHub Actions validates English/Dutch localization coverage and blueprint tier 
 - Diplomatic influence and relationship scores between real MineColonies colonies.
 - Federated realms with an Emperor/capital, member invitations, a separate central treasury, audit log, common tax/policy laws, provincial governors and regional events.
 - Up to three concurrent military operations against distinct colony targets, military postures, persistent supply routes and temporary defensive orders.
-- Strategic priority planning for routes and defense, plus a strategic map command using actual MineColonies colony center coordinates.
+- Strategic priority planning for routes and defense, plus a strategic map command and a full-screen interactive Imperial Theatre using real MineColonies colony center coordinates; map data is server-authoritative.
 - English and Dutch translations, a BlockUI imperial ledger and permission-checked server commands.
 
 ## Province commands
@@ -83,6 +83,7 @@ Each real MineColonies colony can remain independent or join a multi-colony real
 - `/imperium empire routes`, `/imperium empire defenses` and `/imperium empire theatre` — inspect logistics and operations.
 - `/imperium empire map` — show a coordinate-grid map derived from loaded MineColonies hut centers in the capital's dimension. Other-dimension and currently unloaded colonies are listed separately.
 - `/imperium empire map <centerX> <centerZ> <blocksPerCell>` — show a fixed-coordinate viewport. Change X/Z to pan; use a smaller `blocksPerCell` to zoom in and a larger value to zoom out. Colonies outside the viewport are listed with their coordinates, so you can pan toward them.
+- Press **I** to open the BlockUI Imperial Ledger, then select **Empire Map** to open the graphical theatre. Arrow keys pan, the mouse wheel and Zoom buttons adjust scale, **R** recentres, and clicking a province marker shows its current stability, unrest and loyalty. Province membership and map data are resolved on the server.
 
 The shared reserve is separate from provincial treasuries. Enacted empire-wide tax law remits a portion of already-collected provincial tax receipts instead of taxing those citizens a second time.
 

@@ -53,3 +53,24 @@ Commit `6ceed484e4ca0d567e9b81555351eae1abadd422` passed the complete GitHub Act
 - Last previously fully verified commit: `bce773194c56d70cc3a659287dd7d83e438bd3af`, including localization, blueprint progression validation, Gradle tests/build, client startup and server blueprint checks.
 - This viewport implementation is not considered verified until its own GitHub Actions run passes.
 - This feature remains a text/chat map, not a graphical screen. Real survival-world and two-player acceptance remain pending.
+
+
+## 2026-10-11 — Interactive Imperial Theatre GUI (verified by CI)
+
+### Implementation
+- Added bounded custom network payloads for a strategic map request and server-produced realm snapshot.
+- Server resolves the requesting player to their actual MineColonies colony, then resolves that colony's realm; the client does not provide an empire or province ID.
+- Added `ImperialMapScreen`, opened from the BlockUI ledger's Empire Map button.
+- GUI supports arrow-key panning, mouse-wheel and button zoom, recentering with R, province selection and display of province stability, unrest and loyalty.
+- Map payloads cap the number of provinces at 64 and normalize field lengths and metric values.
+- Isolated the client receiver through a client-only callback so dedicated servers do not link the new screen class.
+
+### Verification
+- Commit: `bbf52c41bb16a82f3c0f2cb9c3744f9b21398f73`
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38119451312
+- Localization check, blueprint progression validation, Gradle build/tests, client-start smoke and dedicated-server schematic validation all passed.
+- Artifact uploaded: `imperium-realms-bbf52c41bb16a82f3c0f2cb9c3744f9b21398f73`.
+
+### Still pending
+- A human must open the BlockUI ledger and interact with the map in a real survival world.
+- Save/reload and two-player realm-permission tests remain required before release.
