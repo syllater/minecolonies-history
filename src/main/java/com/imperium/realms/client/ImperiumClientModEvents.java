@@ -1,6 +1,7 @@
 package com.imperium.realms.client;
 
 import com.imperium.realms.ImperiumRealms;
+import com.imperium.realms.network.ImperialMapNetwork;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.neoforged.api.distmarker.Dist;
@@ -27,5 +28,6 @@ public final class ImperiumClientModEvents {
     @SubscribeEvent
     public static void registerKeyMappings(final RegisterKeyMappingsEvent event) {
         event.register(OPEN_LEDGER);
+        ImperialMapNetwork.setClientReceiver(ImperialMapPayloadReceiver::accept);
     }
 }

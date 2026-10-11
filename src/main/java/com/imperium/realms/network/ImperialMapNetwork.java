@@ -10,9 +10,7 @@ import com.minecolonies.api.colony.IColony;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.DistExecutor;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -20,11 +18,23 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 /** Registers the read-only map payloads; all membership/data lookup happens on the server. */
 @EventBusSubscriber(modid = ImperiumRealms.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public final class ImperialMapNetwork {
+    private static volatile Consumer<StrategicMapDataPayload> clientReceiver = payload -> { };
+
     private ImperialMapNetwork() {
+    }
+
+    /**
+     * Installs a client-only receiver without linking common/network classes
+     * to client classes on a dedicated server.
+     */
+    public static void setClientReceiver(final Consumer<StrategicMapDataPayload> receiver) {
+        clientReceiver = Objects.requireNonNull(receiver, "receiver");
     }
 
     @SubscribeEvent
@@ -53,9 +63,9 @@ public final class ImperialMapNetwork {
     private static void handleClientData(
             final StrategicMapDataPayload payload,
             final IPayloadContext context) {
-        DistExecutor.unsafeRunWhenOn(
-                Dist.CLIENT,
-                () -> () -> com.imperium.realms.client.ImperialMapPayloadReceiver.accept(payload));
+        // Client-only code is registered from a Dist.CLIENT mod-bus subscriber.
+        // The dedicated server's default callback is deliberately a no-op.
+        clientReceiver.accept(payload);
     }
 
     private static StrategicMapDataPayload createSnapshot(final ServerPlayer player) {
