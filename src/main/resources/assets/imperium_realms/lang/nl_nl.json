@@ -313,5 +313,6 @@
   "imperium_realms.gui.map.zoom_in": "Zoom in",
   "imperium_realms.gui.map.recenter": "Centreren",
   "imperium_realms.gui.map.refresh": "Vernieuwen",
-  "imperium_realms.gui.map.close": "Sluiten"
+  "imperium_realms.gui.map.close": "Sluiten",
+  "imperium_realms.message.help_header": "§6Imperium — Snelstartgids"
 }
