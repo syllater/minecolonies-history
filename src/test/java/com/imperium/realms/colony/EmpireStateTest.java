@@ -195,6 +195,27 @@ final class EmpireStateTest {
     }
 
     @Test
+    void multipleWorkersContributeIndependentlyWithinAnInterval() {
+        final EmpireState state = EmpireState.create(
+                new ColonyIdentity("minecraft:overworld", 308), "Archive", 0L);
+
+        assertTrue(state.recordScholarWork(100L, 3, "worker-a"));
+        assertFalse(state.recordScholarWork(101L, 3, "worker-a"));
+        assertTrue(state.recordScholarWork(101L, 3, "worker-b"));
+        assertEquals(4L, state.knowledgePoints());
+
+        assertTrue(state.recordTaxCollectorWork(100L, 3, "tax-a"));
+        assertTrue(state.recordTaxCollectorWork(101L, 3, "tax-b"));
+        assertEquals(4, state.taxCollectionEfficiencyPercent());
+        assertFalse(state.recordTaxCollectorWork(102L, 3, "tax-a"));
+
+        assertTrue(state.recordDiplomatWork(200L, 3, "diplomat-a"));
+        assertTrue(state.recordDiplomatWork(201L, 3, "diplomat-b"));
+        assertEquals(4L, state.diplomaticInfluence());
+        assertFalse(state.recordDiplomatWork(202L, 3, "diplomat-a"));
+    }
+
+    @Test
     void guardTowerTierImprovesSpecialistMilitaryTraining() {
         final EmpireState tierOne = EmpireState.create(
                 new ColonyIdentity("minecraft:overworld", 401), "Tier One", 0L);

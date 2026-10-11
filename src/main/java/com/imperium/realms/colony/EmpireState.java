@@ -23,6 +23,8 @@ public final class EmpireState {
     public static final long MAX_DIPLOMATIC_INFLUENCE = 1_000L;
     private static final int MAX_DIPLOMATIC_RELATIONS = 256;
     private static final int MAX_STORED_PROPOSALS = 20;
+    static final int MAX_WORKER_COOLDOWNS = 64;
+    private static final int MAX_WORKER_KEY_LENGTH = 96;
 
     /**
      * Tier 1–2 yields one unit, tier 3–4 yields two, and tier 5 yields three.
@@ -72,9 +74,12 @@ public final class EmpireState {
     private long lastTaxDay = -1L;
     private long lastScholarWorkTick = -1L;
     private long lastTaxCollectorWorkTick = -1L;
+    private final Map<String, Long> scholarWorkerCooldowns = new LinkedHashMap<>();
+    private final Map<String, Long> taxCollectorWorkerCooldowns = new LinkedHashMap<>();
     private int taxCollectionEfficiencyPercent;
     private long diplomaticInfluence;
     private long lastDiplomatWorkTick = -1L;
+    private final Map<String, Long> diplomatWorkerCooldowns = new LinkedHashMap<>();
     private final Map<ColonyIdentity, Integer> diplomaticRelations = new LinkedHashMap<>();
     private final Map<String, Integer> factionApproval = new LinkedHashMap<>();
     private int unrest;
@@ -512,27 +517,126 @@ public final class EmpireState {
         lastCivicDisorderChangeDay = Math.max(-1L, loadedLastChangeDay);
     }
 
-    /** Compatibility overload; legacy callers are treated as a tier-1 Archive. */
+    /** Compatibility overload; legacy callers share one tier-1 worker identity. */
     public boolean recordDiplomatWork(final long gameTime) {
-        return recordDiplomatWork(gameTime, 1);
+        return recordDiplomatWork(gameTime, 1, "legacy");
     }
 
-    /** A Diplomat produces tier-scaled influence no more often than every 2,400 ticks. */
+    /** Compatibility overload for callers that know the hut tier but not the worker identity. */
     public boolean recordDiplomatWork(final long gameTime, final int buildingLevel) {
+        return recordDiplomatWork(gameTime, buildingLevel, "legacy");
+    }
+
+    /** A Diplomat generates capped, tier-scaled influence once per interval per citizen. */
+    public boolean recordDiplomatWork(
+            final long gameTime, final int buildingLevel, final String workerKey) {
         final int yield = workYieldForBuildingLevel(buildingLevel);
-        if (yield == 0) {
-            return false;
-        }
         final long safeTime = Math.max(0L, gameTime);
-        if (diplomaticInfluence >= MAX_DIPLOMATIC_INFLUENCE
-                || (lastDiplomatWorkTick >= 0L
-                    && (safeTime < lastDiplomatWorkTick
-                        || safeTime - lastDiplomatWorkTick < DIPLOMAT_WORK_INTERVAL_TICKS))) {
+        final String key = normalizeWorkerKey(workerKey);
+        if (yield == 0 || key == null
+                || diplomaticInfluence >= MAX_DIPLOMATIC_INFLUENCE
+                || !isWorkerWorkDue(diplomatWorkerCooldowns, key, safeTime,
+                        DIPLOMAT_WORK_INTERVAL_TICKS, lastDiplomatWorkTick)) {
             return false;
         }
         diplomaticInfluence = Math.min(MAX_DIPLOMATIC_INFLUENCE - yield, diplomaticInfluence) + yield;
-        lastDiplomatWorkTick = safeTime;
+        diplomatWorkerCooldowns.put(key, safeTime);
+        trimWorkerCooldowns(diplomatWorkerCooldowns);
+        lastDiplomatWorkTick = Math.max(lastDiplomatWorkTick, safeTime);
         return true;
+    }
+
+    private static String normalizeWorkerKey(final String workerKey) {
+        if (workerKey == null) {
+            return null;
+        }
+        final String key = workerKey.strip();
+        if (key.isEmpty()) {
+            return null;
+        }
+        return key.length() <= MAX_WORKER_KEY_LENGTH
+                ? key : key.substring(0, MAX_WORKER_KEY_LENGTH);
+    }
+
+    private static boolean isWorkerWorkDue(
+            final Map<String, Long> workerCooldowns,
+            final String workerKey,
+            final long gameTime,
+            final long interval,
+            final long legacyColonyTimestamp) {
+        pruneWorkerCooldowns(workerCooldowns, gameTime, interval);
+        final Long lastWorkerTime = workerCooldowns.get(workerKey);
+        if (lastWorkerTime != null) {
+            return gameTime >= lastWorkerTime && gameTime - lastWorkerTime >= interval;
+        }
+
+        // Old saves only kept one colony-wide timestamp. Use that timestamp
+        // once, until a per-worker cooldown has been written, to avoid an
+        // immediate duplicate reward when migrating a legacy save.
+        return !workerCooldowns.isEmpty()
+                || legacyColonyTimestamp < 0L
+                || (gameTime >= legacyColonyTimestamp
+                    && gameTime - legacyColonyTimestamp >= interval);
+    }
+
+    private static void pruneWorkerCooldowns(
+            final Map<String, Long> workerCooldowns, final long gameTime, final long interval) {
+        workerCooldowns.entrySet().removeIf(entry -> gameTime >= entry.getValue()
+                && gameTime - entry.getValue() >= interval);
+    }
+
+    private static void trimWorkerCooldowns(final Map<String, Long> workerCooldowns) {
+        while (workerCooldowns.size() > MAX_WORKER_COOLDOWNS) {
+            String oldestKey = null;
+            long oldestTime = Long.MAX_VALUE;
+            for (final Map.Entry<String, Long> entry : workerCooldowns.entrySet()) {
+                if (entry.getValue() < oldestTime) {
+                    oldestTime = entry.getValue();
+                    oldestKey = entry.getKey();
+                }
+            }
+            if (oldestKey == null) {
+                return;
+            }
+            workerCooldowns.remove(oldestKey);
+        }
+    }
+
+    Map<String, Long> scholarWorkerCooldowns() {
+        return Collections.unmodifiableMap(new LinkedHashMap<>(scholarWorkerCooldowns));
+    }
+
+    Map<String, Long> taxCollectorWorkerCooldowns() {
+        return Collections.unmodifiableMap(new LinkedHashMap<>(taxCollectorWorkerCooldowns));
+    }
+
+    Map<String, Long> diplomatWorkerCooldowns() {
+        return Collections.unmodifiableMap(new LinkedHashMap<>(diplomatWorkerCooldowns));
+    }
+
+    void restoreWorkCooldowns(
+            final Map<String, Long> scholars,
+            final Map<String, Long> taxCollectors,
+            final Map<String, Long> diplomats) {
+        restoreWorkerCooldowns(scholarWorkerCooldowns, scholars);
+        restoreWorkerCooldowns(taxCollectorWorkerCooldowns, taxCollectors);
+        restoreWorkerCooldowns(diplomatWorkerCooldowns, diplomats);
+    }
+
+    private static void restoreWorkerCooldowns(
+            final Map<String, Long> target, final Map<String, Long> loaded) {
+        target.clear();
+        if (loaded == null) {
+            return;
+        }
+        for (final Map.Entry<String, Long> entry : loaded.entrySet()) {
+            final String key = normalizeWorkerKey(entry.getKey());
+            final Long time = entry.getValue();
+            if (key != null && time != null && time >= 0L) {
+                target.merge(key, time, Math::max);
+            }
+        }
+        trimWorkerCooldowns(target);
     }
 
     /**
@@ -908,52 +1012,68 @@ public final class EmpireState {
         return true;
     }
 
-    /** Compatibility overload; legacy callers are treated as a tier-1 Archive. */
+    /** Compatibility overload; legacy callers are treated as one tier-1 worker. */
     public boolean recordScholarWork(final long gameTime) {
-        return recordScholarWork(gameTime, 1);
+        return recordScholarWork(gameTime, 1, "legacy");
     }
 
-    /** A Philosopher produces tier-scaled knowledge once per in-game minute. */
+    /** Compatibility overload for callers that know the hut tier but not the worker identity. */
     public boolean recordScholarWork(final long gameTime, final int buildingLevel) {
-        final int yield = workYieldForBuildingLevel(buildingLevel);
-        if (yield == 0) {
-            return false;
-        }
-        final long safeTime = Math.max(0L, gameTime);
-        if (lastScholarWorkTick >= 0L
-                && (safeTime < lastScholarWorkTick
-                    || safeTime - lastScholarWorkTick < SCHOLAR_WORK_INTERVAL_TICKS)) {
-            return false;
-        }
-        knowledgePoints = Math.min(Long.MAX_VALUE - yield, knowledgePoints) + yield;
-        lastScholarWorkTick = safeTime;
-        return true;
-    }
-
-    /** Compatibility overload; legacy callers are treated as a tier-1 Archive. */
-    public boolean recordTaxCollectorWork(final long gameTime) {
-        return recordTaxCollectorWork(gameTime, 1);
+        return recordScholarWork(gameTime, buildingLevel, "legacy");
     }
 
     /**
-     * Higher Archive tiers improve collection efficiency faster while retaining
-     * one shared colony bonus and its 25-percent cap.
+     * A Philosopher produces tier-scaled knowledge once per interval per citizen.
+     * Different workers can contribute during the same interval; a single worker
+     * cannot double-claim by entering the work state multiple times.
      */
-    public boolean recordTaxCollectorWork(final long gameTime, final int buildingLevel) {
+    public boolean recordScholarWork(
+            final long gameTime, final int buildingLevel, final String workerKey) {
         final int yield = workYieldForBuildingLevel(buildingLevel);
-        if (yield == 0) {
+        final long safeTime = Math.max(0L, gameTime);
+        final String key = normalizeWorkerKey(workerKey);
+        if (yield == 0 || key == null
+                || !isWorkerWorkDue(scholarWorkerCooldowns, key, safeTime,
+                        SCHOLAR_WORK_INTERVAL_TICKS, lastScholarWorkTick)) {
             return false;
         }
+        knowledgePoints = Math.min(Long.MAX_VALUE - yield, knowledgePoints) + yield;
+        scholarWorkerCooldowns.put(key, safeTime);
+        trimWorkerCooldowns(scholarWorkerCooldowns);
+        lastScholarWorkTick = Math.max(lastScholarWorkTick, safeTime);
+        return true;
+    }
+
+    /** Compatibility overload; legacy callers share one tier-1 worker identity. */
+    public boolean recordTaxCollectorWork(final long gameTime) {
+        return recordTaxCollectorWork(gameTime, 1, "legacy");
+    }
+
+    /** Compatibility overload for callers that know the hut tier but not the worker identity. */
+    public boolean recordTaxCollectorWork(final long gameTime, final int buildingLevel) {
+        return recordTaxCollectorWork(gameTime, buildingLevel, "legacy");
+    }
+
+    /**
+     * Each Tax Collector can file once per interval. Its gain is added to the
+     * shared colony efficiency, which remains capped at 25 percentage points.
+     */
+    public boolean recordTaxCollectorWork(
+            final long gameTime, final int buildingLevel, final String workerKey) {
+        final int yield = workYieldForBuildingLevel(buildingLevel);
         final long safeTime = Math.max(0L, gameTime);
-        if (taxCollectionEfficiencyPercent >= MAX_TAX_COLLECTION_EFFICIENCY_PERCENT
-                || (lastTaxCollectorWorkTick >= 0L
-                    && (safeTime < lastTaxCollectorWorkTick
-                        || safeTime - lastTaxCollectorWorkTick < TAX_COLLECTOR_WORK_INTERVAL_TICKS))) {
+        final String key = normalizeWorkerKey(workerKey);
+        if (yield == 0 || key == null
+                || taxCollectionEfficiencyPercent >= MAX_TAX_COLLECTION_EFFICIENCY_PERCENT
+                || !isWorkerWorkDue(taxCollectorWorkerCooldowns, key, safeTime,
+                        TAX_COLLECTOR_WORK_INTERVAL_TICKS, lastTaxCollectorWorkTick)) {
             return false;
         }
         taxCollectionEfficiencyPercent = Math.min(
                 MAX_TAX_COLLECTION_EFFICIENCY_PERCENT, taxCollectionEfficiencyPercent + yield);
-        lastTaxCollectorWorkTick = safeTime;
+        taxCollectorWorkerCooldowns.put(key, safeTime);
+        trimWorkerCooldowns(taxCollectorWorkerCooldowns);
+        lastTaxCollectorWorkTick = Math.max(lastTaxCollectorWorkTick, safeTime);
         return true;
     }
 

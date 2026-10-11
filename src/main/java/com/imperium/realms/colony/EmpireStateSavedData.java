@@ -185,6 +185,10 @@ public final class EmpireStateSavedData extends SavedData {
                         entry.contains("last_diplomat_work_tick")
                                 ? entry.getLong("last_diplomat_work_tick") : -1L,
                         diplomaticRelations);
+                state.restoreWorkCooldowns(
+                        readWorkerCooldowns(entry, "scholar_work_cooldowns"),
+                        readWorkerCooldowns(entry, "tax_collector_work_cooldowns"),
+                        readWorkerCooldowns(entry, "diplomat_work_cooldowns"));
                 state.restoreMilitaryPosture(MilitaryPosture.fromId(entry.getString("military_posture"))
                         .orElse(MilitaryPosture.BALANCED));
 
@@ -910,6 +914,41 @@ public final class EmpireStateSavedData extends SavedData {
         setDirty();
     }
 
+    private static Map<String, Long> readWorkerCooldowns(
+            final CompoundTag entry, final String tagKey) {
+        final Map<String, Long> result = new LinkedHashMap<>();
+        if (!entry.contains(tagKey, Tag.TAG_LIST)) {
+            return result;
+        }
+        final ListTag records = entry.getList(tagKey, Tag.TAG_COMPOUND);
+        // Bound work on malformed or hand-edited NBT before handing data to the state object.
+        final int limit = Math.min(records.size(), EmpireState.MAX_WORKER_COOLDOWNS * 4);
+        for (int index = 0; index < limit; index++) {
+            final CompoundTag record = records.getCompound(index);
+            final String worker = record.getString("worker");
+            final long lastTick = record.getLong("last_tick");
+            if (worker == null || worker.isBlank() || worker.length() > 96 || lastTick < 0L) {
+                continue;
+            }
+            result.merge(worker, lastTick, Math::max);
+        }
+        return result;
+    }
+
+    private static ListTag writeWorkerCooldowns(final Map<String, Long> cooldowns) {
+        final ListTag records = new ListTag();
+        for (final Map.Entry<String, Long> entry : cooldowns.entrySet()) {
+            if (records.size() >= EmpireState.MAX_WORKER_COOLDOWNS) {
+                break;
+            }
+            final CompoundTag record = new CompoundTag();
+            record.putString("worker", entry.getKey());
+            record.putLong("last_tick", entry.getValue());
+            records.add(record);
+        }
+        return records;
+    }
+
     @Override
     public CompoundTag save(final CompoundTag root, final HolderLookup.Provider registries) {
         root.putInt(TAG_SCHEMA_VERSION, SCHEMA_VERSION);
@@ -961,6 +1000,9 @@ public final class EmpireStateSavedData extends SavedData {
             });
             entry.put("diplomatic_relations", diplomaticRelations);
             entry.putLong("last_scholar_work_tick", state.lastScholarWorkTick());
+            entry.put("scholar_work_cooldowns", writeWorkerCooldowns(state.scholarWorkerCooldowns()));
+            entry.put("tax_collector_work_cooldowns", writeWorkerCooldowns(state.taxCollectorWorkerCooldowns()));
+            entry.put("diplomat_work_cooldowns", writeWorkerCooldowns(state.diplomatWorkerCooldowns()));
             entry.putLong("next_proposal_id", state.nextProposalId());
 
             final ListTag proposals = new ListTag();

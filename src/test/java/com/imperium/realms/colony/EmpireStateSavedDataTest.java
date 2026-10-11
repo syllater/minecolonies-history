@@ -59,9 +59,9 @@ final class EmpireStateSavedDataTest {
 
         final EmpireState state = original.get(identity).orElseThrow();
         assertTrue(state.setProvinceFocus(ProvinceFocus.MILITARY));
-        assertTrue(state.recordScholarWork(1_200L, 5));
-        assertTrue(state.recordTaxCollectorWork(1_200L, 5));
-        assertTrue(state.recordDiplomatWork(2_400L, 5));
+        assertTrue(state.recordScholarWork(1_200L, 5, "philosopher-a"));
+        assertTrue(state.recordTaxCollectorWork(1_200L, 5, "tax-collector-a"));
+        assertTrue(state.recordDiplomatWork(2_400L, 5, "diplomat-a"));
         assertTrue(state.recordMilitaryTraining(EmpireState.MilitaryDiscipline.FIELD_MEDICINE, 5));
 
         assertEquals(3L, state.knowledgePoints());
@@ -83,9 +83,17 @@ final class EmpireStateSavedDataTest {
         assertEquals(6L, loaded.fieldMedicinePoints());
 
         // Loading a world must not permit an immediate duplicate work cycle.
-        assertFalse(loaded.recordScholarWork(1_200L, 5));
-        assertFalse(loaded.recordTaxCollectorWork(1_200L, 5));
-        assertFalse(loaded.recordDiplomatWork(2_400L, 5));
+        assertFalse(loaded.recordScholarWork(1_200L, 5, "philosopher-a"));
+        assertFalse(loaded.recordTaxCollectorWork(1_200L, 5, "tax-collector-a"));
+        assertFalse(loaded.recordDiplomatWork(2_400L, 5, "diplomat-a"));
+
+        // A different citizen still works in the same interval after reload.
+        assertTrue(loaded.recordScholarWork(1_200L, 5, "philosopher-b"));
+        assertTrue(loaded.recordTaxCollectorWork(1_200L, 5, "tax-collector-b"));
+        assertTrue(loaded.recordDiplomatWork(2_400L, 5, "diplomat-b"));
+        assertEquals(6L, loaded.knowledgePoints());
+        assertEquals(6, loaded.taxCollectionEfficiencyPercent());
+        assertEquals(6L, loaded.diplomaticInfluence);
     }
 
     @Test
