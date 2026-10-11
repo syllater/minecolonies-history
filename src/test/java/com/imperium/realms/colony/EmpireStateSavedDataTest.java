@@ -1,6 +1,7 @@
 package com.imperium.realms.colony;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -162,4 +163,64 @@ final class EmpireStateSavedDataTest {
         assertFalse(data.areProvincesInSameRealm(null, capital));
         assertFalse(data.areProvincesInSameRealm(capital, null));
     }
+
+    @Test
+    void olderSchemaMissingNewFieldsMigratesWithSafeDefaults() {
+        final CompoundTag root = new CompoundTag();
+        root.putInt("schema_version", 1);
+        final ListTag colonies = new ListTag();
+        final CompoundTag oldColony = new CompoundTag();
+        oldColony.putString("dimension", "minecraft:overworld");
+        oldColony.putInt("colony_id", 21);
+        oldColony.putString("colony_name", "Legacy Settlement");
+        oldColony.putLong("first_seen", 12L);
+        oldColony.putLong("last_seen", 24L);
+        colonies.add(oldColony);
+        root.put("colonies", colonies);
+
+        final EmpireStateSavedData migrated = EmpireStateSavedData.load(root, null);
+        final EmpireState state = migrated.get(
+                new ColonyIdentity("minecraft:overworld", 21)).orElseThrow();
+
+        assertEquals("Legacy Settlement", state.colonyName());
+        assertEquals(12L, state.firstSeenGameTime());
+        assertEquals(24L, state.lastSeenGameTime());
+        assertEquals(0L, state.treasuryCrowns());
+        assertEquals(5, state.taxRatePercent());
+        assertEquals(EconomicPolicy.BALANCED, state.economicPolicy());
+        assertEquals(0L, state.knowledgePoints());
+        assertEquals(50, state.stability());
+        assertEquals(50, state.legitimacy());
+        assertEquals(ProvinceFocus.AGRICULTURE, state.provinceFocus());
+        assertEquals(0L, state.diplomaticInfluence());
+    }
+
+    @Test
+    void malformedColonyRecordIsSkippedWithoutDiscardingValidNeighbor() {
+        final CompoundTag root = new CompoundTag();
+        root.putInt("schema_version", 22);
+        final ListTag colonies = new ListTag();
+
+        final CompoundTag malformed = new CompoundTag();
+        malformed.putString("dimension", "not-a-namespaced-id");
+        malformed.putInt("colony_id", 99);
+        malformed.putString("colony_name", "Malformed");
+        colonies.add(malformed);
+
+        final CompoundTag valid = new CompoundTag();
+        valid.putString("dimension", "minecraft:overworld");
+        valid.putInt("colony_id", 22);
+        valid.putString("colony_name", "Valid Neighbor");
+        valid.putLong("first_seen", 50L);
+        valid.putLong("last_seen", 75L);
+        colonies.add(valid);
+        root.put("colonies", colonies);
+
+        final EmpireStateSavedData loaded = EmpireStateSavedData.load(root, null);
+
+        assertEquals(1, loaded.allStates().size());
+        assertEquals("Valid Neighbor", loaded.get(
+                new ColonyIdentity("minecraft:overworld", 22)).orElseThrow().colonyName());
+    }
+
 }
