@@ -487,4 +487,38 @@ final class EmpireStateSavedDataTest {
             ColonyIdentity province) {
     }
 
+
+    @Test
+    void savedNextRealmIdSurvivesReloadAndNeverFallsBelowAnActiveRealmId() {
+        final EmpireStateSavedData original = new EmpireStateSavedData();
+        final ColonyIdentity capital = new ColonyIdentity("minecraft:overworld", 31);
+        final ColonyIdentity secondCapital = new ColonyIdentity("minecraft:overworld", 32);
+        final ColonyIdentity thirdCapital = new ColonyIdentity("minecraft:the_nether", 33);
+        final ColonyIdentity fourthCapital = new ColonyIdentity("minecraft:the_end", 34);
+        assertTrue(original.observeColony(capital, "First Capital", 0L));
+        assertTrue(original.observeColony(secondCapital, "Second Capital", 0L));
+        assertTrue(original.observeColony(thirdCapital, "Third Capital", 0L));
+        assertTrue(original.observeColony(fourthCapital, "Fourth Capital", 0L));
+
+        assertEquals(1L, original.createRealm(
+                "First Realm", capital, "emperor-1", "Emperor One", 0L).orElseThrow().id());
+
+        final CompoundTag savedWithConsumedIds = original.save(new CompoundTag(), null);
+        savedWithConsumedIds.putLong("next_realm_id", 42L);
+        final EmpireStateSavedData restored = EmpireStateSavedData.load(savedWithConsumedIds, null);
+
+        assertEquals(42L, restored.createRealm(
+                "Second Realm", secondCapital, "emperor-2", "Emperor Two", 0L).orElseThrow().id());
+
+        // Even an outdated/corrupt lower counter must not collide with a realm
+        // that is still active in the same save.
+        final CompoundTag staleCounterSave = restored.save(new CompoundTag(), null);
+        staleCounterSave.putLong("next_realm_id", 1L);
+        final EmpireStateSavedData restoredAgain = EmpireStateSavedData.load(staleCounterSave, null);
+        assertEquals(43L, restoredAgain.createRealm(
+                "Third Realm", thirdCapital, "emperor-3", "Emperor Three", 0L).orElseThrow().id());
+        assertEquals(44L, restoredAgain.createRealm(
+                "Fourth Realm", fourthCapital, "emperor-4", "Emperor Four", 0L).orElseThrow().id());
+    }
+
 }
