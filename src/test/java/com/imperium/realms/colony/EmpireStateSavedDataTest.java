@@ -207,6 +207,24 @@ final class EmpireStateSavedDataTest {
         malformed.putString("colony_name", "Malformed");
         colonies.add(malformed);
 
+        final CompoundTag missingPath = new CompoundTag();
+        missingPath.putString("dimension", "minecraft:");
+        missingPath.putInt("colony_id", 98);
+        missingPath.putString("colony_name", "Missing path");
+        colonies.add(missingPath);
+
+        final CompoundTag invalidPath = new CompoundTag();
+        invalidPath.putString("dimension", "minecraft:the nether");
+        invalidPath.putInt("colony_id", 97);
+        invalidPath.putString("colony_name", "Invalid path");
+        colonies.add(invalidPath);
+
+        final CompoundTag nonCanonical = new CompoundTag();
+        nonCanonical.putString("dimension", "Minecraft:Overworld");
+        nonCanonical.putInt("colony_id", 96);
+        nonCanonical.putString("colony_name", "Non-canonical identifier");
+        colonies.add(nonCanonical);
+
         final CompoundTag valid = new CompoundTag();
         valid.putString("dimension", "minecraft:overworld");
         valid.putInt("colony_id", 22);
@@ -234,6 +252,13 @@ final class EmpireStateSavedDataTest {
         assertEquals(150L, fixture.provinceState().treasuryCrowns());
         assertEquals(120L, fixture.realm().imperialTreasuryCrowns());
         assertEquals("deposit", fixture.realm().recentAuditEntries().get(0).actionId());
+
+        final EmpireStateSavedData reloaded = EmpireStateSavedData.load(
+                fixture.data().save(new CompoundTag(), null), null);
+        assertEquals(150L, reloaded.get(fixture.province()).orElseThrow().treasuryCrowns());
+        final EmpireRealm reloadedRealm = reloaded.realmForProvince(fixture.province()).orElseThrow();
+        assertEquals(120L, reloadedRealm.imperialTreasuryCrowns());
+        assertEquals("deposit", reloadedRealm.recentAuditEntries().get(0).actionId());
 
         assertEquals(EmpireStateSavedData.TreasuryTransferResult.INSUFFICIENT_PROVINCE_FUNDS,
                 fixture.data().depositIntoImperialTreasury(
