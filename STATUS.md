@@ -34,14 +34,17 @@ This commit adds `tools/validate_blueprint_progression.py` to CI. It validates f
 - BlockUI Imperial Ledger; `/imperium empire map` shows loaded MineColonies centers in a coordinate grid.
 - English/Dutch translations and dynamic localization validation.
 
+## Current change being verified
+The branch now adds a fixed-coordinate viewport mode to `/imperium empire map <centerX> <centerZ> <blocksPerCell>`, keeping world coordinates stable between pan/zoom operations. Off-screen colonies are reported with coordinates, and English/Dutch viewport help was added. Unit coverage now includes viewport direction, scale, pan and off-screen filtering. The commit's CI result must be checked before marking this addition green.
+
 ## Remaining acceptance gaps
 - Actual survival test: place both buildings, hire workers, upgrade levels 1–5 and save/reload a new and an existing colony.
 - Actual two-player permission, realm membership and concurrent treasury tests.
 - More mechanical/visual differentiation and deeper modules for building levels.
-- Interactive pan/zoom theatre map; current map is a text grid.
+- A full graphical theatre map; the current pan/zoom viewport is still rendered in chat.
 - Release notes, final JAR/package review and distribution/license decision.
 
 ## Next actions
-1. Verify blueprint progression validator on the current commit.
+1. Confirm CI for the map viewport change and fix any blocking regression.
 2. Continue high-value runtime/persistence validation and defer cosmetic polish.
 3. Keep survival/multiplayer tests marked pending until actually performed in Minecraft.
