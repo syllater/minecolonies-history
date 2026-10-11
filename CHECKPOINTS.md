@@ -189,3 +189,29 @@ This verifies compilation, unit tests, startup and loading of the ten generated 
 ### Remaining acceptance gates
 
 Follow `docs/PLAYTEST_RELEASE_CHECKLIST.md` for the real-world hut upgrade/save-load, interactive Theatre map, two-player permission/concurrency, balance, final packaging and license checks.
+
+
+## 2026-10-11 — Map snapshot rate limiting and elapsed-time cleanup (verified)
+
+### Change
+
+- Added server-side per-player map snapshot cooldown of 10 overworld ticks (half a second at normal game speed).
+- Uses the authenticated server player UUID and the shared overworld clock, so switching dimensions does not bypass the cooldown.
+- Stale entries expire after 24,000 ticks. Housekeeping now runs when the elapsed cleanup deadline passes rather than only when a client sends a request at an exact multiple of 200 ticks.
+- A backwards-moving world clock clears stale session entries, covering an integrated-server restart in the same development JVM.
+- Added unit coverage for spam blocking, player isolation, stale entry pruning when the request tick is not an exact interval boundary, and clock reset handling.
+- Updated README and changelog with the current map and cross-dimension administration behavior.
+
+### Verification
+
+The complete GitHub Actions workflow passed on code commit `329c6ccde562bcfd8fb9b18c2cb372373e0d0c43`:
+- [Build, tests, client startup and dedicated-server blueprint smoke test](https://github.com/syllater/minecolonies-history/actions/runs/38133512797)
+- [Built mod JAR artifact](https://github.com/syllater/minecolonies-history/actions/runs/38133512797/artifacts/11700226575)
+- [Dedicated-server schematic log](https://github.com/syllater/minecolonies-history/actions/runs/38133512797/artifacts/11700405519)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38133512797/artifacts/11700361099)
+
+All workflow jobs passed, including translation/placeholder validation, visual blueprint progression, Gradle unit tests/build, headless client start and dedicated-server validation of 10/10 schematics.
+
+### Still pending
+
+This does not substitute for the required manual survival-world, GUI click-through or two-player dedicated-server tests listed in `docs/PLAYTEST_RELEASE_CHECKLIST.md`.

@@ -6,21 +6,23 @@ Last updated: 2026-10-11 Europe/Amsterdam.
 
 - Repository: https://github.com/syllater/minecolonies-history
 - Active branch: `milestone-2/colony-integration`
-- Latest fully verified code commit: `12a748d92b8cc648ce3b954a0d3b801d107c9e48`.
+- Latest fully verified code commit: `329c6ccde562bcfd8fb9b18c2cb372373e0d0c43`.
 - Overall completion estimate: approximately **80%** (planning estimate, not a measured metric).
-- Current development artifact version: `0.1.0-milestone2`; release versioning remains open.
+- Current development artifact version: `0.1.0-milestone2`; final release versioning remains open.
 
-All GitHub Actions jobs passed in [run 38132956614](https://github.com/syllater/minecolonies-history/actions/runs/38132956614):
-- English/Dutch translation-key validation.
+All GitHub Actions jobs passed in [run 38133512797](https://github.com/syllater/minecolonies-history/actions/runs/38133512797):
+- English/Dutch translation-key and format-placeholder validation.
 - Generated building-tier progression validation.
-- Gradle compilation, unit tests and JAR upload.
+- Gradle compilation, unit tests and mod JAR upload.
 - Headless `runClient` startup smoke test.
 - Dedicated-server startup and validation of all ten generated Structurize schematics.
+- Automated map-request cooldown tests, including pruning stale entries when a request occurs after the elapsed cleanup deadline rather than exactly on a tick boundary.
 
-Artifacts from that run (retained until 2026-10-25):
-- [Mod JAR artifact](https://github.com/syllater/minecolonies-history/actions/runs/38132956614/artifacts/11700370329)
-- [Dedicated-server blueprint log](https://github.com/syllater/minecolonies-history/actions/runs/38132956614/artifacts/11700001367)
-- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38132956614/artifacts/11699443757)
+Artifacts from this run are retained until 2026-10-25:
+- [Mod JAR artifact](https://github.com/syllater/minecolonies-history/actions/runs/38133512797/artifacts/11700226575)
+  - SHA-256: `1fde2be03c3837fcb71fb4a230ac4baef38d495a3ed10ae88489d8dbe82efa1f`
+- [Dedicated-server blueprint log](https://github.com/syllater/minecolonies-history/actions/runs/38133512797/artifacts/11700405519)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38133512797/artifacts/11700361099)
 
 ## Implemented systems
 
@@ -32,10 +34,11 @@ Artifacts from that run (retained until 2026-10-25):
 - Parliament, faction votes, Emperor assent/veto, legitimacy, stability, unrest, strikes, revolts and separatist petitions.
 - Diplomacy, multi-colony realms, same- and cross-dimension invitations, shared treasury/laws, audit history, governors and regional events.
 - Military campaigns, postures, supply routes, defensive orders, strategic-priority actions and protection against targeting a province in the same realm.
-- Cross-dimension realm-management commands for routes, defensive orders and governor appointments/dismissals; every target is resolved server-side and checked against realm membership.
-- BlockUI Imperial Ledger and server-authoritative Imperial Theatre with pan, zoom, selection and a **Next dimension** control. The server allowlists requested dimensions against the current realm's actual provinces.
+- Cross-dimension realm-management commands for routes, defensive orders and governor appointments/dismissals; the server resolves targets and checks realm membership and permissions.
+- BlockUI Imperial Ledger and server-authoritative Imperial Theatre with pan, zoom, selection and a **Next dimension** control. The server only permits map projections for dimensions represented by actual provinces in the current realm.
+- Per-player map-snapshot cooldown of 10 overworld ticks, with stale limiter entries pruned at elapsed intervals and across server clock resets.
 - English and Dutch quick-start/help and command guidance.
-- Regression tests for map-request bounds and rejection of requested dimensions outside the current realm.
+- Regression tests for map-request bounds, realm dimension allowlisting, request throttling and stale-entry pruning.
 
 ## Remaining release acceptance
 

@@ -11,18 +11,24 @@
 - Persistent realm membership, invitations, central treasury, audit entries, supply routes, defensive orders and governors.
 - Up to three concurrent military operations with postures, specialist training and deterministic priority actions.
 - BlockUI Imperial Ledger with shortcuts for politics, economy, development and realm systems.
-- Chat-based strategic overview plus graphical Imperial Theatre with server-authoritative province snapshots, pan/zoom/recenter and province selection.
+- Chat-based strategic overview plus graphical Imperial Theatre with server-authoritative province snapshots, pan/zoom/recenter, province selection and a server-validated dimension selector.
+- Cross-dimension commands for routes, defensive orders, governor appointment/dismissal, diplomacy and campaigns.
+- Per-player map-request throttling with stale limiter cleanup and regression coverage.
 - English and Dutch translation coverage checked in CI.
 
 ## Automated verification
-Commit `a647f1a9876aa83c386a023b5a2da078c06785be` passed:
+Latest fully verified code commit `329c6ccde562bcfd8fb9b18c2cb372373e0d0c43` passed:
 - EN/NL localization validation.
 - Blueprint progression validation.
 - `./gradlew --no-daemon test build` and JAR artifact upload.
 - Headless client startup smoke test.
 - Dedicated server startup and validation of all ten Structurize schematics.
 
-Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38120649287
+Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38133512797
+
+Mod JAR artifact: https://github.com/syllater/minecolonies-history/actions/runs/38133512797/artifacts/11700226575
+
+SHA-256: `1fde2be03c3837fcb71fb4a230ac4baef38d495a3ed10ae88489d8dbe82efa1f`
 
 ## Required before calling the project release-ready
 - A real in-world test of hut placement, hiring, levels 1–5 and save/reload.
