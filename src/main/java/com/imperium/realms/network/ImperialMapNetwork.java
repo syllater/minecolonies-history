@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 /** Registers the read-only map payloads; all membership/data lookup happens on the server. */
 @EventBusSubscriber(modid = ImperiumRealms.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public final class ImperialMapNetwork {
+    private static final MapSnapshotRateLimiter REQUEST_RATE_LIMITER = new MapSnapshotRateLimiter();
     private static volatile Consumer<StrategicMapDataPayload> clientReceiver = payload -> { };
 
     private ImperialMapNetwork() {
@@ -54,6 +55,12 @@ public final class ImperialMapNetwork {
             final StrategicMapRequestPayload request,
             final IPayloadContext context) {
         if (!(context.player() instanceof ServerPlayer player)) {
+            return;
+        }
+        // Bound map work per authenticated player. Use overworld time so changing
+        // dimensions cannot reset the cooldown or bypass the limiter.
+        final long serverTick = player.serverLevel().getServer().overworld().getGameTime();
+        if (!REQUEST_RATE_LIMITER.tryAcquire(player.getUUID(), serverTick)) {
             return;
         }
         // PayloadRegistrar's default thread is the server main thread.

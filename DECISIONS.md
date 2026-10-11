@@ -73,3 +73,13 @@ Rationale:
 ## 2026-10-11 — Cross-dimension realm administration
 
 Decision: Supply-route construction, temporary defensive orders, and governor appointment/dismissal use explicit dimension + colony ID variants. Those variants resolve the target with the server's MineColonies API and re-check that the target is a member province and the caller is the Emperor or a server operator.
+
+
+## 2026-10-11 — Strategic map request rate limiting
+
+Decision: Limit authenticated map snapshot requests to one per player per 10 overworld ticks (0.5 seconds at normal game speed). Expire idle limiter entries after 24,000 ticks and use the shared overworld clock so dimension changes cannot reset the cooldown.
+
+Rationale:
+- Map requests traverse realm membership and MineColonies colony lookups and should not be rebuilt on every packet from a modified client.
+- The client sends a request preference only; this limit does not alter realm data or gameplay state.
+- A small pure-Java utility keeps the cooldown testable without a live Minecraft world.

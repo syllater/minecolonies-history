@@ -18,6 +18,7 @@ This file records user-visible changes. Entries are development notes until a re
 - Automated tests for state persistence, policy/economy bounds, realm membership, strategic map payloads, work cooldowns and tier progression.
 - Cross-dimension supply-route building, defensive orders and governor appointments/dismissals for realm-member provinces.
 - Imperial Theatre dimension selector; clients may request a map projection only for a dimension that actually contains a province in their server-authoritative realm.
+- Per-player server-side cooldown for map snapshot requests, preventing request spam from repeatedly rebuilding colony snapshots.
 - CI validation for translations and generated blueprints, Gradle build/tests, client startup and dedicated-server schematic loading.
 
 ### Fixed / hardened
