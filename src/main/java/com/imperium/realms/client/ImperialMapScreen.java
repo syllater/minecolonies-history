@@ -67,6 +67,10 @@ public final class ImperialMapScreen extends Screen {
                 button -> requestSnapshot())
                 .bounds(buttonX, buttonY, 82, 20).build());
         addRenderableWidget(Button.builder(
+                Component.translatable("imperium_realms.gui.map.next_dimension"),
+                button -> cycleDimension())
+                .bounds(buttonX + 88, buttonY, 128, 20).build());
+        addRenderableWidget(Button.builder(
                 Component.translatable("imperium_realms.gui.map.close"),
                 button -> onClose())
                 .bounds(this.width - 98, buttonY, 78, 20).build());
@@ -75,10 +79,13 @@ public final class ImperialMapScreen extends Screen {
     public void acceptServerSnapshot(final StrategicMapDataPayload payload) {
         Objects.requireNonNull(payload, "payload");
         final boolean firstSnapshot = snapshot == null;
+        final boolean dimensionChanged = snapshot != null
+                && !snapshot.dimensionId().equals(payload.dimensionId());
         snapshot = payload;
-        if (firstSnapshot) {
+        if (firstSnapshot || dimensionChanged) {
             centerX = payload.centerX();
             centerZ = payload.centerZ();
+            zoomIndex = 4;
         }
         if (selectedProvince != null) {
             selectedProvince = payload.provinces().stream()
@@ -89,8 +96,31 @@ public final class ImperialMapScreen extends Screen {
     }
 
     private void requestSnapshot() {
+        final String dimension = snapshot != null && snapshot.available()
+                ? snapshot.dimensionId() : "";
+        requestSnapshot(dimension);
+    }
+
+    private void cycleDimension() {
+        if (snapshot == null || !snapshot.available()) {
+            return;
+        }
+        final List<String> dimensions = snapshot.provinces().stream()
+                .map(StrategicMapDataPayload.ProvinceView::dimensionId)
+                .distinct()
+                .sorted()
+                .toList();
+        if (dimensions.size() <= 1) {
+            return;
+        }
+        final int currentIndex = dimensions.indexOf(snapshot.dimensionId());
+        final int nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % dimensions.size();
+        requestSnapshot(dimensions.get(nextIndex));
+    }
+
+    private void requestSnapshot(final String dimension) {
         if (this.minecraft != null && this.minecraft.player != null) {
-            PacketDistributor.sendToServer(new StrategicMapRequestPayload());
+            PacketDistributor.sendToServer(new StrategicMapRequestPayload(dimension));
         }
     }
 
