@@ -17,18 +17,21 @@
 - English and Dutch translation coverage checked in CI.
 
 ## Automated verification
-Latest fully verified code commit `329c6ccde562bcfd8fb9b18c2cb372373e0d0c43` passed:
+Latest fully verified branch head `eb6b790ebf5f58ef6ea52a36ae7ba5ca33a8f4ab` passed:
 - EN/NL localization validation.
 - Blueprint progression validation.
 - `./gradlew --no-daemon test build` and JAR artifact upload.
+- SHA-256 manifest generation and `sha256sum --check SHA256SUMS.txt`.
 - Headless client startup smoke test.
 - Dedicated server startup and validation of all ten Structurize schematics.
 
-Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38133512797
+Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38133948650
 
-Mod JAR artifact: https://github.com/syllater/minecolonies-history/actions/runs/38133512797/artifacts/11700226575
+Mod JAR + `SHA256SUMS.txt` bundle: https://github.com/syllater/minecolonies-history/actions/runs/38133948650/artifacts/11700525650
 
-SHA-256: `1fde2be03c3837fcb71fb4a230ac4baef38d495a3ed10ae88489d8dbe82efa1f`
+Artifact ZIP SHA-256: `0eb6d4c0393ffa072ad10ae711d4860161fd9565b2bca7e8cfa5f9eccb327fd3`
+
+The checksum file inside the bundle records the JAR SHA-256, and CI verified the JAR against it before uploading.
 
 ## Required before calling the project release-ready
 - A real in-world test of hut placement, hiring, levels 1–5 and save/reload.

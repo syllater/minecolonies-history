@@ -215,3 +215,32 @@ All workflow jobs passed, including translation/placeholder validation, visual b
 ### Still pending
 
 This does not substitute for the required manual survival-world, GUI click-through or two-player dedicated-server tests listed in `docs/PLAYTEST_RELEASE_CHECKLIST.md`.
+
+
+## 2026-10-11 — Verified checksum-gated JAR packaging (full CI green)
+
+### Build pipeline
+
+- Added a `Generate JAR SHA-256 manifest` step after the Gradle build.
+- Added a `Verify generated JAR checksum manifest` step that runs `sha256sum --check SHA256SUMS.txt`.
+- The JAR bundle is uploaded only if manifest generation and verification pass; the artifact contains both the JAR and `SHA256SUMS.txt`.
+- Updated README and changelog instructions accordingly.
+
+### Verification
+
+- Branch head: `eb6b790ebf5f58ef6ea52a36ae7ba5ca33a8f4ab`
+- [Full CI workflow](https://github.com/syllater/minecolonies-history/actions/runs/38133948650)
+- [JAR + checksum manifest bundle](https://github.com/syllater/minecolonies-history/actions/runs/38133948650/artifacts/11700525650)
+- Artifact ZIP SHA-256: `0eb6d4c0393ffa072ad10ae711d4860161fd9565b2bca7e8cfa5f9eccb327fd3`
+- [Dedicated-server schematic validation log](https://github.com/syllater/minecolonies-history/actions/runs/38133948650/artifacts/11700520830)
+- [Client startup smoke log](https://github.com/syllater/minecolonies-history/actions/runs/38133948650/artifacts/11700421184)
+
+The run passed translation validation, blueprint progression validation, Gradle build/tests, JAR checksum verification, client startup and dedicated-server startup with 10/10 generated schematics.
+
+### Known non-blocking warnings
+
+The compiler currently reports the pinned NeoForge line's deprecation warnings for `EventBusSubscriber.bus()`; Gradle/GitHub Actions also report future-compatibility warnings. They do not affect this successful build and should be handled before the next platform/toolchain upgrade.
+
+### Remaining acceptance
+
+Actual survival-world building/hiring/upgrade/save-reload testing, real interactive GUI usage, two-player multiplayer permissions/concurrency/reconnect tests, balance review and the distribution-license decision remain open.

@@ -46,9 +46,9 @@ Implemented: the Imperial Theatre has a server-validated Next dimension control 
 Remaining: interactively validate the map in a real client, including dimensions with unloaded provinces.
 
 ## Milestone 9 — Multiplayer and compatibility hardening
-Status: green automated build/unit/client/server-blueprint workflow; custom map payload is bounded, read-only and answered from server state.
+Status: full automated build/unit/client/server-blueprint workflow is green on branch head `eb6b790ebf5f58ef6ea52a36ae7ba5ca33a8f4ab`; the custom map payload is bounded, read-only and answered from server state. CI also creates a SHA-256 manifest, checks the generated JAR against it, and uploads the manifest alongside the JAR.
 Implemented: automated permission/domain tests and read-only server-authoritative map payload validation; cross-dimension route, defense and governor commands compile and the dedicated server starts cleanly. Map packet work is limited to one snapshot per player per 10 overworld ticks; cleanup is tested without requiring an exact tick-boundary request.
-Remaining: real two-player permissions, realm invitation/membership races, concurrent treasury operations and reconnect/save-load tests.
+Remaining: real two-player permissions, realm invitation/membership races, concurrent treasury operations and reconnect/save-load tests. These are manual playtest gates, not tasks simulated by headless CI.
 
 ## Milestone 10 — Release
 Not complete. Requires in-world acceptance, release notes, final artifact/package review and an explicit distribution/license decision.

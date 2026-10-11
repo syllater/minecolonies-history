@@ -6,23 +6,25 @@ Last updated: 2026-10-11 Europe/Amsterdam.
 
 - Repository: https://github.com/syllater/minecolonies-history
 - Active branch: `milestone-2/colony-integration`
-- Latest fully verified code commit: `329c6ccde562bcfd8fb9b18c2cb372373e0d0c43`.
+- Latest fully verified branch head: `eb6b790ebf5f58ef6ea52a36ae7ba5ca33a8f4ab`.
+- Latest feature-code commit (source unchanged by the later CI/docs-only commits): `329c6ccde562bcfd8fb9b18c2cb372373e0d0c43`.
 - Overall completion estimate: approximately **80%** (planning estimate, not a measured metric).
 - Current development artifact version: `0.1.0-milestone2`; final release versioning remains open.
 
-All GitHub Actions jobs passed in [run 38133512797](https://github.com/syllater/minecolonies-history/actions/runs/38133512797):
-- English/Dutch translation-key and format-placeholder validation.
+All jobs passed in [GitHub Actions run 38133948650](https://github.com/syllater/minecolonies-history/actions/runs/38133948650):
+- English/Dutch translation-key and placeholder validation.
 - Generated building-tier progression validation.
-- Gradle compilation, unit tests and mod JAR upload.
+- `./gradlew --no-daemon test build`.
+- SHA-256 manifest generation and `sha256sum --check SHA256SUMS.txt`; the built JAR verified successfully before upload.
 - Headless `runClient` startup smoke test.
 - Dedicated-server startup and validation of all ten generated Structurize schematics.
-- Automated map-request cooldown tests, including pruning stale entries when a request occurs after the elapsed cleanup deadline rather than exactly on a tick boundary.
 
 Artifacts from this run are retained until 2026-10-25:
-- [Mod JAR artifact](https://github.com/syllater/minecolonies-history/actions/runs/38133512797/artifacts/11700226575)
-  - SHA-256: `1fde2be03c3837fcb71fb4a230ac4baef38d495a3ed10ae88489d8dbe82efa1f`
-- [Dedicated-server blueprint log](https://github.com/syllater/minecolonies-history/actions/runs/38133512797/artifacts/11700405519)
-- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38133512797/artifacts/11700361099)
+- [Mod JAR + SHA256SUMS.txt bundle](https://github.com/syllater/minecolonies-history/actions/runs/38133948650/artifacts/11700525650)
+  - Artifact ZIP SHA-256: `0eb6d4c0393ffa072ad10ae711d4860161fd9565b2bca7e8cfa5f9eccb327fd3`.
+  - The separate `SHA256SUMS.txt` inside the bundle records the JAR checksum; CI verified it with `sha256sum --check`.
+- [Dedicated-server blueprint log](https://github.com/syllater/minecolonies-history/actions/runs/38133948650/artifacts/11700520830)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38133948650/artifacts/11700421184)
 
 ## Implemented systems
 
@@ -39,6 +41,12 @@ Artifacts from this run are retained until 2026-10-25:
 - Per-player map-snapshot cooldown of 10 overworld ticks, with stale limiter entries pruned at elapsed intervals and across server clock resets.
 - English and Dutch quick-start/help and command guidance.
 - Regression tests for map-request bounds, realm dimension allowlisting, request throttling and stale-entry pruning.
+- CI release-artifact hardening: the JAR checksum manifest is generated, verified, and uploaded alongside the JAR.
+
+## Deferred, non-blocking maintenance
+
+- NeoForge emits deprecation warnings for `EventBusSubscriber.bus()` usage in existing event subscribers. This does not prevent compilation or client/server startup on the pinned baseline; migrate these subscribers as a dedicated compatibility task before upgrading NeoForge.
+- Gradle and some GitHub Actions dependencies emit future-compatibility/deprecation warnings. They are tracked as maintenance items and are not current build failures.
 
 ## Remaining release acceptance
 
@@ -50,4 +58,4 @@ Use [the end-to-end survival and multiplayer checklist](docs/PLAYTEST_RELEASE_CH
 4. Perform an in-world balance/usability review.
 5. Prepare release notes and final package review, decide the distribution license, and change the development version before publishing.
 
-Green CI verifies compilation, automated tests, client/server startup and schematic loading. It does not replace an actual survival-world or multiplayer playtest, so the project is not yet a final release.
+Green CI verifies compilation, automated tests, client/server startup, schematic loading and artifact checksums. It does not replace an actual survival-world or multiplayer playtest, so the project is not yet a final release.
