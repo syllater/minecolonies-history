@@ -80,7 +80,18 @@ public final class ImperiumCommands {
                         .then(Commands.literal("theatre")
                                 .executes(context -> showImperialTheatre(context.getSource())))
                         .then(Commands.literal("map")
-                                .executes(context -> showEmpireMap(context.getSource())))
+                                .executes(context -> showEmpireMap(context.getSource()))
+                                .then(Commands.argument("centerX",
+                                                IntegerArgumentType.integer(-30_000_000, 30_000_000))
+                                        .then(Commands.argument("centerZ",
+                                                        IntegerArgumentType.integer(-30_000_000, 30_000_000))
+                                                .then(Commands.argument("blocksPerCell",
+                                                                IntegerArgumentType.integer(1, 1_000_000))
+                                                        .executes(context -> showEmpireMap(
+                                                                context.getSource(),
+                                                                IntegerArgumentType.getInteger(context, "centerX"),
+                                                                IntegerArgumentType.getInteger(context, "centerZ"),
+                                                                IntegerArgumentType.getInteger(context, "blocksPerCell")))))))
                         .then(Commands.literal("defense")
                                 .then(Commands.argument("colonyId", IntegerArgumentType.integer(0))
                                         .executes(context -> issueDefensiveOrder(
@@ -706,6 +717,18 @@ public final class ImperiumCommands {
      * server commands.
      */
     private static int showEmpireMap(final CommandSourceStack source) {
+        return showEmpireMap(source, null, null, null);
+    }
+
+    /**
+     * Render either the auto-fitted overview or a stable world-coordinate
+     * viewport. Supplying center X/Z pans the viewport; blocksPerCell zooms it.
+     */
+    private static int showEmpireMap(
+            final CommandSourceStack source,
+            final Integer centerX,
+            final Integer centerZ,
+            final Integer blocksPerCell) {
         final ColonyContext context = resolveColony(source);
         if (context == null) return 0;
         final EmpireRealm realm = context.data().realmForProvince(context.state().identity()).orElse(null);
@@ -714,6 +737,7 @@ public final class ImperiumCommands {
             return 0;
         }
 
+        final boolean viewport = centerX != null && centerZ != null && blocksPerCell != null;
         record ProvinceMapPoint(
                 ColonyIdentity identity, String name, int x, int z, char marker) { }
 
@@ -743,29 +767,61 @@ public final class ImperiumCommands {
             }
         }
 
-        source.sendSuccess(() -> Component.translatable(
-                "imperium_realms.message.empire_map_header",
-                realm.name(), realm.capital().dimensionId(), mapped.size(), realm.provinceCount()), false);
+        final List<ProvinceMapPoint> visible = viewport
+                ? mapped.stream()
+                        .filter(point -> StrategicMapGrid.isVisibleInViewport(
+                                point.x(), point.z(),
+                                StrategicMapGrid.DEFAULT_WIDTH, StrategicMapGrid.DEFAULT_HEIGHT,
+                                centerX, centerZ, blocksPerCell))
+                        .toList()
+                : mapped;
+
+        if (viewport) {
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.empire_map_viewport_header",
+                    realm.name(), centerX, centerZ, blocksPerCell, visible.size(), mapped.size()), false);
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.empire_map_viewport_help"), false);
+        } else {
+            source.sendSuccess(() -> Component.translatable(
+                    "imperium_realms.message.empire_map_header",
+                    realm.name(), realm.capital().dimensionId(), mapped.size(), realm.provinceCount()), false);
+        }
+
         if (mapped.isEmpty()) {
             source.sendSuccess(() -> Component.translatable(
                     "imperium_realms.message.empire_map_no_centers"), false);
         } else {
-            final List<StrategicMapGrid.Point> points = mapped.stream()
+            final List<StrategicMapGrid.Point> points = visible.stream()
                     .map(point -> new StrategicMapGrid.Point(point.marker(), point.x(), point.z()))
                     .toList();
-            final List<String> gridRows = StrategicMapGrid.render(
-                    points, StrategicMapGrid.DEFAULT_WIDTH, StrategicMapGrid.DEFAULT_HEIGHT);
+            final List<String> gridRows = viewport
+                    ? StrategicMapGrid.renderViewport(
+                            points, StrategicMapGrid.DEFAULT_WIDTH, StrategicMapGrid.DEFAULT_HEIGHT,
+                            centerX, centerZ, blocksPerCell)
+                    : StrategicMapGrid.render(
+                            points, StrategicMapGrid.DEFAULT_WIDTH, StrategicMapGrid.DEFAULT_HEIGHT);
 
             source.sendSuccess(() -> Component.translatable(
                     "imperium_realms.message.empire_map_orientation"), false);
             for (final String line : gridRows) {
                 source.sendSuccess(() -> Component.literal(line), false);
             }
-            for (final ProvinceMapPoint point : mapped) {
+            for (final ProvinceMapPoint point : visible) {
                 source.sendSuccess(() -> Component.translatable(
                         "imperium_realms.message.empire_map_legend_entry",
                         Character.toString(point.marker()), point.name(),
                         point.identity().colonyId(), point.x(), point.z()), false);
+            }
+            if (viewport) {
+                for (final ProvinceMapPoint point : mapped) {
+                    if (visible.contains(point)) {
+                        continue;
+                    }
+                    source.sendSuccess(() -> Component.translatable(
+                            "imperium_realms.message.empire_map_offscreen",
+                            point.name(), point.identity().colonyId(), point.x(), point.z()), false);
+                }
             }
         }
 
