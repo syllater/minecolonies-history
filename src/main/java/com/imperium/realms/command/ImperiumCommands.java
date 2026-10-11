@@ -1638,17 +1638,11 @@ public final class ImperiumCommands {
             source.sendFailure(Component.translatable("imperium_realms.message.campaign_self_target"));
             return 0;
         }
-        if (type == MilitaryCampaign.Type.WAR_CAMPAIGN) {
-            final EmpireRealm ownRealm = context.data()
-                    .realmForProvince(context.state().identity()).orElse(null);
-            final EmpireRealm targetRealm = context.data()
-                    .realmForProvince(targetIdentity).orElse(null);
-            if (ownRealm != null && targetRealm != null && ownRealm.id() == targetRealm.id()) {
-                // Provinces inside a shared realm are allies by membership even
-                // if their optional bilateral diplomacy score has not been set.
-                source.sendFailure(Component.translatable("imperium_realms.message.campaign_target_allied"));
-                return 0;
-            }
+        if (type == MilitaryCampaign.Type.WAR_CAMPAIGN
+                && context.data().areProvincesInSameRealm(context.state().identity(), targetIdentity)) {
+            // Membership makes provinces allies even when no bilateral score exists.
+            source.sendFailure(Component.translatable("imperium_realms.message.campaign_target_allied"));
+            return 0;
         }
         MineColoniesIntegration.getOrCreateState(context.player().serverLevel(), target);
         final EmpireState state = context.state();
