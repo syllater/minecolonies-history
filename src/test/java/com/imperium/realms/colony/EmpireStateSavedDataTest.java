@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 final class EmpireStateSavedDataTest {
@@ -48,6 +49,43 @@ final class EmpireStateSavedDataTest {
         assertEquals(83, loaded.factionApproval("scholars"));
         assertEquals(22, loaded.unrest());
         assertEquals(EmpireState.CivicDisorder.CALM, loaded.civicDisorder());
+    }
+
+    @Test
+    void tierScaledProfessionAndGuardTrainingSurviveNbtRoundTrip() {
+        final EmpireStateSavedData original = new EmpireStateSavedData();
+        final ColonyIdentity identity = new ColonyIdentity("minecraft:overworld", 9);
+        assertTrue(original.observeColony(identity, "Tier Five Province", 0L));
+
+        final EmpireState state = original.get(identity).orElseThrow();
+        assertTrue(state.setProvinceFocus(ProvinceFocus.MILITARY));
+        assertTrue(state.recordScholarWork(1_200L, 5));
+        assertTrue(state.recordTaxCollectorWork(1_200L, 5));
+        assertTrue(state.recordDiplomatWork(2_400L, 5));
+        assertTrue(state.recordMilitaryTraining(EmpireState.MilitaryDiscipline.FIELD_MEDICINE, 5));
+
+        assertEquals(3L, state.knowledgePoints());
+        assertEquals(3, state.taxCollectionEfficiencyPercent());
+        assertEquals(3L, state.diplomaticInfluence());
+        assertEquals(6L, state.fieldMedicinePoints());
+
+        final EmpireStateSavedData restored = EmpireStateSavedData.load(
+                original.save(new CompoundTag(), null), null);
+        final EmpireState loaded = restored.get(identity).orElseThrow();
+
+        assertEquals(3L, loaded.knowledgePoints());
+        assertEquals(3, loaded.taxCollectionEfficiencyPercent());
+        assertEquals(1_200L, loaded.lastScholarWorkTick());
+        assertEquals(1_200L, loaded.lastTaxCollectorWorkTick());
+        assertEquals(3L, loaded.diplomaticInfluence());
+        assertEquals(2_400L, loaded.lastDiplomatWorkTick());
+        assertEquals(ProvinceFocus.MILITARY, loaded.provinceFocus());
+        assertEquals(6L, loaded.fieldMedicinePoints());
+
+        // Loading a world must not permit an immediate duplicate work cycle.
+        assertFalse(loaded.recordScholarWork(1_200L, 5));
+        assertFalse(loaded.recordTaxCollectorWork(1_200L, 5));
+        assertFalse(loaded.recordDiplomatWork(2_400L, 5));
     }
 
     @Test
