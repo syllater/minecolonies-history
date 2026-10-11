@@ -1,5 +1,29 @@
 # Checkpoints
 
+## 2026-10-11 — Daily imperial tax remittance regression coverage (fully verified)
+
+### Change
+- Added a guard against negative day indices in `remitImperialTaxReceipts`.
+- Added tests that a 10% central remittance moves already-collected provincial crowns into the imperial reserve without creating or destroying money.
+- Verified successful remittance appends a `tax-remittance` audit entry and that balances/audit survive SavedData save/load.
+- Verified no enacted imperial tax law, negative day index and zero receipts are no-ops.
+- Verified insufficient provincial balance and a full imperial reserve both return zero, leave both balances unchanged and create no audit entry.
+
+### Verification
+- Source commit: `d483bd4a5ad9b89c468e917f2a4151ea41b8ad69`
+- Full GitHub Actions run: https://github.com/syllater/minecolonies-history/actions/runs/38158879498
+- Translation, blueprint progression, dependency metadata and cross-dimension command validators passed.
+- `./gradlew --no-daemon test build`, checksum manifest validation and self-checking RC packaging passed.
+- Headless client startup smoke passed.
+- Dedicated-server startup and all 10/10 Structurize schematic/anchor validations passed.
+- The CI workflow now avoids duplicate push + pull-request builds on feature branches.
+
+Artifacts:
+- [Release candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38158879498/artifacts/11709508222)
+- [JAR + SHA-256 manifest](https://github.com/syllater/minecolonies-history/actions/runs/38158879498/artifacts/11709238816)
+- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38158879498/artifacts/11709563184)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38158879498/artifacts/11709154307)
+
 ## 2026-10-11 — Treasury conservation and membership guards (fully verified)
 
 ### Change

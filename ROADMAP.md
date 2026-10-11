@@ -21,7 +21,7 @@
 **Core implementation complete.** Faction voting; tax/policy bills; Emperor assent/veto; shared realm laws; happiness-linked faction approval, stability, legitimacy and unrest; strikes, revolts and separatist petitions. Richer proposal variety remains a possible expansion.
 
 ## Milestone 5 — Economy and professions
-**Core implementation complete.** Daily taxes, policy effects, knowledge investment, tier-scaled jobs, provincial specializations, diplomatic influence, bounded treasuries and central tax remittance. Provincial ↔ imperial treasury transfers are atomic, audited only on success, and tested for cap/insufficient-funds rollback plus SavedData round-trip. A 100-step alternating-transfer invariant test proves no crowns are created/destroyed, and independent/non-member provinces plus invalid amount/day attempts are rejected without mutation. Deeper coupling to native MineColonies resource-production/industry remains future depth, not a build blocker.
+**Core implementation complete.** Daily taxes, policy effects, knowledge investment, tier-scaled jobs, provincial specializations, diplomatic influence, bounded treasuries and central tax remittance. Provincial ↔ imperial treasury transfers are atomic, audited only on success, and tested for cap/insufficient-funds rollback plus SavedData round-trip. A 100-step alternating-transfer invariant test proves no crowns are created/destroyed, and independent/non-member provinces plus invalid amount/day attempts are rejected without mutation. Daily imperial tax remittance is tested for conservation of already-collected receipts, success-only audit/persistence, and rollback for no-law/invalid-day, insufficient local balance and a full imperial reserve. Deeper coupling to native MineColonies resource-production/industry remains future depth, not a build blocker.
 
 ## Milestone 6 — Military systems
 **Core implementation complete.** Specialist training, delayed operations, three-front cap, military postures, supply routes, defensive orders and strategic-priority actions. Balance and real multiplayer interaction remain unverified in a survival world.
@@ -33,13 +33,13 @@
 **Core implementation complete; interactive acceptance pending.** Multi-colony realms, capital/Emperor, invitations, central treasury, laws, audit history, governors, events, cohesion/separatist pressure, route/defense logistics, dimension-aware strategy commands and a graphical Imperial Theatre are implemented. Cross-dimension map projection is restricted to dimensions represented by realm provinces.
 
 ## Milestone 9 — Multiplayer and compatibility hardening
-**Automated hardening complete; true multiplayer tests pending.** Server-authoritative bounded map payloads, per-player request throttling, permissions/domain regression tests, seven-command cross-dimension EN/NL contract validation, dependency checks, full Gradle test/build, headless client start, dedicated-server registry/blueprint smoke and JAR/package checksum verification are green in [workflow 38158411131](https://github.com/syllater/minecolonies-history/actions/runs/38158411131). Real two-player permission races, treasury concurrency, reconnect and in-world save/load are not covered by headless CI.
+**Automated hardening complete; true multiplayer tests pending.** Server-authoritative bounded map payloads, per-player request throttling, permissions/domain regression tests, seven-command cross-dimension EN/NL contract validation, dependency checks, full Gradle test/build, headless client start, dedicated-server registry/blueprint smoke and JAR/package checksum verification are green in [workflow 38158879498](https://github.com/syllater/minecolonies-history/actions/runs/38158879498). Real two-player permission races, treasury concurrency, reconnect and in-world save/load are not covered by headless CI.
 
 ## Milestone 10 — Release
 **Release candidate assembled; final release is not complete.**
 - Version `0.1.0-rc1`.
 - A self-checking ZIP contains the mod JAR, its SHA-256 manifest, install/compatibility/release notes and the manual acceptance checklist.
-- [Download the RC bundle from green workflow 38158411131](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709477514).
+- [Download the RC bundle from green workflow 38158411131](https://github.com/syllater/minecolonies-history/actions/runs/38158879498/artifacts/11709508222).
 - Before final release: complete the survival-world and two-player playtests, review balance/package/release notes, choose the distribution license and update the final version/license files.
 
 ## Current acceptance principle

@@ -9,19 +9,19 @@ Last updated: 2026-10-11 Europe/Amsterdam.
 - Active branch: `milestone-2/colony-integration`
 - Candidate version: `0.1.0-rc1`
 - Target: Minecraft Java 1.21.1, Java 21, NeoForge 21.1.x, required MineColonies dependency set.
-- Candidate source commit: `fe9284d0faa098b27cb02b1cf904ab0d38af3f7d`
+- Candidate source commit: `d483bd4a5ad9b89c468e917f2a4151ea41b8ad69`
 - Overall completion estimate: approximately **86%**. This is a planning estimate, not a measured metric.
 - Release status: **release candidate only**. No final public release has been published.
 
 ## Automated verification — green
 
-The RC workflow completed successfully in [GitHub Actions run 38158411131](https://github.com/syllater/minecolonies-history/actions/runs/38158411131) against the branch merged with `main` for CI:
+The RC workflow completed successfully in [GitHub Actions run 38158879498](https://github.com/syllater/minecolonies-history/actions/runs/38158411131) against the branch merged with `main` for CI:
 
 - English and Dutch translation-key/placeholder validation passed.
 - Generated blueprint tier-progression validation passed.
 - Release metadata/dependency declaration validation passed.
 - Cross-dimension command registration and EN/NL help-contract validation passed for all seven new command variants.
-- `./gradlew --no-daemon test build` passed, including treasury transfer success/failure cases, a 100-step mixed-transfer conservation test, rejection of invalid amounts/days and non-member provinces, NBT round-trip persistence of balances/audit records, and isolation of malformed dimension identifiers.
+- `./gradlew --no-daemon test build` passed, including atomic treasury success/failure cases, a 100-step mixed-transfer conservation test, rejection of invalid amounts/days and non-member provinces, daily imperial tax-remittance conservation/rollback/audit tests, NBT round-trip persistence of balances/audit records, and isolation of malformed dimension identifiers.
 - The JAR SHA-256 manifest was generated and verified.
 - The 0.1.0-rc1 release bundle was assembled; ZIP contents and the embedded JAR checksum were verified.
 - Headless `runClient` startup smoke test passed.
@@ -29,10 +29,10 @@ The RC workflow completed successfully in [GitHub Actions run 38158411131](https
 
 Artifacts from that green run (the RC package is retained for 30 days):
 
-- [Self-checking 0.1.0-rc1 release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709477514)
-- [Mod JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709796642)
-- [Dedicated-server blueprint/registry log](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709226976)
-- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11708867734)
+- [Self-checking 0.1.0-rc1 release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709508222)
+- [Mod JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709238816)
+- [Dedicated-server blueprint/registry log](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709563184)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709154307)
 
 The release-candidate bundle contains the JAR, checksum manifest, README, changelog, compatibility notes, candidate notes and the mandatory in-world playtest checklist.
 
@@ -59,6 +59,10 @@ These require a person to interact with a real Minecraft world; headless CI cann
 3. Open the BlockUI ledger and interact with the graphical Imperial Theatre for a realm with multiple provinces, including a dimension containing an unloaded province.
 4. Run a two-player dedicated-server session covering realm invitations, permissions, cross-dimension commands, concurrent treasury operations, reconnect and save/reload.
 5. Review balance/usability, finalize release notes and decide the distribution license before publishing a final package.
+
+## Build efficiency
+
+- Updated `.github/workflows/verify.yml` so feature-branch commits are verified by the pull-request workflow instead of triggering a duplicate push workflow; pushes to `main` and manual workflow dispatch remain supported.
 
 ## Deferred, non-blocking maintenance
 
