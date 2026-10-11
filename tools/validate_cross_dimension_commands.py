@@ -9,6 +9,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 JAVA = ROOT / "src/main/java/com/imperium/realms/command/ImperiumCommands.java"
+LEGACY_REALM_COMMANDS = ROOT / "src/main/java/com/imperium/realms/command/ImperiumCrossDimensionRealmCommands.java"
 EN = ROOT / "src/main/resources/assets/imperium_realms/lang/en_us.json"
 NL = ROOT / "src/main/resources/assets/imperium_realms/lang/nl_nl.json"
 
@@ -30,6 +31,7 @@ def fail(message: str) -> None:
 
 try:
     source = JAVA.read_text(encoding="utf-8")
+    legacy_source = LEGACY_REALM_COMMANDS.read_text(encoding="utf-8")
     locales = {
         "en_us": json.loads(EN.read_text(encoding="utf-8")),
         "nl_nl": json.loads(NL.read_text(encoding="utf-8")),
@@ -48,6 +50,9 @@ for command, help_keys in COMMANDS.items():
 
 if "resolveTargetColony" not in source or "colonyByIdentity" not in source:
     fail("dimension-aware targets must resolve via the server-side MineColonies identity adapter")
+
+if 'Commands.literal("build-at")' in legacy_source and 'Commands.literal("route")' in legacy_source:
+    fail("route build-at must be registered only once; duplicate argument types can shadow namespaced dimension IDs")
 
 if 'Commands.argument("dimension", ResourceLocationArgument.id())' not in source:
     fail("dimension arguments must use ResourceLocationArgument.id(), not Brigadier's unquoted-word parser")
