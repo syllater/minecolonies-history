@@ -25,7 +25,8 @@ All four CI jobs passed:
 - `./gradlew --no-daemon test build`, JAR SHA-256 verification and self-checking RC ZIP assembly.
 - Headless client startup reached `Sound engine started`.
 - Dedicated server validated `jobs=6 buildings=2 guardTypes=3 modules=6` and loaded all `10/10` Structurize schematics.
-- Five live GameTests passed: daily tax/economy/realm persistence; real colony discovery/SavedData round-trip; Archive registration/jobs/capacity; Guard Tower specialists/capacity; and owner/non-owner tax/policy/deposit/withdraw authorization with denied-action state immutability.
+- Six live GameTests passed: daily tax/economy/realm persistence; real colony discovery/SavedData round-trip; Archive registration/jobs/capacity; Guard Tower specialists/capacity; owner/non-owner tax/policy/deposit/withdraw authorization with denied-action state immutability; and cross-dimension invitations, owner-only join, duplicate-join denial and realm NBT round-trip.
+- The command authorization GameTest now also exercises parliamentary assent/veto: unauthorized attempts preserve an open bill, and the Emperor can veto that same bill under their own identity.
 
 Current JAR SHA-256: `a7dd3f42bf49b7703d15f94f7903b3e625d189d86b26919bfcf19b3e505f1940`.
 
