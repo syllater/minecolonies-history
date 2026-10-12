@@ -361,6 +361,66 @@ def build_structure(kind: str, level: int, dimensions: tuple[int, int, int]) -> 
     return gzip.compress(root, mtime=0), (center_x, 0, 0)
 
 
+
+def build_gametest_structure() -> bytes:
+    """Build a minimal vanilla StructureTemplate NBT for the live GameTest runner.
+
+    NeoForge 1.21.1 does not ship a general empty test template, so keep an
+    original 5x2x5 stone-floor template in generated resources. Its content is
+    deliberately tiny and independent of MineColonies blueprints.
+    """
+    size_x, size_y, size_z = 5, 2, 5
+    palette_payloads = [
+        compound_payload([tag(8, "Name", string_payload("minecraft:stone"))]),
+    ]
+
+    def block_entry(x: int, y: int, z: int, state_index: int) -> bytes:
+        return compound_payload([
+            list_tag("pos", 3, [
+                struct.pack(">i", x),
+                struct.pack(">i", y),
+                struct.pack(">i", z),
+            ]),
+            tag(3, "state", struct.pack(">i", state_index)),
+        ])
+
+    blocks = [
+        block_entry(x, 0, z, 0)
+        for y in range(1)
+        for z in range(size_z)
+        for x in range(size_x)
+    ]
+    root = tag(10, "", compound_payload([
+        tag(3, "DataVersion", struct.pack(">i", MC_DATA_VERSION)),
+        tag(8, "author", string_payload("Imperium: European Realms CI")),
+        list_tag("size", 3, [
+            struct.pack(">i", size_x),
+            struct.pack(">i", size_y),
+            struct.pack(">i", size_z),
+        ]),
+        list_tag("palette", 10, palette_payloads),
+        list_tag("blocks", 10, blocks),
+        list_tag("entities", 10, []),
+    ]))
+    uncompressed = gzip.decompress(gzip.compress(root, mtime=0))
+    if not uncompressed.startswith(b"\\x0a\\x00\\x00"):
+        raise ValueError("GameTest structure has an invalid NBT root")
+    for required in (b"DataVersion", b"size", b"palette", b"blocks", b"entities"):
+        if required not in uncompressed:
+            raise ValueError(f"GameTest structure is missing field {required!r}")
+    return gzip.compress(root, mtime=0)
+
+
+def write_gametest_structure(output_root: Path) -> Path:
+    """Generate the test template at Minecraft's singular structure resource path."""
+    path = output_root / "data" / MOD_ID / "structure" / "flat.nbt"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = build_gametest_structure()
+    path.write_bytes(payload)
+    print(f"Generated GameTest template {path}")
+    return path
+
+
 def write_png(path: Path) -> None:
     """Write a tiny original 32x32 shield icon using only the standard library."""
     width = height = 32
@@ -428,6 +488,10 @@ def main() -> int:
         target = tower_dir / f"imperialguardtower{level}.blueprint"
         target.write_bytes(payload)
         created += 1
+
+    test_template = write_gametest_structure(output_root)
+    if not test_template.exists() or test_template.stat().st_size <= 32:
+        raise ValueError("GameTest template was not generated correctly")
 
     print(f"Generated and validated {created} original Structurize blueprints in {pack_root}")
     return 0
