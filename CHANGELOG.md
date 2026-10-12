@@ -37,6 +37,7 @@ This file records user-visible changes. Entries are development notes until a re
 - Persisted work cooldowns prevent duplicate profession output immediately after a save/reload.
 - Imperial treasury transfers validate both balances before mutation; failed cap/insufficient-funds cases leave both balances and audit history unchanged.
 - Regression tests verify that 100 mixed transfers conserve total crowns, invalid amounts/day indexes do not mutate balances, and independent provinces cannot exchange funds with a realm treasury.
+- Live MineColonies GameTests now verify that only an authorized colony owner/Emperor can assent to or veto a bill; denied player commands leave parliamentary proposal status unchanged.
 - Daily imperial tax remittance is tested for conservation of existing receipts, success-only audit and persistence, missing-law/invalid-day rejection, insufficient provincial funds and full-reserve rollback.
 - Dedicated-server class loading is isolated from client-only map UI code.
 
