@@ -9,13 +9,13 @@ Last updated: 2026-10-12 Europe/Amsterdam.
 - Active branch: `milestone-2/colony-integration`
 - Candidate version: `0.1.0-rc1`
 - Target: Minecraft Java 1.21.1, Java 21, NeoForge 21.1.x, required MineColonies dependency set.
-- Latest fully verified source commit: `fa50cc2d67ee890b061fea30cb27598c808a3ac9` (BlockUI ledger wiring validator added).
+- Latest fully verified source commit: `61d7f9c9cb66fca8d9f96f9773878b6b196c43be` (reproducible JAR archives enabled; all CI jobs green).
 - Overall completion estimate: approximately **90%**. This is a planning estimate, not a measured metric.
 - Release status: **release candidate only**. No final public release has been published.
 
 ## Automated verification — green
 
-The latest full workflow, [run 38227463363](https://github.com/syllater/minecolonies-history/actions/runs/38227463363), passed all four jobs on source commit `fa50cc2d67ee890b061fea30cb27598c808a3ac9`.
+The latest full workflow, [run 38228182714](https://github.com/syllater/minecolonies-history/actions/runs/38228182714), passed all four jobs on source commit `fa50cc2d67ee890b061fea30cb27598c808a3ac9`.
 
 - English and Dutch localization: 298 literal/dynamic translation keys and formatting placeholders passed.
 - Static validators passed for generated tier progression, dependency/release metadata, all seven cross-dimension command variants, and BlockUI ledger wiring: 40 buttons, 38 command handlers and two dedicated actions, with no dangling UI commands.
@@ -29,14 +29,14 @@ The latest full workflow, [run 38227463363](https://github.com/syllater/minecolo
   3. Real Imperial Archive block/building registration, three actual worker job assignments and level 1–5 worker-cap validation.
   4. Real Imperial Guard Tower block/building registration, all three military specialist assignments and level 1–5 shared guard-cap validation.
 
-Latest candidate JAR SHA-256: `0c734afd29c2aed195f58169f2ba3e00988472ea17d39d88447d55224fd4b379`.
+Latest candidate JAR SHA-256: `4d44a38535747159a93d22ca46744852931d1929e3dfefc02c37747333685bdb`.
 
 Artifacts from the same fully green run:
-- [Self-checking 0.1.0-rc1 bundle](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11736869886)
-- [Mod JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737190134)
-- [Live GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737395115)
-- [Dedicated-server schematic/registry log](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737195332)
-- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737150342)
+- [Self-checking 0.1.0-rc1 bundle](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737131416)
+- [Mod JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737226311)
+- [Live GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737920417)
+- [Dedicated-server schematic/registry log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737576125)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737760664)
 
 Automated coverage now includes real temporary MineColonies colonies, custom hut/job registration and BlockUI command wiring. It still does **not** replace a survival-world playtest of full Structurize build/upgrade placement, visible tier differences, sustained worker behavior, saved-world reload, GUI click-through or a genuine two-player dedicated-server session.
 
@@ -100,3 +100,13 @@ These require a person to interact with a real Minecraft world; headless CI cann
 - The validator passed in CI: 40 buttons, 38 command handlers and two dedicated actions; no missing or unused handler and no dangling command path.
 - [Full green four-job workflow 38227463363](https://github.com/syllater/minecolonies-history/actions/runs/38227463363) includes this validator, Gradle build/tests, checksum/RC packaging, client startup, dedicated-server/10-blueprint validation and all four live GameTests.
 - Candidate JAR SHA-256: `0c734afd29c2aed195f58169f2ba3e00988472ea17d39d88447d55224fd4b379`.
+
+
+## 2026-10-12 — Reproducible release candidate verified
+
+- Source commit: `61d7f9c9cb66fca8d9f96f9773878b6b196c43be`.
+- Full workflow [38228182714](https://github.com/syllater/minecolonies-history/actions/runs/38228182714) passed all four jobs: static/build checks, client smoke, live GameTests, and dedicated-server/blueprint smoke.
+- JAR build, SHA-256 manifest check and self-checking release-candidate package all passed.
+- Current candidate JAR SHA-256: `4d44a38535747159a93d22ca46744852931d1929e3dfefc02c37747333685bdb`.
+- Current artifacts: [release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737131416), [JAR and checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737226311), [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737920417), [dedicated-server log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737576125), [client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737760664).
+- Final public release remains blocked only by the uncompleted hands-on survival GUI/world-save and two-player acceptance checklist, balance review, and explicit distribution-license decision. These have not been falsely marked complete.
