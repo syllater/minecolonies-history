@@ -403,7 +403,7 @@ def build_gametest_structure() -> bytes:
         list_tag("entities", 10, []),
     ]))
     uncompressed = gzip.decompress(gzip.compress(root, mtime=0))
-    if not uncompressed.startswith(b"\\x0a\\x00\\x00"):
+    if not uncompressed.startswith(b"\x0a\x00\x00"):
         raise ValueError("GameTest structure has an invalid NBT root")
     for required in (b"DataVersion", b"size", b"palette", b"blocks", b"entities"):
         if required not in uncompressed:
