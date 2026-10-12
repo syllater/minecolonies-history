@@ -52,11 +52,11 @@ Use namespaced dimension IDs such as `minecraft:the_nether`. The server resolves
 
 ## Automated checks
 
-The GitHub Actions workflow runs EN/NL translation/placeholder validation, blueprint progression, dependency metadata validation, cross-dimension command/help validation, `./gradlew --no-daemon test build`, JAR checksum verification, a headless `runClient` startup check and dedicated-server validation of MineColonies registries/all ten Structurize blueprints. The latest full green workflow is [run 38162651747](https://github.com/syllater/minecolonies-history/actions/runs/38162651747) on commit `d5dc286d2e3e1e1b4ac30b5c7d6af48810fd0952`. It includes the command-registration cleanup, namespaced dimension parsing, monotonic realm-ID recovery, bounded SavedData history, and newest-invitation retention regression test.
+The GitHub Actions workflow runs EN/NL translation/placeholder validation, blueprint progression (including the generated GameTest fixture), dependency metadata validation, cross-dimension command/help validation, `./gradlew --no-daemon test build`, JAR checksum verification, a headless `runClient` startup check, dedicated-server validation of MineColonies registries/all ten Structurize blueprints, and a live `runGameTestServer` persistence test. The latest full green workflow is [run 38219495032](https://github.com/syllater/minecolonies-history/actions/runs/38219495032) on commit `9d2cf82ca3a9a7cc909785e1b39b6dc57233b82c`. All four jobs passed.
 
 Additional integrity checks cover atomic provincial ↔ imperial treasury transfers: successful transfers update both balances and the audit trail; insufficient-funds or destination-cap failures leave balances unchanged; a save/load cycle preserves the resulting balances and audit record. A 100-step alternating transfer test checks conservation of crowns, while invalid amounts/day indexes and non-member province transfers are rejected without changing balances or audit history. Daily imperial tax remittance tests cover the 10% central transfer of existing receipts, audit/persistence, rejection without an enacted realm tax law or valid day index, and rollback for insufficient provincial funds or a full central reserve.
 
-These automated checks are not a substitute for a hands-on survival-world or two-player dedicated-server test.
+The live GameTest covers synthetic-state serialization, realm membership/law propagation, treasury transfer/audit and worker cooldowns. It does not create or mutate a real MineColonies colony. These automated checks are not a substitute for a hands-on survival-world or two-player dedicated-server test.
 
 ## Outstanding release gates
 
@@ -67,3 +67,21 @@ These automated checks are not a substitute for a hands-on survival-world or two
 - Decide the project's distribution license and review the final package/license obligations.
 
 The project currently uses `All Rights Reserved` metadata for its own code and has no selected redistribution license. Do not treat this candidate as a license-cleared final release or redistribute it as a finished release before those decisions and tests are complete.
+
+
+## Latest verified candidate (2026-10-12)
+
+All four jobs passed in [workflow 38219495032](https://github.com/syllater/minecolonies-history/actions/runs/38219495032):
+- Build, unit tests, metadata/EN-NL/blueprint/command checks, checksum generation and RC package validation.
+- Headless client startup.
+- Dedicated server startup, MineColonies registry validation and `10/10` Structurize blueprints.
+- Live Minecraft GameTest: `IMPERIUM_GAMETEST_PASS: live SavedData economy, worker cooldown, realm and treasury round-trip`.
+
+Current candidate JAR SHA-256: `5220c9fc9ce992e258086f2153d848f4dd18731582ad149c8f232194948f6299`.
+
+Artifacts:
+- [Self-checking RC package](https://github.com/syllater/minecolonies-history/actions/runs/38219495032/artifacts/11733657660)
+- [JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38219495032/artifacts/11733072967)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38219495032/artifacts/11733234549)
+
+This remains an RC, not a license-cleared final release. The genuine survival-world construction/hiring/behavior/save-reload and two-player acceptance checklist still needs to be executed.
