@@ -67,7 +67,7 @@ def validate_gametest_template() -> list[str]:
     except (OSError, ValueError) as exc:
         return [f"GameTest structure: generation/decompression failed: {exc}"]
 
-    if not uncompressed.startswith(b"\\x0a\\x00\\x00"):
+    if not uncompressed.startswith(b"\x0a\x00\x00"):
         errors.append("GameTest structure: invalid NBT root signature")
     for required in (b"DataVersion", b"author", b"size", b"palette", b"blocks", b"entities"):
         if required not in uncompressed:
