@@ -493,7 +493,32 @@ public final class EmpireRuntimeGameTests {
                             + ", imperial=" + imperialAfterWithdrawal + "; expected "
                             + (fundedProvinceTreasury - 40L) + "/40");
 
-            LOGGER.info("IMPERIUM_GAMETEST_PASS: owner tax/deposit/withdraw succeed; non-owner tax/policy/deposit/withdraw are denied without state mutation");
+            final EmpireRealm realmBeforeRejectedTransfers = data.realmForProvince(identity).orElseThrow();
+            final int auditCountBeforeRejectedTransfers = realmBeforeRejectedTransfers.recentAuditEntries().size();
+            final long provinceBeforeRejectedTransfers = data.get(identity).orElseThrow().treasuryCrowns();
+            final long reserveBeforeRejectedTransfers = realmBeforeRejectedTransfers.imperialTreasuryCrowns();
+
+            // These amounts fit the command's numeric range but exceed the available
+            // provincial/imperial balances. The authoritative command path must reject
+            // them without leaking funds or appending success audit entries.
+            final int insufficientDepositResult = executeCommand(
+                    level, owner, "imperium empire deposit 1000000000");
+            require(insufficientDepositResult == 0,
+                    "A deposit exceeding the provincial balance must be rejected");
+            final int insufficientWithdrawalResult = executeCommand(
+                    level, owner, "imperium empire withdraw 1000000000");
+            require(insufficientWithdrawalResult == 0,
+                    "A withdrawal exceeding the imperial reserve must be rejected");
+
+            final long provinceAfterRejectedTransfers = data.get(identity).orElseThrow().treasuryCrowns();
+            final EmpireRealm realmAfterRejectedTransfers = data.realmForProvince(identity).orElseThrow();
+            require(provinceAfterRejectedTransfers == provinceBeforeRejectedTransfers
+                            && realmAfterRejectedTransfers.imperialTreasuryCrowns() == reserveBeforeRejectedTransfers,
+                    "Insufficient-funds transfers changed a treasury balance");
+            require(realmAfterRejectedTransfers.recentAuditEntries().size() == auditCountBeforeRejectedTransfers,
+                    "Insufficient-funds transfers added audit entries");
+
+            LOGGER.info("IMPERIUM_GAMETEST_PASS: owner tax/deposit/withdraw succeed; non-owner mutations are denied; insufficient-funds transfers preserve balances and audit history");
         } finally {
             IColonyManager.getInstance().deleteColonyByWorld(colony.getID(), false, level);
         }
