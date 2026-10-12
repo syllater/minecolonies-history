@@ -647,3 +647,30 @@ The test uses synthetic colony identity records; it does not test building a hut
 - JAR SHA-256: `a7dd3f42bf49b7703d15f94f7903b3e625d189d86b26919bfcf19b3e505f1940`.
 - Artifacts: [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764163159), [JAR + manifest](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764183051), [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11763763931), [server log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764487140), [client log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11763913074).
 - Remaining gates: survival construction/upgrades, sustained workers/save-reload, actual GUI click-through, genuine multiplayer, balance review and distribution-license decision.
+
+
+## 2026-10-12 — Cross-dimension realm and parliamentary authorization integration verified
+
+### Changes
+- Added a live Minecraft GameTest with real temporary MineColonies colonies in separate dimensions.
+- Verified an Emperor can invite a remote province, an unrelated non-owner cannot accept, the invited colony owner can join, repeat joins are denied and dimension + colony ID membership survives NBT round-trip.
+- Isolated the temporary capital in the End and province in the Nether. GameTests can reuse numeric colony IDs; keeping this fixture out of the Overworld prevents its temporary realm membership from colliding with another permission test's reused Overworld ID.
+- Extended the real Brigadier permission test: an unrelated player cannot assent to or veto a bill, those denied attempts leave the bill open with no resolution actor, and the Emperor can then veto the same bill under the Emperor's identity.
+
+### Verification
+- Source commit: `a2bf703628c25379dd1c4f4acb1a8aa1e3dc457a`.
+- Full green workflow: [38296167316](https://github.com/syllater/minecolonies-history/actions/runs/38296167316) — all four jobs passed.
+- Static EN/NL, generated-tier, release/dependency, cross-dimension command and ledger wiring validators passed.
+- `./gradlew --no-daemon test build`, JAR checksum verification and self-checking RC bundle passed.
+- Headless `runClient`, dedicated server, all ten Structurize blueprints and all six live GameTests passed.
+- JAR SHA-256: `351eeafb48e8e6bea538a701c55ae24f10b806df2a3ed15c8979c7701d13bebe`.
+
+Artifacts:
+- [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38296167316/artifacts/11768472386)
+- [JAR + manifest](https://github.com/syllater/minecolonies-history/actions/runs/38296167316/artifacts/11768327658)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38296167316/artifacts/11767998216)
+- [Dedicated-server log](https://github.com/syllater/minecolonies-history/actions/runs/38296167316/artifacts/11768902441)
+- [Client log](https://github.com/syllater/minecolonies-history/actions/runs/38296167316/artifacts/11768358033)
+
+### Remaining acceptance gates
+Real survival build/upgrade and sustained worker tests, actual GUI click-through, genuine two-player concurrency/reconnect/save-reload, balance review and the distribution-license decision remain open. No final public release is claimed.

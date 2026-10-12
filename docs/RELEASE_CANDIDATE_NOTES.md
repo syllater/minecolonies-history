@@ -2,45 +2,36 @@
 
 This is a release candidate for evaluation, not a final public release.
 
-## Contents
-
-The release-candidate bundle contains the built Imperium mod JAR, `SHA256SUMS.txt`, project README/changelog/compatibility notes, this file and the in-game playtest/release checklist.
-
 ## Target environment
-
 - Minecraft Java Edition 1.21.1
 - Java 21
 - NeoForge 21.1.x
 - MineColonies `1.1.1403-1.21.1`
 - Structurize `1.0.832-1.21.1-snapshot` or a compatible newer 1.21.1 build
-- BlockUI `1.0.199-1.21.1-snapshot` or compatible newer build
-- Domum Ornamentum `1.0.223-snapshot` or compatible newer build
-- MultiPiston `1.2.51-1.21.1-snapshot` or compatible newer build
+- BlockUI `1.0.199-1.21.1-snapshot` or a compatible newer 1.21.1 build
+- Domum Ornamentum `1.0.223-snapshot` or a compatible newer 1.21.1 build
+- MultiPiston `1.2.51-1.21.1-snapshot` or a compatible newer 1.21.1 build
 
-MineColonies and all listed required dependencies must be installed as normal mods; they are not shaded into the Imperium JAR.
+MineColonies and its required dependencies must be installed as normal mods; they are not shaded into the Imperium JAR.
 
-## Installation for evaluation
-
+## Install for evaluation
 1. Back up any world you intend to test.
-2. Install the matching Minecraft/NeoForge versions and MineColonies plus all of its required dependencies.
-3. Place the Imperium JAR in the instance's `mods` directory. For multiplayer, install compatible mod versions on the server and connecting clients as required by NeoForge.
-4. Launch once, check the log for errors, then use a disposable world for testing.
-5. Follow `PLAYTEST_RELEASE_CHECKLIST.md` for huts, hiring, worker behavior, level upgrades, save/reload, permissions, and multiplayer checks.
+2. Install the matching Minecraft/NeoForge versions and MineColonies plus its required dependencies.
+3. Place the Imperium JAR in the instance's `mods` directory. For multiplayer, use matching server/client mod versions as required by NeoForge.
+4. Launch once, inspect the log, then use a disposable world for testing.
+5. Follow [the playtest/release checklist](PLAYTEST_RELEASE_CHECKLIST.md) for hut construction/upgrades, hiring, worker behavior, save/reload, permissions and multiplayer.
 
 ## Integrity
-
-The accompanying `SHA256SUMS.txt` records the JAR SHA-256. From the directory containing the JAR and the checksum file, run:
+The bundle contains the JAR and `SHA256SUMS.txt`. From the folder containing them, run:
 
 ```bash
 sha256sum --check SHA256SUMS.txt
 ```
 
-The CI build verifies this manifest before packaging and verifies the checksum again inside the release-candidate bundle.
+CI generates and checks the manifest before packaging, then validates the self-checking release-candidate ZIP.
 
-## Cross-dimension command syntax
-
-Use these commands to target real MineColonies colonies in another server dimension; existing permission, realm-membership and cost checks still apply:
-
+## Cross-dimension commands
+All target real MineColonies colonies by namespaced dimension and colony ID. Existing permission, realm-membership and cost checks remain server-side:
 - Diplomacy: `/imperium diplomacy improve-at <dimension> <colonyId>`
 - Campaign: `/imperium campaign launch-at <type> <dimension> <colonyId>`
 - Governor: `/imperium governor appoint-at <dimension> <colonyId> <player>` and `/imperium governor dismiss-at <dimension> <colonyId>`
@@ -48,44 +39,32 @@ Use these commands to target real MineColonies colonies in another server dimens
 - Defensive order: `/imperium empire defense-at <dimension> <colonyId>`
 - Separatist petition: `/imperium empire resolve-at <dimension> <colonyId> <reassure|crackdown>`
 
-Use namespaced dimension IDs such as `minecraft:the_nether`. The server resolves targets through MineColonies' public API and verifies the stored dimension + colony ID.
-
-## Automated checks
-
-The GitHub Actions workflow runs EN/NL translation/placeholder validation, blueprint progression (including the generated GameTest fixture), dependency metadata validation, cross-dimension command/help validation, `./gradlew --no-daemon test build`, JAR checksum verification, a headless `runClient` startup check, dedicated-server validation of MineColonies registries/all ten Structurize blueprints, and a live `runGameTestServer` persistence test. The latest full green workflow is [run 38220155005](https://github.com/syllater/minecolonies-history/actions/runs/38220155005) on commit `0e96ba3ba809ad7e09735891593322b2514383fd`. All four jobs passed.
-
-Additional integrity checks cover atomic provincial ↔ imperial treasury transfers: successful transfers update both balances and the audit trail; insufficient-funds or destination-cap failures leave balances unchanged; a save/load cycle preserves the resulting balances and audit record. A 100-step alternating transfer test checks conservation of crowns, while invalid amounts/day indexes and non-member province transfers are rejected without changing balances or audit history. Daily imperial tax remittance tests cover the 10% central transfer of existing receipts, audit/persistence, rejection without an enacted realm tax law or valid day index, and rollback for insufficient provincial funds or a full central reserve.
-
-The live GameTests cover synthetic-state economy/realm persistence and also create real temporary MineColonies colonies. They test public API discovery, colony-state NBT round-trip, real Imperial Archive and Guard Tower block/building registration, actual custom job assignment and tier-scaled worker/guard capacity. They still do not replace a survival-world playtest of full Structurize construction/upgrades, sustained work, in-world save/reload, GUI interaction or genuine two-player permissions/concurrency/reconnect.
-
-## Outstanding release gates
-
-- Confirm both huts build and upgrade at levels 1–5 in a real survival world.
-- Verify worker hiring, production, specialist training, and save/reload in-game.
-- Click through the Imperial Theatre and the ledger in a real client.
-- Perform a two-player test of permissions, cross-dimension command variants, treasury concurrency, reconnect and save/reload.
-- Decide the project's distribution license and review the final package/license obligations.
-
-The project currently uses `All Rights Reserved` metadata for its own code and has no selected redistribution license. Do not treat this candidate as a license-cleared final release or redistribute it as a finished release before those decisions and tests are complete.
-
-
-
-
 ## Latest verified candidate — 2026-10-12
 
-All four jobs passed in [workflow 38288316185](https://github.com/syllater/minecolonies-history/actions/runs/38288316185) on source commit `eb002edc10253472f235f367d226b42d12d1d709`:
-- EN/NL localization, tier progression, release/dependency metadata, cross-dimension command validators and BlockUI ledger wiring passed.
-- `./gradlew --no-daemon test build`, reproducible archive checks, JAR SHA-256 manifest and self-checking RC package passed.
-- Headless client startup, dedicated-server startup and all 10/10 Structurize blueprint validations passed.
-- Six live Minecraft GameTests passed. They cover tax/economy/realm persistence; real colony discovery and SavedData round-trip; Archive and Guard Tower registrations/jobs/capacity; owner-vs-non-owner permissions including treasury rollback and parliamentary assent/veto; and cross-dimension invitations with owner-only join and persistence.
+All four jobs passed in [workflow 38296167316](https://github.com/syllater/minecolonies-history/actions/runs/38296167316) on source commit `a2bf703628c25379dd1c4f4acb1a8aa1e3dc457a`:
+- EN/NL localization (298 keys/placeholders), blueprint progression, dependency/release metadata, seven cross-dimension command variants and BlockUI ledger wiring (40 buttons, 38 handlers, two dedicated actions).
+- `./gradlew --no-daemon test build`, JAR SHA-256 verification and reproducible self-checking RC package.
+- Headless `runClient` reached `Sound engine started`.
+- Dedicated server verified `jobs=6 buildings=2 guardTypes=3 modules=6` and all `10/10` Structurize schematics.
+- Six live Minecraft GameTests passed: economy/tax/profession persistence; real colony discovery; Archive registration/jobs/capacity; Guard Tower specialists/capacity; owner/non-owner treasury and parliamentary authorization with rollback; and cross-dimension invitation/join/persistence.
 
-Current JAR SHA-256: `a7dd3f42bf49b7703d15f94f7903b3e625d189d86b26919bfcf19b3e505f1940`.
+JAR SHA-256:
+```text
+351eeafb48e8e6bea538a701c55ae24f10b806df2a3ed15c8979c7701d13bebe
+```
 
 Artifacts:
-- [Self-checking release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764163159)
-- [Mod JAR + SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764183051)
-- [Live GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11763763931)
-- [Dedicated-server/blueprint log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764487140)
-- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11763913074)
+- [Self-checking release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38296167316/artifacts/11768472386)
+- [Mod JAR + checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38296167316/artifacts/11768327658)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38296167316/artifacts/11767998216)
+- [Dedicated-server/blueprint log](https://github.com/syllater/minecolonies-history/actions/runs/38296167316/artifacts/11768902441)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38296167316/artifacts/11768358033)
 
-This remains a release candidate, not a final public release. Survival construction/upgrades, sustained worker/guard behavior, in-world save/reload, actual GUI click-through, a genuine two-player test, balance review and the distribution-license decision remain open.
+## Final-release gate — still open
+
+A green CI run is not a substitute for:
+- Real survival construction/upgrades at levels 1–5, sustained worker/guard behavior and actual world save/reload.
+- In-client click-through of the BlockUI Ledger and Imperial Theatre.
+- Genuine two-player dedicated-server test for permissions, cross-dimension commands, treasury concurrency, reconnect and persistence.
+- Gameplay balance/usability review and final release-note review.
+- Explicit choice of a distribution license. The repository's own metadata is currently `All Rights Reserved`; redistribution clearance has not been decided. Do not treat this RC as license-cleared or final.
