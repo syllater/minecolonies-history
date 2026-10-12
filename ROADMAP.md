@@ -1,47 +1,50 @@
 # Roadmap
 
 ## Milestone 0 — Repository and compatibility
-**Implementation complete.** Minecraft 1.21.1, Java 21 and NeoForge baseline are pinned; the public MineColonies API and dependency baseline are documented.
+**Implementation complete.** Minecraft 1.21.1, Java 21 and NeoForge are pinned; the MineColonies public API/dependency baseline is documented.
 
 ## Milestone 1 — Technical foundation
-**Implementation complete.** Gradle wrapper/configuration, English/Dutch translations, unit-test infrastructure, dependency resolution and GitHub Actions verification are in place.
+**Implementation complete.** Gradle configuration, EN/NL translations, JUnit infrastructure, pinned dependency declarations and a four-job CI workflow are in place.
 
 ## Milestone 2 — MineColonies integration
-**Implementation complete and covered by CI.** Real server-side colony lookup; stable identity by dimension + colony ID; idempotent discovery of old/new colonies; Imperium-owned, versioned SavedData; NBT round-trip and legacy/malformed-record tests.
+**Implementation complete and covered by live Minecraft GameTests.** Server-side public API lookup; dimension + colony ID identity; idempotent discovery of existing/new colonies; Imperium-owned versioned SavedData; rename preservation and serialization tests against a real temporary MineColonies colony.
 
 ## Milestone 3 — First playable vertical slice
-**Core implementation complete; human survival-world acceptance pending.**
-- Imperial Archive and Imperial Guard Tower, each with levels 1–5 and ten generated Structurize schematics.
-- Philosopher, Tax Collector and Diplomat jobs plus specialist guard roles.
-- Tier-scaled worker slots/output and guard training, with persistent per-citizen cooldowns.
-- Treasury, taxation, policies, knowledge investment, province development and BlockUI ledger.
-- Hiring, physical construction/upgrades, worker behavior and real-world save/reload still need a human survival playtest.
+**Automated integration coverage is green; in-world survival acceptance remains open.**
+- Imperial Archive and Imperial Guard Tower blocks are linked to real MineColonies building registry entries and the shared colony-building block-entity type.
+- Both building families support levels 1–5 and have five Structurize blueprints each (10/10 loaded and validated on a dedicated server).
+- A live GameTest places each real hut anchor and checks building registration.
+- Philosopher, Tax Collector and Diplomat job registration/assignment and level 1–5 worker capacity are live-tested.
+- Siege Engineer, Imperial Field Medic and Cavalier guard registration/assignment and level 1–5 shared guard capacity are live-tested.
+- Treasury/taxation, policies, knowledge investment, provincial development and BlockUI ledger are implemented.
+- Full Structurize survival construction/upgrade, sustained AI work, visible tier differences and world save/reload still need a human playtest.
 
 ## Milestone 4 — Parliament and politics
-**Core implementation complete.** Faction voting; tax/policy bills; Emperor assent/veto; shared realm laws; happiness-linked faction approval, stability, legitimacy and unrest; strikes, revolts and separatist petitions. Richer proposal variety remains a possible expansion.
+**Core implementation complete.** Faction voting, tax/policy bills, Emperor assent/veto, shared realm laws, approval/stability/legitimacy/unrest, strikes, revolts and separatist petitions.
 
 ## Milestone 5 — Economy and professions
-**Core implementation complete.** Daily taxes, policy effects, knowledge investment, tier-scaled jobs, provincial specializations, diplomatic influence, bounded treasuries and central tax remittance. Provincial ↔ imperial treasury transfers are atomic, audited only on success, and tested for cap/insufficient-funds rollback plus SavedData round-trip. A 100-step alternating-transfer invariant test proves no crowns are created/destroyed, and independent/non-member provinces plus invalid amount/day attempts are rejected without mutation. Daily imperial tax remittance is tested for conservation of already-collected receipts, success-only audit/persistence, and rollback for no-law/invalid-day, insufficient local balance and a full imperial reserve. Deeper coupling to native MineColonies resource-production/industry remains future depth, not a build blocker.
+**Core implementation complete and regression-tested.** Daily tax idempotency, policy effects, tier-scaled jobs, province development/focus, atomic audited treasury transfers, imperial tax remittance, treasury conservation and rollback/invalid-input behavior.
 
 ## Milestone 6 — Military systems
-**Core implementation complete.** Specialist training, delayed operations, three-front cap, military postures, supply routes, defensive orders and strategic-priority actions. Balance and real multiplayer interaction remain unverified in a survival world.
+**Core implementation complete and live-tested at the guard-module boundary.** Specialist training and guard jobs, tier-scaled hiring, three-front campaign cap, postures, supply routes, defensive orders and strategy priorities. Balance and sustained in-world behavior remain unverified.
 
 ## Milestone 7 — Buildings and progression
-**Automated checks complete; in-world validation pending.** Two registered MineColonies hut families at levels 1–5. CI checks all ten generated schematics, dimensions, anchors and tier-specific architectural detail; dedicated-server startup confirms they load. Actual placement/upgrade aesthetics, hiring and save/reload require a survival test.
+**Automated validation complete; physical survival upgrade acceptance remains open.** Both custom MineColonies hut block-entity registrations, building entries, tier capacity and all 10 Structurize blueprints have passed. CI validates anchors/dimensions; human playtesting must still confirm actual building construction, level upgrades and aesthetics.
 
 ## Milestone 8 — Empire and provincial simulation
-**Core implementation complete; interactive acceptance pending.** Multi-colony realms, capital/Emperor, invitations, central treasury, laws, audit history, governors, events, cohesion/separatist pressure, route/defense logistics, dimension-aware strategy commands and a graphical Imperial Theatre are implemented. Cross-dimension map projection is restricted to dimensions represented by realm provinces.
+**Core implementation complete.** Multi-colony realms, capital/Emperor, invitations, central treasury, laws/audit history, governors, events, cohesion/separatist pressure, logistics, dimension-aware strategy commands and graphical Imperial Theatre. Interactive client usability still needs a manual click-through.
 
 ## Milestone 9 — Multiplayer and compatibility hardening
-**Automated hardening complete; live persistence GameTest green; true multiplayer tests pending.** Server-authoritative bounded map payloads, per-player request throttling, treasury/permission regression tests, the seven-command cross-dimension EN/NL contract, malformed SavedData bounds, unique command registration, namespaced dimension parsing, Gradle tests/build, checksum packaging, headless client startup, dedicated-server startup with 10/10 Structurize schematics, and the live Minecraft `runGameTestServer` NBT/realm/economy round-trip test plus daily-tax idempotency before and after reload are green in [workflow 38220155005](https://github.com/syllater/minecolonies-history/actions/runs/38220155005) on commit `0e96ba3ba809ad7e09735891593322b2514383fd`. Real two-player permission races, treasury concurrency, reconnect and in-world save/load are not covered by headless CI.
+**Automated hardening complete; genuine multiplayer acceptance remains open.** Bounded/rate-limited map payloads, server-side permission/treasury checks, EN/NL cross-dimension command contracts, bounded/malformed SavedData handling, build/test/checksum packaging, real colony/building/job GameTests, client startup and dedicated-server startup with 10/10 schematics are green in [workflow 38226482725](https://github.com/syllater/minecolonies-history/actions/runs/38226482725) on commit `337a51000fe0889b854cc607994cab5d1b05f447`. The four live GameTests cover tax idempotency and persistence, real colony discovery/SavedData, Archive jobs/capacity and Guard Tower specialists/capacity. A real two-player session is still needed for permission races, concurrent treasury, reconnect and saved-world behavior.
 
 ## Milestone 10 — Release
-**Release candidate assembled; final release is not complete.**
-- Version `0.1.0-rc1`.
-- A self-checking ZIP contains the mod JAR, its SHA-256 manifest, install/compatibility/release notes and the manual acceptance checklist.
-- [Download the latest fully verified RC bundle from workflow 38220155005](https://github.com/syllater/minecolonies-history/actions/runs/38220155005/artifacts/11733153882).
-- Before final release: complete the survival-world and two-player playtests, review balance/package/release notes, choose the distribution license and update the final version/license files.
+**Self-checking release candidate assembled; final public release is not complete.**
+- Candidate version: `0.1.0-rc1`.
+- [Download the latest verified release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11736788200).
+- [Download the JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11737026081).
+- Latest JAR SHA-256: `31c771467f7787fe8fa75ff4489aa8d87874dd5057b35f3f3d1c1f71fd514b12`.
+- Before final release: complete the survival-world and two-player checks, review gameplay balance and release notes, and make an explicit distribution-license decision. Do not call the project release-ready or publish a final package before these gates are addressed.
 
-The latest tested JAR SHA-256 is `a138ce2eb57adbb7572962a59a844a091ff2cbe958e1e336ce18d62a859ffd6e` from [workflow 38220155005](https://github.com/syllater/minecolonies-history/actions/runs/38220155005). The runtime test still uses synthetic colony keys rather than creating a genuine MineColonies colony.\n\n## Current acceptance principle
+## Acceptance principle
 
-Automated tests verify compilation, unit logic, client/server startup, registry setup, blueprint loading, an actual in-game SavedData/realm/economy round-trip via GameTest, and artifact integrity. They do not pretend to verify physical hut placement, in-world usability or genuine two-player interaction. Those remain the last meaningful product-acceptance gates.
+Green CI now proves compilation, static checks, artifact integrity, Minecraft client/server startup, MineColonies registry linkage, ten blueprint loads, real colony discovery/persistence, and real building/job/slot-cap assignment tests. It does not claim to have completed the interactive survival and two-player acceptance checklist.

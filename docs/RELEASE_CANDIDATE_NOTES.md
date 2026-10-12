@@ -56,7 +56,7 @@ The GitHub Actions workflow runs EN/NL translation/placeholder validation, bluep
 
 Additional integrity checks cover atomic provincial ↔ imperial treasury transfers: successful transfers update both balances and the audit trail; insufficient-funds or destination-cap failures leave balances unchanged; a save/load cycle preserves the resulting balances and audit record. A 100-step alternating transfer test checks conservation of crowns, while invalid amounts/day indexes and non-member province transfers are rejected without changing balances or audit history. Daily imperial tax remittance tests cover the 10% central transfer of existing receipts, audit/persistence, rejection without an enacted realm tax law or valid day index, and rollback for insufficient provincial funds or a full central reserve.
 
-The live GameTest covers synthetic-state serialization, realm membership/law propagation, treasury transfer/audit and worker cooldowns. It does not create or mutate a real MineColonies colony. These automated checks are not a substitute for a hands-on survival-world or two-player dedicated-server test.
+The live GameTests cover synthetic-state economy/realm persistence and also create real temporary MineColonies colonies. They test public API discovery, colony-state NBT round-trip, real Imperial Archive and Guard Tower block/building registration, actual custom job assignment and tier-scaled worker/guard capacity. They still do not replace a survival-world playtest of full Structurize construction/upgrades, sustained work, in-world save/reload, GUI interaction or genuine two-player permissions/concurrency/reconnect.
 
 ## Outstanding release gates
 
@@ -71,17 +71,19 @@ The project currently uses `All Rights Reserved` metadata for its own code and h
 
 ## Latest verified candidate (2026-10-12)
 
-All four jobs passed in [workflow 38220155005](https://github.com/syllater/minecolonies-history/actions/runs/38220155005):
-- Build, unit tests, metadata/EN-NL/blueprint/command checks, checksum generation and RC package validation.
-- Headless client startup.
-- Dedicated server startup, MineColonies registry validation and `10/10` Structurize blueprints.
-- Live Minecraft GameTest: `IMPERIUM_GAMETEST_PASS: live SavedData daily tax idempotency, economy, worker cooldown, realm and treasury round-trip`.
+All four jobs passed in [workflow 38226482725](https://github.com/syllater/minecolonies-history/actions/runs/38226482725) on source commit `337a51000fe0889b854cc607994cab5d1b05f447`:
+- Static validation, unit tests, `./gradlew --no-daemon test build`, SHA-256 verification and self-checking release ZIP.
+- Headless client startup (`Sound engine started`).
+- Dedicated-server startup; registry validation (`jobs=6 buildings=2 guardTypes=3 modules=6`) and all `10/10` Structurize blueprints loaded.
+- Four live Minecraft GameTests, including discovery/persistence of a real MineColonies colony, registered Archive/Guard Tower building instances, the three citizen professions, the three military specialists, and tier-scaled hiring limits.
 
-Current candidate JAR SHA-256: `a138ce2eb57adbb7572962a59a844a091ff2cbe958e1e336ce18d62a859ffd6e`. The live test also verifies a province can collect its daily taxes only once, including across an NBT save/load.
+Current JAR SHA-256: `31c771467f7787fe8fa75ff4489aa8d87874dd5057b35f3f3d1c1f71fd514b12`.
 
 Artifacts:
-- [Self-checking RC package](https://github.com/syllater/minecolonies-history/actions/runs/38220155005/artifacts/11733153882)
-- [JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38220155005/artifacts/11733033873)
-- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38220155005/artifacts/11734255934)
+- [Self-checking RC package](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11736788200)
+- [JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11737026081)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11735878195)
+- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11735948022)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11736267720)
 
-This remains an RC, not a license-cleared final release. The genuine survival-world construction/hiring/behavior/save-reload and two-player acceptance checklist still needs to be executed.
+This is still a release candidate, not a license-cleared final release. The genuine survival-world construction/hiring/behavior/save-reload and two-player acceptance checklist, balance review, and distribution-license decision remain open.

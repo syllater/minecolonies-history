@@ -93,3 +93,14 @@ Rationale:
 - Unit tests are fast, but an actual GameTest server exercises Minecraft's CompoundTag and SavedData code in its mapped runtime.
 - The test uses synthetic colony identity keys and does not create fake MineColonies colonies or write into MineColonies internals.
 - Physical hut placement, worker AI in survival, GUI click-through and two-player network/permission acceptance remain manual release gates; passing the GameTest is not used to certify those behaviors.
+
+
+## 2026-10-12 — Extend MineColonies shared hut block-entity type through NeoForge
+
+Decision: Use NeoForge's `BlockEntityTypeAddBlocksEvent` to add the custom Imperial Archive and Imperial Guard Tower blocks to `minecolonies:colonybuilding`.
+
+Rationale: MineColonies constructs its shared hut block-entity type from its own internal hut list. An addon block that extends `AbstractBlockHut` but is absent from that list is rejected as an invalid block-entity state at placement time. The official mod-bus event safely extends the type's valid-block set; this avoids mixins/reflection and was verified by real Minecraft GameTests.
+
+## 2026-10-12 — Runtime integration acceptance boundary
+
+Decision: Keep the release candidate open until manual survival and two-player acceptance is completed. Live GameTests now prove real colony lookup, hut anchor/building registration, registered job assignment and tier capacity, but they do not claim to build entire Structurize schematics in survival, observe workers over multiple game days, exercise every GUI interaction, or verify genuine multiplayer permissions/concurrency/reconnect.

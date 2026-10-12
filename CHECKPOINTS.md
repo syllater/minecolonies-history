@@ -525,3 +525,37 @@ Real survival-world placement/upgrades, job/guard hiring and actual behavior, sa
 
 ### Not claimed as automated
 The test uses synthetic colony identity records; it does not test building a hut, hiring a real worker, the real MineColonies colony discovery lifecycle, GUI interaction or genuine two-player permissions/concurrency/reconnect. The in-world checklist and distribution-license decision remain open.
+
+
+## 2026-10-12 — Real Archive and Guard Tower runtime integration (fully verified)
+
+### Implementation
+- Added `MineColoniesBlockEntityCompatibility` using NeoForge's supported `BlockEntityTypeAddBlocksEvent`. MineColonies creates its shared `minecolonies:colonybuilding` block-entity type from a built-in hut list; custom addon huts do not join that list merely by extending `AbstractBlockHut`. The event now adds both Imperial Archive and Imperial Guard Tower, fixing the invalid block-entity error when the Archive anchor was placed.
+- Added live Minecraft GameTests that create disposable real MineColonies colonies, place the custom hut anchors, resolve the registered MineColonies building instances and assign real custom job entries.
+- The Archive test assigns Philosopher, Tax Collector and Diplomat jobs and verifies the hiring cap scales from 1 to 5 workers per role from hut level 1 to level 5.
+- The Guard Tower test assigns Siege Engineer, Imperial Field Medic and Cavalier jobs and verifies shared guard capacity of 1 at level 1 and 5 at level 5.
+- The real-colony test validates public API discovery by position, dimension + colony-ID identity, colony-name refresh, treasury preservation and Imperium SavedData NBT round-trip.
+
+### Verification
+- Fully green GitHub Actions run: [38226482725](https://github.com/syllater/minecolonies-history/actions/runs/38226482725), source commit `337a51000fe0889b854cc607994cab5d1b05f447`.
+- `./gradlew --no-daemon test build` passed, as did EN/NL, blueprint-progression, dependency/release-metadata and cross-dimension-command validators.
+- JAR checksum manifest verification and self-checking RC ZIP validation passed.
+- Dedicated server passed: `jobs=6 buildings=2 guardTypes=3 modules=6` and `10/10` Structurize schematics.
+- Headless client passed the `Sound engine started` marker.
+- All four live GameTests passed:
+  - `IMPERIUM_GAMETEST_PASS: live SavedData daily tax idempotency, economy, worker cooldown, realm and treasury round-trip`
+  - `IMPERIUM_GAMETEST_PASS: real MineColonies colony discovery, rename preservation and Imperium SavedData round-trip`
+  - `IMPERIUM_GAMETEST_PASS: real Imperial Archive hut registration, MineColonies jobs and level-scaled worker capacity`
+  - `IMPERIUM_GAMETEST_PASS: real Guard Tower hut registration, military specialist jobs and level-scaled shared capacity`
+
+### Artifacts
+- [Self-checking RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11736788200)
+- [JAR and checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11737026081)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11735878195)
+- [Dedicated-server/blueprint log](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11735948022)
+- [Client smoke-test log](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11736267720)
+
+### Release status
+- Version remains `0.1.0-rc1`; candidate JAR SHA-256: `31c771467f7787fe8fa75ff4489aa8d87874dd5057b35f3f3d1c1f71fd514b12`.
+- Full Structurize survival placement/upgrades, sustained worker AI behavior, in-world save/reload, interactive GUI and true two-player permission/concurrency/reconnect tests still require hands-on playtesting.
+- The project owner's distribution-license decision remains a release gate. No final public release is claimed.

@@ -2,6 +2,8 @@
 
 Use a disposable Minecraft 1.21.1 world with the exact tested NeoForge and MineColonies dependency versions. Check each item in singleplayer first, then repeat the permission-sensitive items on a dedicated server with two players.
 
+Automated CI now creates real disposable MineColonies colonies and verifies discovery/persistence, Archive and Guard Tower hut-anchor registration, custom job assignment, and tier capacity. This does not mark the checklist items below complete: the full Structurize building/upgrade cycle, sustained work, real world save/reload and multiplayer interaction still need an actual hands-on playtest.
+
 ## Install / startup
 - [ ] Install the built Imperium JAR together with MineColonies and all required dependencies.
 - [ ] Create a world with no pre-existing MineColonies colony; confirm there is no startup error.
