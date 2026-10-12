@@ -47,6 +47,13 @@ public final class EmpireRuntimeGameTests {
         final EmpireState provinceState = live.get(province).orElseThrow();
         require(capitalState.creditTreasury(250L), "Could not seed capital treasury");
         require(provinceState.creditTreasury(500L), "Could not seed province treasury");
+        require(provinceState.collectDailyTaxes(dayIndex, 10L) == 10L,
+                "First daily tax turn should collect the expected crowns");
+        require(provinceState.collectDailyTaxes(dayIndex, 10L) == 0L,
+                "The same daily tax turn must not collect twice");
+        require(provinceState.treasuryCrowns() == 510L,
+                "Repeated daily tax processing changed the provincial balance");
+
         require(capitalState.recordScholarWork(gameTime, 5, "philosopher-" + runId),
                 "Tier-five Philosopher work should succeed");
         require(capitalState.recordTaxCollectorWork(gameTime, 5, "tax-collector-" + runId),
@@ -93,8 +100,12 @@ public final class EmpireRuntimeGameTests {
         require(!restoredCapital.recordDiplomatWork(gameTime, 5, "diplomat-" + runId),
                 "Saved worker cooldown allowed duplicate diplomatic influence");
 
-        require(restoredProvince.treasuryCrowns() == 375L,
-                "Provincial treasury did not retain the committed transfer");
+        require(restoredProvince.treasuryCrowns() == 385L,
+                "Tax receipt and treasury transfer did not survive NBT load");
+        require(restoredProvince.lastTaxDay() == dayIndex,
+                "Saved daily tax marker did not survive NBT load");
+        require(restoredProvince.collectDailyTaxes(dayIndex, 10L) == 0L,
+                "Reloaded state allowed the same daily tax turn to run twice");
         require(restoredProvince.taxRatePercent() == 12,
                 "Realm tax law was not inherited by the province");
         require(restoredProvince.economicPolicy() == EconomicPolicy.WELFARE,
@@ -107,7 +118,7 @@ public final class EmpireRuntimeGameTests {
                         && "deposit".equals(restoredRealm.recentAuditEntries().get(0).actionId()),
                 "Successful treasury transfer audit did not survive NBT load");
 
-        LOGGER.info("IMPERIUM_GAMETEST_PASS: live SavedData economy, worker cooldown, realm and treasury round-trip");
+        LOGGER.info("IMPERIUM_GAMETEST_PASS: live SavedData daily tax idempotency, economy, worker cooldown, realm and treasury round-trip");
         helper.succeed();
     }
 
