@@ -15,6 +15,7 @@ import com.minecolonies.api.tileentities.AbstractTileEntityColonyBuilding;
 import com.minecolonies.core.colony.buildings.modules.WorkerBuildingModule;
 import com.minecolonies.core.colony.buildings.modules.GuardBuildingModule;
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.logging.LogUtils;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -425,8 +426,7 @@ public final class EmpireRuntimeGameTests {
 
             // Prove the command route itself is valid: the colony owner can submit
             // a bill through the same Brigadier dispatcher used by real players.
-            final int ownerResult = level.getServer().getCommands().performPrefixedCommand(
-                    owner.createCommandSourceStack(), "imperium tax 10");
+            final int ownerResult = executeCommand(level, owner, "imperium tax 10");
             require(ownerResult > 0, "The colony owner should be able to submit a tax proposal");
             require(state.recentParliamentProposals().size() == 1,
                     "The authorized tax command did not create exactly one proposal");
@@ -434,12 +434,10 @@ public final class EmpireRuntimeGameTests {
 
             // A second player standing in the same colony must not be able to use
             // proximity alone to change colony economy or parliament state.
-            final int outsiderTaxResult = level.getServer().getCommands().performPrefixedCommand(
-                    outsider.createCommandSourceStack(), "imperium tax 15");
+            final int outsiderTaxResult = executeCommand(level, outsider, "imperium tax 15");
             require(outsiderTaxResult == 0,
                     "A non-owner without MANAGE_HUTS must not submit a tax proposal");
-            final int outsiderPolicyResult = level.getServer().getCommands().performPrefixedCommand(
-                    outsider.createCommandSourceStack(), "imperium policy mercantile");
+            final int outsiderPolicyResult = executeCommand(level, outsider, "imperium policy mercantile");
             require(outsiderPolicyResult == 0,
                     "A non-owner without MANAGE_HUTS must not submit an economic policy proposal");
 
@@ -468,6 +466,18 @@ public final class EmpireRuntimeGameTests {
         // These are synthetic identity keys only; no MineColonies colony is created or mutated.
         final int positiveBits = (int) (UUID.randomUUID().getMostSignificantBits() & 0x3fffffffL);
         return 1_000_000_000 + positiveBits;
+    }
+
+    private static int executeCommand(
+            final ServerLevel level,
+            final ServerPlayer player,
+            final String command) {
+        try {
+            return level.getServer().getCommands().getDispatcher()
+                    .execute(command, player.createCommandSourceStack());
+        } catch (CommandSyntaxException exception) {
+            throw new AssertionError("Could not execute GameTest command: " + command, exception);
+        }
     }
 
     private static void require(final boolean condition, final String message) {
