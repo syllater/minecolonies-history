@@ -62,6 +62,12 @@ neoForge {
             server()
             programArgument '--nogui'
         }
+
+        gameTestServer {
+            type = "gameTestServer"
+            gameDirectory = file('run/gametest')
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+        }
     }
 
     mods {
