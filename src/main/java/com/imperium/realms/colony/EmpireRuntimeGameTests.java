@@ -2,15 +2,18 @@ package com.imperium.realms.colony;
 
 import com.imperium.realms.ImperiumRealms;
 import com.imperium.realms.building.BuildingImperialArchive;
+import com.imperium.realms.building.BuildingImperialGuardTower;
 import com.imperium.realms.registry.ModBlocks;
 import com.imperium.realms.registry.ModImperiumBuildings;
 import com.imperium.realms.registry.ModImperiumJobs;
+import com.imperium.realms.registry.ModImperiumGuardTypes;
 import com.minecolonies.api.colony.ICitizenData;
 import com.minecolonies.api.colony.IColony;
 import com.minecolonies.api.colony.IColonyManager;
 import com.minecolonies.api.colony.buildings.IBuilding;
 import com.minecolonies.api.tileentities.AbstractTileEntityColonyBuilding;
 import com.minecolonies.core.colony.buildings.modules.WorkerBuildingModule;
+import com.minecolonies.core.colony.buildings.modules.GuardBuildingModule;
 import com.mojang.authlib.GameProfile;
 import com.mojang.logging.LogUtils;
 import net.minecraft.gametest.framework.GameTest;
@@ -292,6 +295,113 @@ public final class EmpireRuntimeGameTests {
         }
 
         helper.succeed();
+    }
+
+    @GameTest(template = "flat", timeoutTicks = 100)
+    public static void imperialGuardTowerRegistersSpecialistsAndScalesGuardCapacity(final GameTestHelper helper) {
+        final ServerLevel level = helper.getLevel();
+        final ServerPlayer owner = FakePlayerFactory.get(level, COLONY_TEST_OWNER);
+        final BlockPos center = helper.absolutePos(new BlockPos(4, 1, 4));
+        final IColony colony = IColonyManager.getInstance().createColony(
+                level, center, owner, "Imperium Guard Tower Test", "Colonial");
+        require(colony != null, "MineColonies did not create the Guard Tower test colony");
+
+        try {
+            final Block hutBlock = ModBlocks.IMPERIAL_GUARD_TOWER.get();
+            final BlockPos hutPos = helper.absolutePos(new BlockPos(2, 1, 2));
+            final BlockState hutState = hutBlock.defaultBlockState();
+            level.setBlock(hutPos, hutState, 3);
+            hutBlock.setPlacedBy(level, hutPos, hutState, owner, ItemStack.EMPTY);
+
+            IBuilding registered = IColonyManager.getInstance().getBuilding(level, hutPos);
+            if (registered == null
+                    && level.getBlockEntity(hutPos) instanceof AbstractTileEntityColonyBuilding tile) {
+                registered = colony.getServerBuildingManager().addNewBuilding(tile, level);
+            }
+            require(registered instanceof BuildingImperialGuardTower,
+                    "Placed Guard Tower hut block did not register a BuildingImperialGuardTower");
+
+            final BuildingImperialGuardTower tower = (BuildingImperialGuardTower) registered;
+            require(tower.getBuildingType().equals(ModImperiumBuildings.IMPERIAL_GUARD_TOWER.get()),
+                    "Placed Guard Tower is linked to the wrong MineColonies BuildingEntry");
+            require(tower.getMaxBuildingLevel() == 5,
+                    "Imperial Guard Tower must support five building tiers");
+
+            final var guardModules = tower.getModules(GuardBuildingModule.class);
+            require(guardModules.size() == 3,
+                    "Imperial Guard Tower must expose Siege Engineer, Field Medic and Cavalier modules");
+
+            final GuardBuildingModule siegeEngineer =
+                    findGuardModule(guardModules, ModImperiumJobs.IMPERIAL_SIEGE_ENGINEER.get());
+            final GuardBuildingModule fieldMedic =
+                    findGuardModule(guardModules, ModImperiumJobs.IMPERIAL_FIELD_MEDIC.get());
+            final GuardBuildingModule cavalier =
+                    findGuardModule(guardModules, ModImperiumJobs.IMPERIAL_CAVALIER.get());
+            require(siegeEngineer != null && fieldMedic != null && cavalier != null,
+                    "One or more military specialist guard modules are missing");
+
+            tower.setBuildingLevel(1);
+            require(siegeEngineer.getModuleMax() == 1
+                            && fieldMedic.getModuleMax() == 1
+                            && cavalier.getModuleMax() == 1,
+                    "Level 1 Guard Tower must have a one-guard total capacity");
+
+            final ICitizenData engineerData = colony.getCitizenManager().createAndRegisterCivilianData();
+            require(siegeEngineer.assignCitizen(engineerData),
+                    "Level 1 Guard Tower refused its first Siege Engineer");
+            require(engineerData.getJob() != null
+                            && engineerData.getJob().getJobRegistryEntry()
+                                    .equals(ModImperiumJobs.IMPERIAL_SIEGE_ENGINEER.get()),
+                    "MineColonies did not assign the registered Siege Engineer job");
+            require(!fieldMedic.assignCitizen(colony.getCitizenManager().createAndRegisterCivilianData()),
+                    "Level 1 Guard Tower accepted a second guard beyond its shared capacity");
+
+            tower.setBuildingLevel(5);
+            require(siegeEngineer.getModuleMax() == 5
+                            && fieldMedic.getModuleMax() == 5
+                            && cavalier.getModuleMax() == 5,
+                    "Level 5 Guard Tower must scale the shared capacity to five guards");
+
+            final ICitizenData medicData = colony.getCitizenManager().createAndRegisterCivilianData();
+            require(fieldMedic.assignCitizen(medicData),
+                    "Level 5 Guard Tower refused its first Imperial Field Medic");
+            require(medicData.getJob() != null
+                            && medicData.getJob().getJobRegistryEntry()
+                                    .equals(ModImperiumJobs.IMPERIAL_FIELD_MEDIC.get()),
+                    "MineColonies did not assign the registered Imperial Field Medic job");
+
+            final ICitizenData cavalierData = colony.getCitizenManager().createAndRegisterCivilianData();
+            require(cavalier.assignCitizen(cavalierData),
+                    "Level 5 Guard Tower refused its first Imperial Cavalier");
+            require(cavalierData.getJob() != null
+                            && cavalierData.getJob().getJobRegistryEntry()
+                                    .equals(ModImperiumJobs.IMPERIAL_CAVALIER.get()),
+                    "MineColonies did not assign the registered Imperial Cavalier job");
+
+            require(siegeEngineer.assignCitizen(colony.getCitizenManager().createAndRegisterCivilianData()),
+                    "Level 5 Guard Tower refused a second Siege Engineer below capacity");
+            require(fieldMedic.assignCitizen(colony.getCitizenManager().createAndRegisterCivilianData()),
+                    "Level 5 Guard Tower refused a second Field Medic below capacity");
+            require(tower.getAllAssignedCitizen().size() == 5,
+                    "Level 5 Guard Tower did not reach its five-guard shared capacity");
+            require(!cavalier.assignCitizen(colony.getCitizenManager().createAndRegisterCivilianData()),
+                    "Level 5 Guard Tower accepted a sixth guard beyond capacity");
+
+            LOGGER.info("IMPERIUM_GAMETEST_PASS: real Guard Tower hut registration, military specialist jobs and level-scaled shared capacity");
+        } finally {
+            IColonyManager.getInstance().deleteColonyByWorld(colony.getID(), false, level);
+        }
+
+        helper.succeed();
+    }
+
+    private static GuardBuildingModule findGuardModule(
+            final java.util.List<GuardBuildingModule> modules,
+            final com.minecolonies.api.colony.jobs.registry.JobEntry entry) {
+        return modules.stream()
+                .filter(module -> module.getJobEntry().equals(entry))
+                .findFirst()
+                .orElse(null);
     }
 
     private static WorkerBuildingModule findWorkerModule(
