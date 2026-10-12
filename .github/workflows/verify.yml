@@ -173,6 +173,41 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
 
+  gametest-smoke:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
+      - name: Run live Minecraft persistence GameTests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          log="build/runGameTestServer.log"
+          rm -rf run/gametest
+          mkdir -p run/gametest
+          ./gradlew --no-daemon runGameTestServer --console=plain 2>&1 | tee "$log"
+          grep -Fq "IMPERIUM_GAMETEST_PASS: live SavedData economy, worker cooldown, realm and treasury round-trip" "$log"
+      - name: Upload GameTest log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: runGameTestServer-log-${{ github.sha }}
+          path: build/runGameTestServer.log
+          if-no-files-found: ignore
+          retention-days: 14
+
   client-smoke:
     needs: build-and-test
     runs-on: ubuntu-latest
