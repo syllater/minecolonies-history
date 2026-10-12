@@ -9,13 +9,13 @@ Last updated: 2026-10-12 Europe/Amsterdam.
 - Active branch: `milestone-2/colony-integration`
 - Candidate version: `0.1.0-rc1`
 - Target: Minecraft Java 1.21.1, Java 21, NeoForge 21.1.x, required MineColonies dependency set.
-- Latest fully verified source commit: `8d75647dd41f2527976f142a1361978a7619282b`.
+- Latest fully verified source commit: `eb002edc10253472f235f367d226b42d12d1d709`.
 - Overall completion estimate: approximately **90%**. This is a planning estimate, not a measured metric.
 - Release status: **release candidate only**. No final public release has been published.
 
 ## Latest automated verification — all green
 
-[GitHub Actions run 38287296842](https://github.com/syllater/minecolonies-history/actions/runs/38287296842) passed **all four jobs** on source commit `8d75647dd41f2527976f142a1361978a7619282b`.
+[GitHub Actions run 38288316185](https://github.com/syllater/minecolonies-history/actions/runs/38288316185) passed **all four jobs** on source commit `eb002edc10253472f235f367d226b42d12d1d709`.
 
 - English and Dutch localization: 298 translation keys/placeholders passed.
 - Static validators passed for tier progression, dependency/release metadata, all seven cross-dimension command variants, and BlockUI ledger wiring: 40 buttons, 38 command handlers and two dedicated actions.
@@ -28,16 +28,16 @@ Last updated: 2026-10-12 Europe/Amsterdam.
   2. Discovery and serialization of a real temporary MineColonies colony with rename preservation.
   3. Real Imperial Archive registration, worker-job assignment and tier 1–5 capacity.
   4. Real Imperial Guard Tower registration, military specialists and tier 1–5 capacity.
-  5. Real command dispatch: the colony owner can submit tax and perform treasury deposits/withdrawals; a non-owner cannot submit tax/policy or deposit/withdraw funds, and rejected commands leave treasury and Parliament proposal state unchanged. The test accounts for the province's actual opening balance rather than assuming it starts at zero.
+  5. Real command dispatch: the owner can submit tax and perform treasury deposits/withdrawals; non-owner tax/policy/deposit/withdraw attempts are denied; underfunded authorized transfers are rejected without changing balances or audit history. Denied commands leave Parliament proposal state unchanged, and the test accounts for the province's actual opening balance.
 
-Latest candidate JAR SHA-256: `a7aa3b3bf6fde8d62eecb6b26079cf694e23f3913e924e8906dbaa137002aee4`.
+Latest candidate JAR SHA-256: `a7dd3f42bf49b7703d15f94f7903b3e625d189d86b26919bfcf19b3e505f1940`.
 
 Artifacts from the verified run:
-- [Self-checking 0.1.0-rc1 bundle](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11764435629)
-- [Mod JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763264551)
-- [Live GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763737489)
-- [Dedicated-server schematic/registry log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763947174)
-- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763882201)
+- [Self-checking 0.1.0-rc1 bundle](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764163159)
+- [Mod JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764183051)
+- [Live GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11763763931)
+- [Dedicated-server schematic/registry log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764487140)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11763913074)
 
 ## Implemented systems
 
