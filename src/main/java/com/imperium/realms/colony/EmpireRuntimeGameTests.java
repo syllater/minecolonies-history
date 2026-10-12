@@ -404,6 +404,57 @@ public final class EmpireRuntimeGameTests {
                 .orElse(null);
     }
 
+    @GameTest(template = "flat", timeoutTicks = 100)
+    public static void nonOwnerCannotMutateColonyEconomyThroughCommands(final GameTestHelper helper) {
+        final ServerLevel level = helper.getLevel();
+        final ServerPlayer owner = FakePlayerFactory.get(level, COLONY_TEST_OWNER);
+        final BlockPos center = helper.absolutePos(new BlockPos(4, 1, 4));
+        owner.setPos(center.getX() + 0.5D, center.getY(), center.getZ() + 0.5D);
+        final IColony colony = IColonyManager.getInstance().createColony(
+                level, center, owner, "Imperium Permission Test", "Colonial");
+        require(colony != null, "MineColonies did not create the command-permission test colony");
+
+        try {
+            final GameProfile outsiderProfile = new GameProfile(
+                    UUID.fromString("7e50ba59-8e88-40d8-b5e4-3d7734c63e87"),
+                    "imperium_outsider");
+            final ServerPlayer outsider = FakePlayerFactory.get(level, outsiderProfile);
+            outsider.setPos(center.getX() + 0.5D, center.getY(), center.getZ() + 0.5D);
+
+            final EmpireState state = MineColoniesIntegration.getOrCreateState(level, colony);
+
+            // Prove the command route itself is valid: the colony owner can submit
+            // a bill through the same Brigadier dispatcher used by real players.
+            final int ownerResult = level.getServer().getCommands().performPrefixedCommand(
+                    owner.createCommandSourceStack(), "imperium tax 10");
+            require(ownerResult > 0, "The colony owner should be able to submit a tax proposal");
+            require(state.recentParliamentProposals().size() == 1,
+                    "The authorized tax command did not create exactly one proposal");
+            final long originalProposalId = state.recentParliamentProposals().get(0).id();
+
+            // A second player standing in the same colony must not be able to use
+            // proximity alone to change colony economy or parliament state.
+            final int outsiderTaxResult = level.getServer().getCommands().performPrefixedCommand(
+                    outsider.createCommandSourceStack(), "imperium tax 15");
+            require(outsiderTaxResult == 0,
+                    "A non-owner without MANAGE_HUTS must not submit a tax proposal");
+            final int outsiderPolicyResult = level.getServer().getCommands().performPrefixedCommand(
+                    outsider.createCommandSourceStack(), "imperium policy mercantile");
+            require(outsiderPolicyResult == 0,
+                    "A non-owner without MANAGE_HUTS must not submit an economic policy proposal");
+
+            final var afterDeniedCommands = state.recentParliamentProposals();
+            require(afterDeniedCommands.size() == 1 && afterDeniedCommands.get(0).id() == originalProposalId,
+                    "Unauthorized commands changed the stored parliament proposals");
+
+            LOGGER.info("IMPERIUM_GAMETEST_PASS: colony-owner economy commands succeed and non-owner tax/policy mutations are denied");
+        } finally {
+            IColonyManager.getInstance().deleteColonyByWorld(colony.getID(), false, level);
+        }
+
+        helper.succeed();
+    }
+
     private static WorkerBuildingModule findWorkerModule(
             final java.util.List<WorkerBuildingModule> modules,
             final com.minecolonies.api.colony.jobs.registry.JobEntry entry) {
