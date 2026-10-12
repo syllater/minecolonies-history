@@ -494,3 +494,34 @@ Hands-on survival-world hut construction/upgrades, worker hiring/work, real in-w
 
 ### Remaining release gates
 Real survival-world placement/upgrades, job/guard hiring and actual behavior, save/reload of genuine MineColonies colony state, interactive GUI, two-player permissions/treasury concurrency/reconnect, balance review, and distribution-license choice remain open.
+
+
+## 2026-10-12 — Daily-tax idempotency GameTest and latest RC build green
+
+### Source
+- Fully verified source commit: `0e96ba3ba809ad7e09735891593322b2514383fd`.
+- [GitHub Actions workflow 38220155005](https://github.com/syllater/minecolonies-history/actions/runs/38220155005): all four jobs passed.
+
+### Added runtime assertions
+- The live Minecraft GameTest now calls `collectDailyTaxes(dayIndex, 10)` twice for a synthetic province and asserts the first call collects 10 crowns while the second returns 0.
+- After saving/loading `EmpireStateSavedData`, the test checks the stored `lastTaxDay` and calls the same day again; it must return 0 rather than collect twice.
+- Following a 125-crown provincial-to-imperial transfer, the loaded province balance is checked at 385 crowns (500 initial + 10 daily tax − 125 transfer). The central treasury and success-only audit entry are also checked.
+- Success marker: `IMPERIUM_GAMETEST_PASS: live SavedData daily tax idempotency, economy, worker cooldown, realm and treasury round-trip`.
+
+### Full validation
+- Build, unit tests, static validators, SHA-256 manifest and self-checking release-candidate packaging passed.
+- Headless client startup passed; log contains `Sound engine started`.
+- Dedicated server started and validated MineColonies registries plus all `10/10` Structurize blueprints.
+- Minecraft GameTest server started and reported `All 1 required tests passed`.
+
+### Candidate
+- Candidate remains `0.1.0-rc1`, not a final release.
+- JAR SHA-256: `a138ce2eb57adbb7572962a59a844a091ff2cbe958e1e336ce18d62a859ffd6e`.
+- [Self-checking RC package](https://github.com/syllater/minecolonies-history/actions/runs/38220155005/artifacts/11733153882)
+- [JAR and checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38220155005/artifacts/11733033873)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38220155005/artifacts/11734255934)
+- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38220155005/artifacts/11734335936)
+- [Client smoke log](https://github.com/syllater/minecolonies-history/actions/runs/38220155005/artifacts/11734166005)
+
+### Not claimed as automated
+The test uses synthetic colony identity records; it does not test building a hut, hiring a real worker, the real MineColonies colony discovery lifecycle, GUI interaction or genuine two-player permissions/concurrency/reconnect. The in-world checklist and distribution-license decision remain open.
