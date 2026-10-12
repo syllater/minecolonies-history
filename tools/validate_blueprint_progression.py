@@ -57,10 +57,31 @@ def validate_family(name: str, sizes: list[tuple[int, int, int]]) -> list[str]:
     return errors
 
 
+
+def validate_gametest_template() -> list[str]:
+    """Fail early if the generated live-Minecraft GameTest fixture is malformed."""
+    errors: list[str] = []
+    try:
+        payload = generate_blueprints.build_gametest_structure()
+        uncompressed = gzip.decompress(payload)
+    except (OSError, ValueError) as exc:
+        return [f"GameTest structure: generation/decompression failed: {exc}"]
+
+    if not uncompressed.startswith(b"\\x0a\\x00\\x00"):
+        errors.append("GameTest structure: invalid NBT root signature")
+    for required in (b"DataVersion", b"author", b"size", b"palette", b"blocks", b"entities"):
+        if required not in uncompressed:
+            errors.append(f"GameTest structure: missing NBT field {required!r}")
+    if b"minecraft:stone" not in uncompressed:
+        errors.append("GameTest structure: expected stone-floor palette entry is missing")
+    return errors
+
+
 def main() -> int:
     errors = []
     errors.extend(validate_family("imperialarchive", generate_blueprints.ARCHIVE_SIZES))
     errors.extend(validate_family("imperialguardtower", generate_blueprints.TOWER_SIZES))
+    errors.extend(validate_gametest_template())
 
     if errors:
         print("Blueprint tier validation failed:")
@@ -68,7 +89,7 @@ def main() -> int:
             print(f" - {error}")
         return 1
 
-    print("Blueprint tier validation passed: 10 distinct visual tiers with progressive dimensions, roof details, furnishings and valid anchor offsets.")
+    print("Blueprint validation passed: 10 distinct building tiers plus the generated live-Minecraft GameTest template.")
     return 0
 
 
