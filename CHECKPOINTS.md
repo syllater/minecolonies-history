@@ -625,3 +625,14 @@ The test uses synthetic colony identity records; it does not test building a hut
 ### Release gate
 - Overall progress remains approximately **90%**. Automated command authorization coverage is improved, but it is not a substitute for the real two-player permissions/concurrency/reconnect test.
 - Physical survival placement/upgrades, sustained worker behavior/world reload, graphical UI click-through, two-player session, balance review and license decision remain open. No final release has been published.
+
+
+## 2026-10-12 — Treasury command authorization integration test green
+
+- Source commit: `8d75647dd41f2527976f142a1361978a7619282b`.
+- Full workflow [38287296842](https://github.com/syllater/minecolonies-history/actions/runs/38287296842) passed all four jobs: build/tests/package, headless client, dedicated server/blueprints and live GameTests.
+- The fifth live GameTest executes commands through the real Brigadier dispatcher. The owner may submit tax and perform treasury deposit/withdraw; a non-owner is denied tax, policy, deposit and withdrawal. Denied commands leave treasury balances and Parliament proposals unchanged.
+- The test uses the actual opening provincial balance and checks exact transfer deltas rather than assuming the province starts at zero.
+- JAR SHA-256: `a7aa3b3bf6fde8d62eecb6b26079cf694e23f3913e924e8906dbaa137002aee4`.
+- Artifacts: [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11764435629); [JAR + manifest](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763264551); [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763737489); [server/blueprint log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763947174); [client log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763882201).
+- Overall completion remains approximately **90%**. Real survival construction/upgrades, sustained worker behavior/save-reload, graphical UI click-through, genuine two-player permissions/concurrency/reconnect, balance review and a distribution-license decision remain open. No final public release has been published.

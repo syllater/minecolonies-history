@@ -69,41 +69,23 @@ The live GameTests cover synthetic-state economy/realm persistence and also crea
 The project currently uses `All Rights Reserved` metadata for its own code and has no selected redistribution license. Do not treat this candidate as a license-cleared final release or redistribute it as a finished release before those decisions and tests are complete.
 
 
-## Latest verified candidate (2026-10-12)
 
-All four jobs passed in [workflow 38285019437](https://github.com/syllater/minecolonies-history/actions/runs/38285019437) on source commit `e3e4e7c541ffc0de78daf1a3d8b3483db28d2b22`:
-- EN/NL localization validator: 298 literal/dynamic keys with matching format placeholders.
-- Blueprint progression, release/dependency metadata, cross-dimension commands, and BlockUI ledger wiring validators passed. The ledger validator checked all 40 XML buttons, 38 command handlers and two dedicated actions, and found no dangling command paths.
-- `./gradlew --no-daemon test build`, JAR SHA-256 verification and self-checking RC ZIP packaging passed.
-- Headless client reached `Sound engine started`.
-- Dedicated server validated `jobs=6 buildings=2 guardTypes=3 modules=6` and all `10/10` Structurize blueprints loaded.
-- Four live Minecraft GameTests passed: daily tax/economy/realm persistence; discovery/serialization of a real MineColonies colony; Archive building registration, the three citizen jobs and tier-scaled hiring; Guard Tower registration, three military specialists and level-scaled shared capacity; command-level authorization verifies that non-owners cannot submit tax/policy bills from another owner's colony.
 
-Current JAR SHA-256: `4c4720cadf82f82e944f67134bab8d11ac8d0f74b1056653e274a1868482fbd0`.
+## Latest verified candidate — 2026-10-12
+
+All four jobs passed in [workflow 38287296842](https://github.com/syllater/minecolonies-history/actions/runs/38287296842) on source commit `8d75647dd41f2527976f142a1361978a7619282b`:
+- EN/NL localization, tier progression, release/dependency metadata, cross-dimension command validators and BlockUI ledger wiring passed.
+- `./gradlew --no-daemon test build`, reproducible archive checks, JAR SHA-256 manifest and self-checking RC package passed.
+- Headless client startup, dedicated-server startup and all 10/10 Structurize blueprint validations passed.
+- Five live Minecraft GameTests passed. The latest verifies that the owner can submit tax and perform treasury deposit/withdraw, while a non-owner is denied tax, policy, deposit and withdrawal commands without mutating treasury or Parliament state.
+
+Current JAR SHA-256: `a7aa3b3bf6fde8d62eecb6b26079cf694e23f3913e924e8906dbaa137002aee4`.
 
 Artifacts:
-- [Self-checking RC package](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11763166421)
-- [JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11762818347)
-- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11763480400)
-- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11762294179)
-- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11762678784)
+- [Self-checking release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11764435629)
+- [Mod JAR + SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763264551)
+- [Live GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763737489)
+- [Dedicated-server/blueprint log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763947174)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763882201)
 
-This remains a release candidate, not a license-cleared final release. Real survival-world full blueprint construction/upgrades, sustained worker/guard behavior, in-world save/reload, actual GUI click-through, two-player permissions/concurrency/reconnect, balance review and the distribution-license decision remain open.
-
-
-## Reproducibility update (2026-10-12)
-
-Commit `e3e4e7c541ffc0de78daf1a3d8b3483db28d2b22` enables stable JAR archive timestamps/order. Full CI [38285019437](https://github.com/syllater/minecolonies-history/actions/runs/38285019437) passed all four jobs, including build/test, headless client startup, real MineColonies GameTests and dedicated-server blueprint validation. Current candidate JAR SHA-256: `4c4720cadf82f82e944f67134bab8d11ac8d0f74b1056653e274a1868482fbd0`.
-
-
-## Latest permission-checked candidate — 2026-10-12
-
-The current full green run is [38285019437](https://github.com/syllater/minecolonies-history/actions/runs/38285019437), commit `e3e4e7c541ffc0de78daf1a3d8b3483db28d2b22`. All four jobs passed. A fifth live GameTest executes tax and policy commands through the real Brigadier dispatcher and verifies rejected non-owner actions leave parliament proposals unchanged. Current JAR SHA-256: `4c4720cadf82f82e944f67134bab8d11ac8d0f74b1056653e274a1868482fbd0`.
-
-- [Self-checking RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11763166421)
-- [JAR + SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11762818347)
-- [Five-test GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11763480400)
-- [Dedicated-server blueprint log](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11762294179)
-- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11762678784)
-
-This remains an RC, not a final public release. Survival construction/upgrades, sustained workers, saved-world reload, live GUI interaction, real two-player testing, balance review and a distribution-license decision remain open.
+This remains a release candidate, not a final public release. Survival construction/upgrades, sustained worker/guard behavior, in-world save/reload, actual GUI click-through, a genuine two-player test, balance review and the distribution-license decision remain open.
