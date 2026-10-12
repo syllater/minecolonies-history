@@ -438,15 +438,23 @@ public final class EmpireRuntimeGameTests {
             // treasury command paths as well as the basic tax/policy authorization.
             final int foundResult = executeCommand(level, owner, "imperium empire found Permission Realm");
             require(foundResult > 0, "The colony owner should be able to found the test realm");
-            final EmpireRealm realm = data.realmForProvince(identity).orElseThrow(
-                    () -> new AssertionError("Authorized realm creation did not register its capital"));
+            require(data.realmForProvince(identity).isPresent(),
+                    "Authorized realm creation did not register its capital");
             require(state.creditTreasury(250L), "Could not fund the test province treasury");
             data.markChanged();
 
             final int ownerDepositResult = executeCommand(level, owner, "imperium empire deposit 50");
             require(ownerDepositResult > 0, "The realm owner should be able to deposit into the imperial treasury");
-            require(state.treasuryCrowns() == 200L && realm.imperialTreasuryCrowns() == 50L,
-                    "Authorized treasury deposit did not move the expected crowns");
+            final EmpireState provinceAfterDeposit = data.get(identity).orElseThrow();
+            final EmpireRealm realmAfterDeposit = data.realmForProvince(identity).orElseThrow();
+            LOGGER.info("IMPERIUM_GAMETEST_DIAGNOSTIC: after owner deposit provincial={} imperial={}",
+                    provinceAfterDeposit.treasuryCrowns(), realmAfterDeposit.imperialTreasuryCrowns());
+            require(provinceAfterDeposit.treasuryCrowns() == 200L,
+                    "Authorized deposit left provincial treasury at " + provinceAfterDeposit.treasuryCrowns()
+                            + " crowns; expected 200");
+            require(realmAfterDeposit.imperialTreasuryCrowns() == 50L,
+                    "Authorized deposit left imperial treasury at " + realmAfterDeposit.imperialTreasuryCrowns()
+                            + " crowns; expected 50");
 
             // A second player standing in the same colony must not be able to use
             // proximity alone to change policy, province funds or the imperial reserve.
@@ -463,7 +471,8 @@ public final class EmpireRuntimeGameTests {
             require(outsiderWithdrawResult == 0,
                     "A non-Emperor must not withdraw funds from the imperial reserve");
 
-            require(state.treasuryCrowns() == 200L && realm.imperialTreasuryCrowns() == 50L,
+            require(data.get(identity).orElseThrow().treasuryCrowns() == 200L
+                            && data.realmForProvince(identity).orElseThrow().imperialTreasuryCrowns() == 50L,
                     "Denied treasury commands changed provincial or imperial balances");
             final var afterDeniedCommands = state.recentParliamentProposals();
             require(afterDeniedCommands.size() == 1 && afterDeniedCommands.get(0).id() == originalProposalId,
@@ -471,10 +480,13 @@ public final class EmpireRuntimeGameTests {
 
             // The legitimate Emperor remains able to withdraw; this guards against
             // a test that only passes because all treasury actions are broken.
-            final int ownerWithdrawResult = executeCommand(level, owner, "imperium withdraw 10");
+            final int ownerWithdrawResult = executeCommand(level, owner, "imperium empire withdraw 10");
             require(ownerWithdrawResult > 0, "The Emperor should be able to withdraw from the imperial treasury");
-            require(state.treasuryCrowns() == 210L && realm.imperialTreasuryCrowns() == 40L,
-                    "Authorized treasury withdrawal did not move the expected crowns");
+            final long provinceAfterWithdrawal = data.get(identity).orElseThrow().treasuryCrowns();
+            final long imperialAfterWithdrawal = data.realmForProvince(identity).orElseThrow().imperialTreasuryCrowns();
+            require(provinceAfterWithdrawal == 210L && imperialAfterWithdrawal == 40L,
+                    "Authorized withdrawal balances were provincial=" + provinceAfterWithdrawal
+                            + ", imperial=" + imperialAfterWithdrawal + "; expected 210/40");
 
             LOGGER.info("IMPERIUM_GAMETEST_PASS: owner tax/deposit/withdraw succeed; non-owner tax/policy/deposit/withdraw are denied without state mutation");
         } finally {
