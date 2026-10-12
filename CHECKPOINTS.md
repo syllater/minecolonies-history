@@ -636,3 +636,14 @@ The test uses synthetic colony identity records; it does not test building a hut
 - JAR SHA-256: `a7aa3b3bf6fde8d62eecb6b26079cf694e23f3913e924e8906dbaa137002aee4`.
 - Artifacts: [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11764435629); [JAR + manifest](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763264551); [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763737489); [server/blueprint log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763947174); [client log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763882201).
 - Overall completion remains approximately **90%**. Real survival construction/upgrades, sustained worker behavior/save-reload, graphical UI click-through, genuine two-player permissions/concurrency/reconnect, balance review and a distribution-license decision remain open. No final public release has been published.
+
+
+## 2026-10-12 — Insufficient-funds treasury rollback GameTest green
+
+- Source commit: `eb002edc10253472f235f367d226b42d12d1d709`.
+- Full CI [38288316185](https://github.com/syllater/minecolonies-history/actions/runs/38288316185) passed all four jobs: build/tests/package, headless client, dedicated server with 10/10 schematics, and live GameTests.
+- The fifth live GameTest executes actual Brigadier commands: owner tax/deposit/withdraw succeeds; non-owner tax/policy/deposit/withdraw is denied; and underfunded authorised deposit/withdraw attempts are rejected with provincial/imperial balances and audit history unchanged.
+- The test uses the actual opening provincial balance rather than assuming an empty treasury.
+- JAR SHA-256: `a7dd3f42bf49b7703d15f94f7903b3e625d189d86b26919bfcf19b3e505f1940`.
+- Artifacts: [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764163159), [JAR + manifest](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764183051), [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11763763931), [server log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764487140), [client log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11763913074).
+- Remaining gates: survival construction/upgrades, sustained workers/save-reload, actual GUI click-through, genuine multiplayer, balance review and distribution-license decision.
