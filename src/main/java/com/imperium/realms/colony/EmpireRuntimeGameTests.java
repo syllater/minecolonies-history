@@ -55,7 +55,7 @@ public final class EmpireRuntimeGameTests {
                 "Tier-five Diplomat work should succeed");
 
         final EmpireRealm realm = live.createRealm(
-                "GameTest Realm " + runId, capital, "uuid-" + runId,
+                "GameTest Realm " + runId.substring(0, 8), capital, "uuid-" + runId,
                 "GameTest Emperor", dayIndex).orElseThrow(
                 () -> new AssertionError("Could not create a test realm"));
         require(realm.setImperialTaxRatePercent(12), "Could not set test tax law");
