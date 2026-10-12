@@ -71,7 +71,7 @@ The project currently uses `All Rights Reserved` metadata for its own code and h
 
 ## Latest verified candidate (2026-10-12)
 
-All four jobs passed in [workflow 38227463363](https://github.com/syllater/minecolonies-history/actions/runs/38227463363) on source commit `fa50cc2d67ee890b061fea30cb27598c808a3ac9`:
+All four jobs passed in [workflow 38228182714](https://github.com/syllater/minecolonies-history/actions/runs/38228182714) on source commit `61d7f9c9cb66fca8d9f96f9773878b6b196c43be`:
 - EN/NL localization validator: 298 literal/dynamic keys with matching format placeholders.
 - Blueprint progression, release/dependency metadata, cross-dimension commands, and BlockUI ledger wiring validators passed. The ledger validator checked all 40 XML buttons, 38 command handlers and two dedicated actions, and found no dangling command paths.
 - `./gradlew --no-daemon test build`, JAR SHA-256 verification and self-checking RC ZIP packaging passed.
@@ -79,13 +79,18 @@ All four jobs passed in [workflow 38227463363](https://github.com/syllater/minec
 - Dedicated server validated `jobs=6 buildings=2 guardTypes=3 modules=6` and all `10/10` Structurize blueprints loaded.
 - Four live Minecraft GameTests passed: daily tax/economy/realm persistence; discovery/serialization of a real MineColonies colony; Archive building registration, the three citizen jobs and tier-scaled hiring; Guard Tower registration, three military specialists and level-scaled shared capacity.
 
-Current JAR SHA-256: `0c734afd29c2aed195f58169f2ba3e00988472ea17d39d88447d55224fd4b379`.
+Current JAR SHA-256: `4d44a38535747159a93d22ca46744852931d1929e3dfefc02c37747333685bdb`.
 
 Artifacts:
-- [Self-checking RC package](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11736869886)
-- [JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737190134)
-- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737395115)
-- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737195332)
-- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737150342)
+- [Self-checking RC package](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737131416)
+- [JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737226311)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737920417)
+- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737576125)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737760664)
 
 This remains a release candidate, not a license-cleared final release. Real survival-world full blueprint construction/upgrades, sustained worker/guard behavior, in-world save/reload, actual GUI click-through, two-player permissions/concurrency/reconnect, balance review and the distribution-license decision remain open.
+
+
+## Reproducibility update (2026-10-12)
+
+Commit `61d7f9c9cb66fca8d9f96f9773878b6b196c43be` enables stable JAR archive timestamps/order. Full CI [38228182714](https://github.com/syllater/minecolonies-history/actions/runs/38228182714) passed all four jobs, including build/test, headless client startup, real MineColonies GameTests and dedicated-server blueprint validation. Current candidate JAR SHA-256: `4d44a38535747159a93d22ca46744852931d1929e3dfefc02c37747333685bdb`.
