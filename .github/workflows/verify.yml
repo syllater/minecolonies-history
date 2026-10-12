@@ -200,6 +200,7 @@ jobs:
           ./gradlew --no-daemon runGameTestServer --console=plain 2>&1 | tee "$log"
           grep -Fq "IMPERIUM_GAMETEST_PASS: live SavedData daily tax idempotency, economy, worker cooldown, realm and treasury round-trip" "$log"
           grep -Fq "IMPERIUM_GAMETEST_PASS: real MineColonies colony discovery, rename preservation and Imperium SavedData round-trip" "$log"
+          grep -Fq "IMPERIUM_GAMETEST_PASS: real Imperial Archive hut registration, MineColonies jobs and level-scaled worker capacity" "$log"
       - name: Upload GameTest log
         if: always()
         uses: actions/upload-artifact@v4
