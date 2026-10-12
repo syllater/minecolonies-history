@@ -1,8 +1,16 @@
 package com.imperium.realms.colony;
 
 import com.imperium.realms.ImperiumRealms;
+import com.imperium.realms.building.BuildingImperialArchive;
+import com.imperium.realms.registry.ModBlocks;
+import com.imperium.realms.registry.ModImperiumBuildings;
+import com.imperium.realms.registry.ModImperiumJobs;
+import com.minecolonies.api.colony.ICitizenData;
 import com.minecolonies.api.colony.IColony;
 import com.minecolonies.api.colony.IColonyManager;
+import com.minecolonies.api.colony.buildings.IBuilding;
+import com.minecolonies.api.tileentities.AbstractTileEntityColonyBuilding;
+import com.minecolonies.core.colony.buildings.modules.WorkerBuildingModule;
 import com.mojang.authlib.GameProfile;
 import com.mojang.logging.LogUtils;
 import net.minecraft.gametest.framework.GameTest;
@@ -11,6 +19,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
@@ -186,6 +197,110 @@ public final class EmpireRuntimeGameTests {
         }
 
         helper.succeed();
+    }
+
+    @GameTest(template = "flat", timeoutTicks = 100)
+    public static void imperialArchiveRegistersWorkersAndScalesHiringLimit(final GameTestHelper helper) {
+        final ServerLevel level = helper.getLevel();
+        final ServerPlayer owner = FakePlayerFactory.get(level, COLONY_TEST_OWNER);
+        final BlockPos center = helper.absolutePos(new BlockPos(4, 1, 4));
+        final IColony colony = IColonyManager.getInstance().createColony(
+                level, center, owner, "Imperium Archive Test", "Colonial");
+        require(colony != null, "MineColonies did not create the Archive test colony");
+
+        try {
+            final Block hutBlock = ModBlocks.IMPERIAL_ARCHIVE.get();
+            final BlockPos hutPos = helper.absolutePos(new BlockPos(2, 1, 2));
+            final BlockState hutState = hutBlock.defaultBlockState();
+            level.setBlock(hutPos, hutState, 3);
+            hutBlock.setPlacedBy(level, hutPos, hutState, owner, ItemStack.EMPTY);
+
+            IBuilding registered = IColonyManager.getInstance().getBuilding(level, hutPos);
+            if (registered == null && level.getBlockEntity(hutPos) instanceof AbstractTileEntityColonyBuilding tile) {
+                // Keep the same fallback that MineColonies addon GameTests use when placement
+                // hasn't yet populated the manager index for this test tick.
+                registered = colony.getServerBuildingManager().addNewBuilding(tile, level);
+            }
+            require(registered instanceof BuildingImperialArchive,
+                    "Placed Archive hut block did not register a BuildingImperialArchive");
+
+            final BuildingImperialArchive archive = (BuildingImperialArchive) registered;
+            require(archive.getBuildingType().equals(ModImperiumBuildings.IMPERIAL_ARCHIVE.get()),
+                    "Placed Archive building is linked to the wrong MineColonies BuildingEntry");
+            require(archive.getMaxBuildingLevel() == 5,
+                    "Imperial Archive must support five building tiers");
+
+            final var workerModules = archive.getModules(WorkerBuildingModule.class);
+            require(workerModules.size() == 3,
+                    "Imperial Archive must expose Philosopher, Tax Collector and Diplomat worker modules");
+
+            final WorkerBuildingModule philosopher = findWorkerModule(workerModules, ModImperiumJobs.PHILOSOPHER.get());
+            final WorkerBuildingModule taxCollector = findWorkerModule(workerModules, ModImperiumJobs.TAX_COLLECTOR.get());
+            final WorkerBuildingModule diplomat = findWorkerModule(workerModules, ModImperiumJobs.DIPLOMAT.get());
+            require(philosopher != null && taxCollector != null && diplomat != null,
+                    "One or more custom Archive worker modules are missing");
+
+            archive.setBuildingLevel(1);
+            require(philosopher.getModuleMax() == 1
+                            && taxCollector.getModuleMax() == 1
+                            && diplomat.getModuleMax() == 1,
+                    "Level 1 Archive must limit each profession to one worker");
+
+            final ICitizenData philosopherData = colony.getCitizenManager().createAndRegisterCivilianData();
+            require(philosopher.assignCitizen(philosopherData),
+                    "Level 1 Archive refused its first Philosopher");
+            require(philosopherData.getJob() != null
+                            && philosopherData.getJob().getJobRegistryEntry().equals(ModImperiumJobs.PHILOSOPHER.get()),
+                    "MineColonies did not assign the registered Philosopher job");
+            final ICitizenData extraPhilosopher = colony.getCitizenManager().createAndRegisterCivilianData();
+            require(!philosopher.assignCitizen(extraPhilosopher),
+                    "Level 1 Archive accepted a second Philosopher beyond its hiring limit");
+
+            final ICitizenData taxCollectorData = colony.getCitizenManager().createAndRegisterCivilianData();
+            require(taxCollector.assignCitizen(taxCollectorData),
+                    "Level 1 Archive refused its first Tax Collector");
+            require(taxCollectorData.getJob() != null
+                            && taxCollectorData.getJob().getJobRegistryEntry().equals(ModImperiumJobs.TAX_COLLECTOR.get()),
+                    "MineColonies did not assign the registered Tax Collector job");
+
+            final ICitizenData diplomatData = colony.getCitizenManager().createAndRegisterCivilianData();
+            require(diplomat.assignCitizen(diplomatData),
+                    "Level 1 Archive refused its first Diplomat");
+            require(diplomatData.getJob() != null
+                            && diplomatData.getJob().getJobRegistryEntry().equals(ModImperiumJobs.DIPLOMAT.get()),
+                    "MineColonies did not assign the registered Diplomat job");
+
+            archive.setBuildingLevel(5);
+            require(philosopher.getModuleMax() == 5
+                            && taxCollector.getModuleMax() == 5
+                            && diplomat.getModuleMax() == 5,
+                    "Level 5 Archive must allow five workers per profession");
+
+            for (int index = 0; index < 4; index++) {
+                final ICitizenData additionalPhilosopher = colony.getCitizenManager().createAndRegisterCivilianData();
+                require(philosopher.assignCitizen(additionalPhilosopher),
+                        "Level 5 Archive refused a Philosopher below the five-worker cap");
+            }
+            require(philosopher.getAssignedCitizen().size() == 5,
+                    "Level 5 Philosopher module did not reach its five-worker capacity");
+            require(!philosopher.assignCitizen(colony.getCitizenManager().createAndRegisterCivilianData()),
+                    "Level 5 Archive accepted a sixth Philosopher beyond its hiring limit");
+
+            LOGGER.info("IMPERIUM_GAMETEST_PASS: real Imperial Archive hut registration, MineColonies jobs and level-scaled worker capacity");
+        } finally {
+            IColonyManager.getInstance().deleteColonyByWorld(colony.getID(), false, level);
+        }
+
+        helper.succeed();
+    }
+
+    private static WorkerBuildingModule findWorkerModule(
+            final java.util.List<WorkerBuildingModule> modules,
+            final com.minecolonies.api.colony.jobs.registry.JobEntry entry) {
+        return modules.stream()
+                .filter(module -> module.getJobEntry().equals(entry))
+                .findFirst()
+                .orElse(null);
     }
 
     private static int uniqueTestColonyId() {
