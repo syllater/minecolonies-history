@@ -18,7 +18,7 @@
 
 ## Latest candidate verification
 
-Full green workflow: [38287296842](https://github.com/syllater/minecolonies-history/actions/runs/38287296842) on source commit `8d75647dd41f2527976f142a1361978a7619282b`.
+Full green workflow: [38288316185](https://github.com/syllater/minecolonies-history/actions/runs/38288316185) on source commit `eb002edc10253472f235f367d226b42d12d1d709`.
 
 All four CI jobs passed:
 - EN/NL localization, tier progression, dependency/release metadata, cross-dimension command/help and BlockUI ledger wiring.
@@ -27,14 +27,14 @@ All four CI jobs passed:
 - Dedicated server validated `jobs=6 buildings=2 guardTypes=3 modules=6` and loaded all `10/10` Structurize schematics.
 - Five live GameTests passed: daily tax/economy/realm persistence; real colony discovery/SavedData round-trip; Archive registration/jobs/capacity; Guard Tower specialists/capacity; and owner/non-owner tax/policy/deposit/withdraw authorization with denied-action state immutability.
 
-Current JAR SHA-256: `a7aa3b3bf6fde8d62eecb6b26079cf694e23f3913e924e8906dbaa137002aee4`.
+Current JAR SHA-256: `a7dd3f42bf49b7703d15f94f7903b3e625d189d86b26919bfcf19b3e505f1940`.
 
 Artifacts:
-- [Self-checking release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11764435629)
-- [JAR + checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763264551)
-- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763737489)
-- [Dedicated-server log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763947174)
-- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763882201)
+- [Self-checking release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764163159)
+- [JAR + checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764183051)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11763763931)
+- [Dedicated-server log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764487140)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11763913074)
 
 ## Required before calling the project release-ready
 - A real in-world test of hut placement, hiring, levels 1–5 and save/reload.
@@ -48,10 +48,10 @@ Artifacts:
 
 ## Latest verified treasury authorization — 2026-10-12
 
-The full green [workflow 38287296842](https://github.com/syllater/minecolonies-history/actions/runs/38287296842) on `8d75647dd41f2527976f142a1361978a7619282b` includes a live command integration test. The colony owner can submit a tax proposal and perform treasury deposit/withdraw; an unauthorised non-owner cannot execute tax, policy, deposit or withdrawal commands, and rejected actions leave proposals and balances unchanged. The test checks exact transfer deltas against the actual starting treasury balance.
+The full green [workflow 38288316185](https://github.com/syllater/minecolonies-history/actions/runs/38288316185) on `eb002edc10253472f235f367d226b42d12d1d709` includes a live command integration test. The owner can submit tax and perform funded treasury transfers; non-owner tax/policy/deposit/withdraw mutations are denied; underfunded authorised deposit/withdraw commands are rejected without changing balances or audit history. The test accounts for the actual starting treasury balance.
 
-- JAR SHA-256: `a7aa3b3bf6fde8d62eecb6b26079cf694e23f3913e924e8906dbaa137002aee4`
-- [Release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11764435629)
-- [JAR + checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763264551)
-- [GameTest output](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763737489)
+- JAR SHA-256: `a7dd3f42bf49b7703d15f94f7903b3e625d189d86b26919bfcf19b3e505f1940`
+- [Release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764163159)
+- [JAR + checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764183051)
+- [GameTest output](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11763763931)
 - Survival build/upgrades, sustained worker behavior/save-reload, GUI click-through and true two-player concurrency/reconnect still require manual acceptance; balance and license decisions remain open.
