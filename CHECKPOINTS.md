@@ -600,3 +600,28 @@ The test uses synthetic colony identity records; it does not test building a hut
 - JAR SHA-256: `4d44a38535747159a93d22ca46744852931d1929e3dfefc02c37747333685bdb`.
 - Artifacts: [RC ZIP](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737131416), [JAR + manifest](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737226311), [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737920417), [server schematic log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737576125), [client smoke log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737760664).
 - User-visible completion estimate remains approximately 90%. All software milestones are implemented at core level; remaining release blockers are genuine survival-world construction/upgrades, sustained AI behavior/save-reload, GUI click-through, true two-player permissions/concurrency/reconnect, balance review, and license decision. The final release has not been published.
+
+
+## 2026-10-12 — Live command authorization test and full CI verified
+
+### Change
+- Added a live Minecraft GameTest that executes tax/policy commands through the real Brigadier dispatcher.
+- The colony owner can submit a tax bill. A non-owner placed in the same colony is denied both tax and policy changes without mutating the stored Parliament proposal list.
+- Added the expected GameTest marker to `.github/workflows/verify.yml` so the job fails if this protection regresses.
+
+### Verification
+- Source commit: `e3e4e7c541ffc0de78daf1a3d8b3483db28d2b22`.
+- Full green workflow: [38285019437](https://github.com/syllater/minecolonies-history/actions/runs/38285019437) — all four jobs passed.
+- Static validators, `./gradlew --no-daemon test build`, JAR checksum manifest/package, headless `runClient`, dedicated server with 10/10 Structurize blueprints, and all five live GameTests passed.
+- Candidate JAR SHA-256: `4c4720cadf82f82e944f67134bab8d11ac8d0f74b1056653e274a1868482fbd0`.
+
+### Artifacts
+- [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11763166421)
+- [JAR + checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11762818347)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11763480400)
+- [Dedicated server log](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11762294179)
+- [Client smoke-test log](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11762678784)
+
+### Release gate
+- Overall progress remains approximately **90%**. Automated command authorization coverage is improved, but it is not a substitute for the real two-player permissions/concurrency/reconnect test.
+- Physical survival placement/upgrades, sustained worker behavior/world reload, graphical UI click-through, two-player session, balance review and license decision remain open. No final release has been published.
