@@ -1,11 +1,17 @@
 package com.imperium.realms.colony;
 
 import com.imperium.realms.ImperiumRealms;
+import com.minecolonies.api.colony.IColony;
+import com.minecolonies.api.colony.IColonyManager;
+import com.mojang.authlib.GameProfile;
 import com.mojang.logging.LogUtils;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.common.util.FakePlayerFactory;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import org.slf4j.Logger;
@@ -20,6 +26,9 @@ import java.util.UUID;
 @PrefixGameTestTemplate(false)
 public final class EmpireRuntimeGameTests {
     private static final Logger LOGGER = LogUtils.getLogger();
+    private static final GameProfile COLONY_TEST_OWNER = new GameProfile(
+            UUID.fromString("54dfb4b8-9cc3-4a52-8c7b-2a1b9f18c911"),
+            "imperium_gametest");
 
     private EmpireRuntimeGameTests() {
     }
@@ -119,6 +128,63 @@ public final class EmpireRuntimeGameTests {
                 "Successful treasury transfer audit did not survive NBT load");
 
         LOGGER.info("IMPERIUM_GAMETEST_PASS: live SavedData daily tax idempotency, economy, worker cooldown, realm and treasury round-trip");
+        helper.succeed();
+    }
+
+    @GameTest(template = "flat", timeoutTicks = 100)
+    public static void discoversRealMineColoniesColonyAndPersistsState(final GameTestHelper helper) {
+        final ServerLevel level = helper.getLevel();
+        final ServerPlayer owner = FakePlayerFactory.get(level, COLONY_TEST_OWNER);
+        final BlockPos center = helper.absolutePos(new BlockPos(4, 1, 4));
+        final IColony colony = IColonyManager.getInstance().createColony(
+                level, center, owner, "Imperium Integration Test", "Colonial");
+        require(colony != null, "MineColonies did not create the real integration-test colony");
+
+        try {
+            final ColonyIdentity identity = ColonyIdentity.from(colony);
+            final IColony located = MineColoniesIntegration.colonyAt(level, center).orElse(null);
+            require(located != null, "MineColonies position lookup did not resolve the created colony");
+            require(identity.equals(ColonyIdentity.from(located)),
+                    "MineColonies position lookup returned a different colony");
+
+            // Exercise the same discovery path used by the server lifecycle event.
+            MineColoniesIntegration.synchronizeLoadedColonies(level);
+            final EmpireStateSavedData data = EmpireStateSavedData.get(level);
+            final EmpireState state = data.get(identity).orElseThrow(
+                    () -> new AssertionError("Imperium did not discover the real MineColonies colony"));
+            final long firstSeen = state.firstSeenGameTime();
+
+            require(state.creditTreasury(7L), "Could not mutate the test colony's Imperium state");
+            colony.setName("Imperium Renamed Colony");
+            MineColoniesIntegration.synchronizeLoadedColonies(level);
+
+            final EmpireState renamed = data.get(identity).orElseThrow(
+                    () -> new AssertionError("Colony state disappeared after a second discovery pass"));
+            require("Imperium Renamed Colony".equals(renamed.colonyName()),
+                    "Imperium did not refresh the changed MineColonies colony name");
+            require(renamed.firstSeenGameTime() == firstSeen,
+                    "Repeated discovery reset the original first-seen timestamp");
+            require(renamed.treasuryCrowns() == 7L,
+                    "Repeated discovery reset the existing Imperium treasury");
+
+            final CompoundTag snapshot = data.save(new CompoundTag(), level.registryAccess());
+            final EmpireStateSavedData restored =
+                    EmpireStateSavedData.load(snapshot, level.registryAccess());
+            final EmpireState restoredState = restored.get(identity).orElseThrow(
+                    () -> new AssertionError("Real colony's Imperium record did not survive NBT round-trip"));
+            require(restoredState.treasuryCrowns() == 7L,
+                    "Real colony's Imperium treasury changed after NBT round-trip");
+            require(restoredState.firstSeenGameTime() == firstSeen,
+                    "Real colony's first-seen timestamp changed after NBT round-trip");
+            require("Imperium Renamed Colony".equals(restoredState.colonyName()),
+                    "Real colony's latest name did not survive NBT round-trip");
+
+            LOGGER.info("IMPERIUM_GAMETEST_PASS: real MineColonies colony discovery, rename preservation and Imperium SavedData round-trip");
+        } finally {
+            // This is a disposable GameTest colony; never leave it registered for later tests.
+            IColonyManager.getInstance().deleteColonyByWorld(colony.getID(), false, level);
+        }
+
         helper.succeed();
     }
 
