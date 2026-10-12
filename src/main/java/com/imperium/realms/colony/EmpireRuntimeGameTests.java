@@ -475,6 +475,17 @@ public final class EmpireRuntimeGameTests {
             final int outsiderWithdrawResult = executeCommand(level, outsider, "imperium empire withdraw 10");
             require(outsiderWithdrawResult == 0,
                     "A non-Emperor must not withdraw funds from the imperial reserve");
+            require(executeCommand(level, outsider,
+                            "imperium parliament assent " + originalProposalId) == 0,
+                    "A non-owner must not assent to a parliamentary bill");
+            require(executeCommand(level, outsider,
+                            "imperium parliament veto " + originalProposalId) == 0,
+                    "A non-owner must not veto a parliamentary bill");
+            final ParliamentProposal proposalAfterDeniedVotes =
+                    state.findProposal(originalProposalId).orElseThrow();
+            require(proposalAfterDeniedVotes.status() == ParliamentProposal.Status.OPEN
+                            && proposalAfterDeniedVotes.resolvedBy().isBlank(),
+                    "Denied parliamentary vote commands changed the bill status or resolution actor");
 
             require(data.get(identity).orElseThrow().treasuryCrowns() == fundedProvinceTreasury - 50L
                             && data.realmForProvince(identity).orElseThrow().imperialTreasuryCrowns() == 50L,
@@ -482,6 +493,14 @@ public final class EmpireRuntimeGameTests {
             final var afterDeniedCommands = state.recentParliamentProposals();
             require(afterDeniedCommands.size() == 1 && afterDeniedCommands.get(0).id() == originalProposalId,
                     "Unauthorized commands changed the stored parliament proposals");
+
+            // The legitimate Emperor can still resolve the same bill after the
+            // outsider's denied assent/veto attempts.
+            executeCommand(level, owner, "imperium parliament veto " + originalProposalId);
+            final ParliamentProposal resolvedProposal = state.findProposal(originalProposalId).orElseThrow();
+            require(resolvedProposal.status() == ParliamentProposal.Status.REJECTED
+                            && owner.getGameProfile().getName().equals(resolvedProposal.resolvedBy()),
+                    "The Emperor's veto did not resolve the open bill under the Emperor's identity");
 
             // The legitimate Emperor remains able to withdraw; this guards against
             // a test that only passes because all treasury actions are broken.
@@ -519,7 +538,7 @@ public final class EmpireRuntimeGameTests {
             require(realmAfterRejectedTransfers.recentAuditEntries().size() == auditCountBeforeRejectedTransfers,
                     "Insufficient-funds transfers added audit entries");
 
-            LOGGER.info("IMPERIUM_GAMETEST_PASS: owner tax/deposit/withdraw succeed; non-owner mutations are denied; insufficient-funds transfers preserve balances and audit history");
+            LOGGER.info("IMPERIUM_GAMETEST_PASS: owner tax/treasury/parliament actions succeed; non-owner tax/policy/treasury/assent/veto mutations are denied; insufficient-funds transfers preserve balances and audit history");
         } finally {
             IColonyManager.getInstance().deleteColonyByWorld(colony.getID(), false, level);
         }
