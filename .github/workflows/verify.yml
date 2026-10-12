@@ -204,7 +204,7 @@ jobs:
           grep -Fq "IMPERIUM_GAMETEST_PASS: real MineColonies colony discovery, rename preservation and Imperium SavedData round-trip" "$log"
           grep -Fq "IMPERIUM_GAMETEST_PASS: real Imperial Archive hut registration, MineColonies jobs and level-scaled worker capacity" "$log"
           grep -Fq "IMPERIUM_GAMETEST_PASS: real Guard Tower hut registration, military specialist jobs and level-scaled shared capacity" "$log"
-          grep -Fq "IMPERIUM_GAMETEST_PASS: owner tax/deposit/withdraw succeed; non-owner mutations are denied; insufficient-funds transfers preserve balances and audit history" "$log"
+          grep -Fq "IMPERIUM_GAMETEST_PASS: owner tax/treasury/parliament actions succeed; non-owner tax/policy/treasury/assent/veto mutations are denied; insufficient-funds transfers preserve balances and audit history" "$log"
           grep -Fq "IMPERIUM_GAMETEST_PASS: real cross-dimension colony invitation, owner-only join, duplicate-join denial and realm NBT round-trip" "$log"
       - name: Upload GameTest log
         if: always()
