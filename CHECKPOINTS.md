@@ -589,3 +589,14 @@ The test uses synthetic colony identity records; it does not test building a hut
 - Version: `0.1.0-rc1`.
 - JAR SHA-256: `0c734afd29c2aed195f58169f2ba3e00988472ea17d39d88447d55224fd4b379`.
 - Still not a final public release: real survival-world blueprint upgrades/worker longevity/save-reload, interactive GUI playtest, two-player acceptance and a distribution-license decision remain open.
+
+
+## 2026-10-12 — Reproducible release-candidate build fully verified
+
+- Source commit: `61d7f9c9cb66fca8d9f96f9773878b6b196c43be`.
+- Change: Gradle archive tasks now disable variable file timestamps and use reproducible archive ordering.
+- Full CI: [workflow 38228182714](https://github.com/syllater/minecolonies-history/actions/runs/38228182714) completed successfully across all four jobs.
+- Checks passed: localization and static command/UI/dependency validators; `./gradlew --no-daemon test build`; JAR SHA-256 manifest; self-checking release ZIP; headless `runClient`; real MineColonies/GameTest integration; dedicated-server registry and 10/10 schematic validation.
+- JAR SHA-256: `4d44a38535747159a93d22ca46744852931d1929e3dfefc02c37747333685bdb`.
+- Artifacts: [RC ZIP](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737131416), [JAR + manifest](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737226311), [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737920417), [server schematic log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737576125), [client smoke log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737760664).
+- User-visible completion estimate remains approximately 90%. All software milestones are implemented at core level; remaining release blockers are genuine survival-world construction/upgrades, sustained AI behavior/save-reload, GUI click-through, true two-player permissions/concurrency/reconnect, balance review, and license decision. The final release has not been published.
