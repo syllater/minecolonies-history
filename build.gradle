@@ -140,6 +140,13 @@ tasks.withType(Test).configureEach {
     useJUnitPlatform()
 }
 
+// Keep the built JAR stable when the source tree is unchanged. This makes the
+// SHA-256 manifest useful for verifying artifacts across clean CI rebuilds.
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
 processResources {
     inputs.property 'minecraft_version_range', minecraft_version_range
     inputs.property 'neo_version_range', neo_version_range
