@@ -467,3 +467,30 @@ Artifacts:
 
 ### Still open
 Hands-on survival-world hut construction/upgrades, worker hiring/work, real in-world save/reload, interactive GUI use, two-player permissions/concurrency/reconnect, balance review, and a distribution-license decision.
+
+
+## 2026-10-12 — Live Minecraft GameTest and full CI green
+
+### Source
+- Verified commit: `9d2cf82ca3a9a7cc909785e1b39b6dc57233b82c`.
+- Workflow: [38219495032 — all four jobs green](https://github.com/syllater/minecolonies-history/actions/runs/38219495032).
+
+### Added runtime coverage
+- Added `EmpireRuntimeGameTests`, executed in a real Minecraft 1.21.1 GameTest server.
+- Generated a minimal vanilla `imperium_realms:flat` test structure during resource generation so the test runner can place its fixture.
+- Fixed the runtime fixture to respect the realm-name limit of 3–32 visible characters.
+- Test passed: `IMPERIUM_GAMETEST_PASS: live SavedData economy, worker cooldown, realm and treasury round-trip`.
+- It validates persisted synthetic colony identity records, treasury balances, Philosopher/Tax Collector/Diplomat cooldown/progress, realm membership, inherited tax/economic law, treasury transfer and success-only audit entry.
+- Synthetic identities are used intentionally: this test does not claim to create or mutate a genuine MineColonies colony, nor replace real survival-world hiring/building/multiplayer acceptance.
+
+### CI evidence
+- Build/unit tests, release package, JAR checksum verification, headless client launch, dedicated server launch with `10/10` Structurize blueprints, and the new GameTest all passed.
+- Current candidate JAR SHA-256: `5220c9fc9ce992e258086f2153d848f4dd18731582ad149c8f232194948f6299`.
+- [RC package](https://github.com/syllater/minecolonies-history/actions/runs/38219495032/artifacts/11733657660)
+- [JAR and checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38219495032/artifacts/11733072967)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38219495032/artifacts/11733234549)
+- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38219495032/artifacts/11732794716)
+- [Client smoke log](https://github.com/syllater/minecolonies-history/actions/runs/38219495032/artifacts/11733414413)
+
+### Remaining release gates
+Real survival-world placement/upgrades, job/guard hiring and actual behavior, save/reload of genuine MineColonies colony state, interactive GUI, two-player permissions/treasury concurrency/reconnect, balance review, and distribution-license choice remain open.
