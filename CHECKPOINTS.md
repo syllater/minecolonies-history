@@ -559,3 +559,33 @@ The test uses synthetic colony identity records; it does not test building a hut
 - Version remains `0.1.0-rc1`; candidate JAR SHA-256: `31c771467f7787fe8fa75ff4489aa8d87874dd5057b35f3f3d1c1f71fd514b12`.
 - Full Structurize survival placement/upgrades, sustained worker AI behavior, in-world save/reload, interactive GUI and true two-player permission/concurrency/reconnect tests still require hands-on playtesting.
 - The project owner's distribution-license decision remains a release gate. No final public release is claimed.
+
+
+## 2026-10-12 — BlockUI command wiring validator and fresh RC package (fully verified)
+
+### Change
+- Added `tools/validate_ledger_controls.py` and wired it into `.github/workflows/verify.yml`.
+- The checker parses the real BlockUI XML and `ImperiumLedgerWindow` handler table, rejects duplicate/unwired/unused buttons, and checks fixed command paths against registered Brigadier literals.
+- Dedicated GUI actions (`close`, `empire_map`) are explicitly checked as dedicated handlers, not treated as command strings.
+
+### Verification
+- Full green workflow: [38227463363](https://github.com/syllater/minecolonies-history/actions/runs/38227463363) on source commit `fa50cc2d67ee890b061fea30cb27598c808a3ac9`.
+- EN/NL localization validator passed for 298 literal/dynamic keys with matching format signatures.
+- BlockUI validation passed: `40 BlockUI buttons, 38 command handlers, 2 dedicated actions`.
+- All static validators and `./gradlew --no-daemon test build` passed.
+- JAR checksum manifest and self-checking release-candidate bundle passed.
+- Headless client startup reached `Sound engine started`.
+- Dedicated server validated `jobs=6 buildings=2 guardTypes=3 modules=6` and all `10/10` Structurize blueprints.
+- All four live Minecraft GameTests passed, including real colony discovery, real Archive and Guard Tower registration/job assignment, and level-scaled hiring capacity.
+
+### Artifacts
+- [Self-checking RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11736869886)
+- [JAR + SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737190134)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737395115)
+- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737195332)
+- [Client smoke-test log](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737150342)
+
+### Candidate
+- Version: `0.1.0-rc1`.
+- JAR SHA-256: `0c734afd29c2aed195f58169f2ba3e00988472ea17d39d88447d55224fd4b379`.
+- Still not a final public release: real survival-world blueprint upgrades/worker longevity/save-reload, interactive GUI playtest, two-player acceptance and a distribution-license decision remain open.

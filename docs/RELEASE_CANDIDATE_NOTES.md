@@ -71,19 +71,21 @@ The project currently uses `All Rights Reserved` metadata for its own code and h
 
 ## Latest verified candidate (2026-10-12)
 
-All four jobs passed in [workflow 38226482725](https://github.com/syllater/minecolonies-history/actions/runs/38226482725) on source commit `337a51000fe0889b854cc607994cab5d1b05f447`:
-- Static validation, unit tests, `./gradlew --no-daemon test build`, SHA-256 verification and self-checking release ZIP.
-- Headless client startup (`Sound engine started`).
-- Dedicated-server startup; registry validation (`jobs=6 buildings=2 guardTypes=3 modules=6`) and all `10/10` Structurize blueprints loaded.
-- Four live Minecraft GameTests, including discovery/persistence of a real MineColonies colony, registered Archive/Guard Tower building instances, the three citizen professions, the three military specialists, and tier-scaled hiring limits.
+All four jobs passed in [workflow 38227463363](https://github.com/syllater/minecolonies-history/actions/runs/38227463363) on source commit `fa50cc2d67ee890b061fea30cb27598c808a3ac9`:
+- EN/NL localization validator: 298 literal/dynamic keys with matching format placeholders.
+- Blueprint progression, release/dependency metadata, cross-dimension commands, and BlockUI ledger wiring validators passed. The ledger validator checked all 40 XML buttons, 38 command handlers and two dedicated actions, and found no dangling command paths.
+- `./gradlew --no-daemon test build`, JAR SHA-256 verification and self-checking RC ZIP packaging passed.
+- Headless client reached `Sound engine started`.
+- Dedicated server validated `jobs=6 buildings=2 guardTypes=3 modules=6` and all `10/10` Structurize blueprints loaded.
+- Four live Minecraft GameTests passed: daily tax/economy/realm persistence; discovery/serialization of a real MineColonies colony; Archive building registration, the three citizen jobs and tier-scaled hiring; Guard Tower registration, three military specialists and level-scaled shared capacity.
 
-Current JAR SHA-256: `31c771467f7787fe8fa75ff4489aa8d87874dd5057b35f3f3d1c1f71fd514b12`.
+Current JAR SHA-256: `0c734afd29c2aed195f58169f2ba3e00988472ea17d39d88447d55224fd4b379`.
 
 Artifacts:
-- [Self-checking RC package](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11736788200)
-- [JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11737026081)
-- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11735878195)
-- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11735948022)
-- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11736267720)
+- [Self-checking RC package](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11736869886)
+- [JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737190134)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737395115)
+- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737195332)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737150342)
 
-This is still a release candidate, not a license-cleared final release. The genuine survival-world construction/hiring/behavior/save-reload and two-player acceptance checklist, balance review, and distribution-license decision remain open.
+This remains a release candidate, not a license-cleared final release. Real survival-world full blueprint construction/upgrades, sustained worker/guard behavior, in-world save/reload, actual GUI click-through, two-player permissions/concurrency/reconnect, balance review and the distribution-license decision remain open.
