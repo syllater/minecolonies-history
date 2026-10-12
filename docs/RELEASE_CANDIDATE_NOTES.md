@@ -77,7 +77,7 @@ All four jobs passed in [workflow 38288316185](https://github.com/syllater/minec
 - EN/NL localization, tier progression, release/dependency metadata, cross-dimension command validators and BlockUI ledger wiring passed.
 - `./gradlew --no-daemon test build`, reproducible archive checks, JAR SHA-256 manifest and self-checking RC package passed.
 - Headless client startup, dedicated-server startup and all 10/10 Structurize blueprint validations passed.
-- Five live Minecraft GameTests passed. The latest verifies that the owner can submit tax and perform treasury deposit/withdraw, while a non-owner is denied tax, policy, deposit and withdrawal commands without mutating treasury or Parliament state.
+- Six live Minecraft GameTests passed. They cover tax/economy/realm persistence; real colony discovery and SavedData round-trip; Archive and Guard Tower registrations/jobs/capacity; owner-vs-non-owner permissions including treasury rollback and parliamentary assent/veto; and cross-dimension invitations with owner-only join and persistence.
 
 Current JAR SHA-256: `a7dd3f42bf49b7703d15f94f7903b3e625d189d86b26919bfcf19b3e505f1940`.
 
