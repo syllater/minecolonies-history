@@ -24,6 +24,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.common.util.FakePlayerFactory;
@@ -521,6 +522,105 @@ public final class EmpireRuntimeGameTests {
             LOGGER.info("IMPERIUM_GAMETEST_PASS: owner tax/deposit/withdraw succeed; non-owner mutations are denied; insufficient-funds transfers preserve balances and audit history");
         } finally {
             IColonyManager.getInstance().deleteColonyByWorld(colony.getID(), false, level);
+        }
+
+        helper.succeed();
+    }
+
+    @GameTest(template = "flat", timeoutTicks = 100)
+    public static void crossDimensionRealmInvitationRequiresProvinceOwner(final GameTestHelper helper) {
+        final ServerLevel overworld = helper.getLevel();
+        final ServerLevel nether = overworld.getServer().getLevel(Level.NETHER);
+        require(nether != null, "The server did not expose the Nether level");
+
+        final GameProfile capitalProfile = new GameProfile(
+                UUID.randomUUID(), "imperium_realm_capital");
+        final GameProfile provinceProfile = new GameProfile(
+                UUID.randomUUID(), "imperium_realm_province");
+        final GameProfile outsiderProfile = new GameProfile(
+                UUID.randomUUID(), "imperium_realm_outsider");
+
+        final ServerPlayer capitalOwner = FakePlayerFactory.get(overworld, capitalProfile);
+        final BlockPos capitalCenter = helper.absolutePos(new BlockPos(4, 1, 4));
+        capitalOwner.setPos(capitalCenter.getX() + 0.5D, capitalCenter.getY(), capitalCenter.getZ() + 0.5D);
+        IColony capitalColony = IColonyManager.getInstance().createColony(
+                overworld, capitalCenter, capitalOwner, "Imperium Cross-Dimension Capital", "Colonial");
+        require(capitalColony != null, "MineColonies did not create the test capital");
+
+        IColony provinceColony = null;
+        try {
+            final BlockPos provinceCenter = new BlockPos(0, 64, 0);
+            nether.getChunkAt(provinceCenter);
+            final ServerPlayer provinceOwner = FakePlayerFactory.get(nether, provinceProfile);
+            provinceOwner.setPos(provinceCenter.getX() + 0.5D,
+                    provinceCenter.getY(), provinceCenter.getZ() + 0.5D);
+            provinceColony = IColonyManager.getInstance().createColony(
+                    nether, provinceCenter, provinceOwner, "Imperium Cross-Dimension Province", "Colonial");
+            require(provinceColony != null, "MineColonies did not create the Nether province");
+
+            final EmpireStateSavedData data = EmpireStateSavedData.get(overworld);
+            final ColonyIdentity capitalIdentity = ColonyIdentity.from(capitalColony);
+            final ColonyIdentity provinceIdentity = ColonyIdentity.from(provinceColony);
+            require(!capitalIdentity.dimensionId().equals(provinceIdentity.dimensionId()),
+                    "The test colonies must belong to different dimensions");
+
+            require(executeCommand(overworld, capitalOwner, "imperium empire found Cross-Dimension Realm") > 0,
+                    "The capital owner could not found a realm");
+            final EmpireRealm realm = data.realmForProvince(capitalIdentity).orElseThrow(
+                    () -> new AssertionError("The capital was not added to the new realm"));
+
+            final String inviteCommand = "imperium empire invite "
+                    + provinceIdentity.dimensionId() + " " + provinceIdentity.colonyId();
+            require(executeCommand(overworld, capitalOwner, inviteCommand) > 0,
+                    "The Emperor could not invite a province in another dimension");
+            require(realm.invitations().containsKey(provinceIdentity),
+                    "The cross-dimension invitation was not stored against the full colony identity");
+
+            final ServerPlayer outsider = FakePlayerFactory.get(nether, outsiderProfile);
+            outsider.setPos(provinceCenter.getX() + 0.5D,
+                    provinceCenter.getY(), provinceCenter.getZ() + 0.5D);
+            require(executeCommand(nether, outsider, "imperium empire join") == 0,
+                    "A non-owner must not accept a colony invitation based on proximity alone");
+            require(data.realmForProvince(provinceIdentity).isEmpty(),
+                    "An outsider's rejected join command changed province membership");
+            require(realm.invitations().containsKey(provinceIdentity),
+                    "A rejected join attempt must not consume the valid invitation");
+
+            require(executeCommand(nether, provinceOwner, "imperium empire join") > 0,
+                    "The invited colony owner could not accept the realm invitation");
+            final EmpireRealm provinceRealm = data.realmForProvince(provinceIdentity).orElseThrow(
+                    () -> new AssertionError("The invited colony was not added to the realm"));
+            require(provinceRealm.id() == realm.id() && provinceRealm.provinceCount() == 2,
+                    "Realm membership did not preserve both the capital and remote province");
+            require(provinceRealm.capital().equals(capitalIdentity),
+                    "Accepting an invitation changed the realm's capital identity");
+
+            require(executeCommand(nether, provinceOwner, "imperium empire join") == 0,
+                    "A province that already joined must not join the same realm a second time");
+            require(data.realmForProvince(provinceIdentity).orElseThrow().provinceCount() == 2,
+                    "A duplicate join attempt changed realm membership");
+
+            final CompoundTag snapshot = data.save(new CompoundTag(), overworld.registryAccess());
+            final EmpireStateSavedData restored =
+                    EmpireStateSavedData.load(snapshot, overworld.registryAccess());
+            final EmpireRealm restoredRealm = restored.realmForProvince(provinceIdentity).orElseThrow(
+                    () -> new AssertionError("Cross-dimension realm membership did not survive NBT reload"));
+            require(restoredRealm.id() == realm.id()
+                            && restoredRealm.capital().equals(capitalIdentity)
+                            && restoredRealm.containsProvince(provinceIdentity)
+                            && restoredRealm.provinceCount() == 2,
+                    "Cross-dimension capital/province identity changed after NBT round-trip");
+
+            LOGGER.info("IMPERIUM_GAMETEST_PASS: real cross-dimension colony invitation, owner-only join, duplicate-join denial and realm NBT round-trip");
+        } finally {
+            if (provinceColony != null) {
+                IColonyManager.getInstance().deleteColonyByWorld(
+                        provinceColony.getID(), false, nether);
+            }
+            if (capitalColony != null) {
+                IColonyManager.getInstance().deleteColonyByWorld(
+                        capitalColony.getID(), false, overworld);
+            }
         }
 
         helper.succeed();
