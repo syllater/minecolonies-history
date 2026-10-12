@@ -35,14 +35,14 @@
 **Core implementation complete.** Multi-colony realms, capital/Emperor, invitations, central treasury, laws/audit history, governors, events, cohesion/separatist pressure, logistics, dimension-aware strategy commands and graphical Imperial Theatre. Interactive client usability still needs a manual click-through.
 
 ## Milestone 9 — Multiplayer and compatibility hardening
-**Automated hardening complete; genuine multiplayer acceptance remains open.** Bounded/rate-limited map payloads, server-side permission/treasury checks, EN/NL cross-dimension command contracts, BlockUI ledger button/command-path validation (40 buttons/38 handlers), bounded/malformed SavedData handling, build/test/checksum packaging, real colony/building/job GameTests, client startup and dedicated-server startup with 10/10 schematics are green in [workflow 38227463363](https://github.com/syllater/minecolonies-history/actions/runs/38227463363) on commit `fa50cc2d67ee890b061fea30cb27598c808a3ac9`. The four live GameTests cover tax idempotency and persistence, real colony discovery/SavedData, Archive jobs/capacity and Guard Tower specialists/capacity. A real two-player session is still needed for permission races, concurrent treasury, reconnect and saved-world behavior.
+**Automated hardening complete; genuine multiplayer acceptance remains open.** Bounded/rate-limited map payloads, server-side permission/treasury checks, EN/NL cross-dimension command contracts, BlockUI ledger button/command-path validation (40 buttons/38 handlers), bounded/malformed SavedData handling, build/test/checksum packaging, real colony/building/job GameTests, client startup and dedicated-server startup with 10/10 schematics are green in [workflow 38228182714](https://github.com/syllater/minecolonies-history/actions/runs/38228182714) on commit `61d7f9c9cb66fca8d9f96f9773878b6b196c43be`. The four live GameTests cover tax idempotency and persistence, real colony discovery/SavedData, Archive jobs/capacity and Guard Tower specialists/capacity. A real two-player session is still needed for permission races, concurrent treasury, reconnect and saved-world behavior.
 
 ## Milestone 10 — Release
 **Self-checking release candidate assembled; final public release is not complete.**
 - Candidate version: `0.1.0-rc1`.
-- [Download the latest verified release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11736869886).
-- [Download the JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737190134).
-- Latest JAR SHA-256: `0c734afd29c2aed195f58169f2ba3e00988472ea17d39d88447d55224fd4b379`. The added BlockUI validator confirms all 40 ledger buttons are wired to the 38 fixed command handlers or dedicated actions, and all command paths resolve.
+- [Download the latest verified release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737131416).
+- [Download the JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737226311).
+- Latest JAR SHA-256: `4d44a38535747159a93d22ca46744852931d1929e3dfefc02c37747333685bdb`. The added BlockUI validator confirms all 40 ledger buttons are wired to the 38 fixed command handlers or dedicated actions, and all command paths resolve.
 - Before final release: complete the survival-world and two-player checks, review gameplay balance and release notes, and make an explicit distribution-license decision. Do not call the project release-ready or publish a final package before these gates are addressed.
 
 ## Acceptance principle
