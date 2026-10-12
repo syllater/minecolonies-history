@@ -37,3 +37,70 @@ Decision: Prefer public MineColonies API types under `com.minecolonies.api`; do 
 ## 2026-10-09 — Exact artifacts
 
 Decision: Update the candidate MineColonies/Structurize/BlockUI version notes using upstream 1.21.1 release metadata. Compilation against the actual artifacts remains unverified because this session has no local shell/build execution capability.
+
+## 2026-10-10 — Imperial supply routes
+
+Decision: Phase one logistics uses direct routes from the empire capital to a member province, not a graph/path network. Routes cost 100 central crowns to construct and 2 crowns/day to maintain.
+
+Rationale:
+- The direct model fits the current multi-colony identity and can be tested without relying on world-coordinate assumptions.
+- Active routes (condition >= 40/100) add +8 launch readiness from the routed province and +12 defensive readiness when that province is targeted. The capital is intrinsically supplied.
+- A route starts at 100 condition, repairs +5 per paid daily upkeep and wears -10 on unpaid upkeep.
+- Routes are stored in Imperium SavedData and removed if the province leaves the realm.
+
+## 2026-10-10 — Military readiness and supply-route review
+
+- Defensive doctrine and current supply-route condition are evaluated when an operation resolves; launch readiness and source logistics are saved with the operation.
+- Supply-route CI initially caught a missing command-layer import and an incorrect unit-test treasury expectation. Both are corrected in the follow-up commit.
+
+## 2026-10-10 — Temporary defensive orders
+
+Decision: Give the Emperor a timed defensive-order mechanism, distinct from standing military posture. One active order is allowed per province; it costs 50 central crowns, lasts seven in-game days and adds +20 readiness when the province is targeted.
+
+Rationale: Strategic defense should be an explicit command choice, not just an automatic passive score. Orders are persistent, server-authoritative and expire during the daily turn.
+
+
+## 2026-10-11 — Imperial Theatre dimension selection
+
+Decision: The map client may request a display dimension, but the server resolves it only when at least one province in the player's current realm exists in that dimension. Empty or invalid requests fall back to the realm capital's dimension.
+
+Rationale:
+- A realm can span multiple Minecraft dimensions, while a single X/Z projection cannot meaningfully combine coordinates from unrelated dimension spaces.
+- The client request is a presentation preference only and never contains a realm ID or membership list.
+- Province names, membership, coordinates and metrics remain sourced from server state.
+- A regression test covers a valid member dimension, empty/blank requests and rejection of a dimension absent from the realm.
+
+## 2026-10-11 — Cross-dimension realm administration
+
+Decision: Supply-route construction, temporary defensive orders, and governor appointment/dismissal use explicit dimension + colony ID variants. Those variants resolve the target with the server's MineColonies API and re-check that the target is a member province and the caller is the Emperor or a server operator.
+
+
+## 2026-10-11 — Strategic map request rate limiting
+
+Decision: Limit authenticated map snapshot requests to one per player per 10 overworld ticks (0.5 seconds at normal game speed). Expire idle limiter entries after 24,000 ticks and use the shared overworld clock so dimension changes cannot reset the cooldown.
+
+Rationale:
+- Map requests traverse realm membership and MineColonies colony lookups and should not be rebuilt on every packet from a modified client.
+- The client sends a request preference only; this limit does not alter realm data or gameplay state.
+- A small pure-Java utility keeps the cooldown testable without a live Minecraft world.
+
+
+## 2026-10-12 — Add live GameTest persistence gate
+
+Decision: Keep a small, headless Minecraft GameTest in CI for the most important SavedData economy/realm serialization contract, in addition to pure unit tests and client/server smoke launches.
+
+Rationale:
+- Unit tests are fast, but an actual GameTest server exercises Minecraft's CompoundTag and SavedData code in its mapped runtime.
+- The test uses synthetic colony identity keys and does not create fake MineColonies colonies or write into MineColonies internals.
+- Physical hut placement, worker AI in survival, GUI click-through and two-player network/permission acceptance remain manual release gates; passing the GameTest is not used to certify those behaviors.
+
+
+## 2026-10-12 — Extend MineColonies shared hut block-entity type through NeoForge
+
+Decision: Use NeoForge's `BlockEntityTypeAddBlocksEvent` to add the custom Imperial Archive and Imperial Guard Tower blocks to `minecolonies:colonybuilding`.
+
+Rationale: MineColonies constructs its shared hut block-entity type from its own internal hut list. An addon block that extends `AbstractBlockHut` but is absent from that list is rejected as an invalid block-entity state at placement time. The official mod-bus event safely extends the type's valid-block set; this avoids mixins/reflection and was verified by real Minecraft GameTests.
+
+## 2026-10-12 — Runtime integration acceptance boundary
+
+Decision: Keep the release candidate open until manual survival and two-player acceptance is completed. Live GameTests now prove real colony lookup, hut anchor/building registration, registered job assignment and tier capacity, but they do not claim to build entire Structurize schematics in survival, observe workers over multiple game days, exercise every GUI interaction, or verify genuine multiplayer permissions/concurrency/reconnect.

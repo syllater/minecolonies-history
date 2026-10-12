@@ -1,46 +1,676 @@
 # Checkpoints
 
-## 2026-10-09 — Milestone 2 Source and Build Setup
+## 2026-10-11 — Daily imperial tax remittance regression coverage (fully verified)
+
+### Change
+- Added a guard against negative day indices in `remitImperialTaxReceipts`.
+- Added tests that a 10% central remittance moves already-collected provincial crowns into the imperial reserve without creating or destroying money.
+- Verified successful remittance appends a `tax-remittance` audit entry and that balances/audit survive SavedData save/load.
+- Verified no enacted imperial tax law, negative day index and zero receipts are no-ops.
+- Verified insufficient provincial balance and a full imperial reserve both return zero, leave both balances unchanged and create no audit entry.
+
+### Verification
+- Source commit: `d483bd4a5ad9b89c468e917f2a4151ea41b8ad69`
+- Full GitHub Actions run: https://github.com/syllater/minecolonies-history/actions/runs/38158879498
+- Translation, blueprint progression, dependency metadata and cross-dimension command validators passed.
+- `./gradlew --no-daemon test build`, checksum manifest validation and self-checking RC packaging passed.
+- Headless client startup smoke passed.
+- Dedicated-server startup and all 10/10 Structurize schematic/anchor validations passed.
+- The CI workflow now avoids duplicate push + pull-request builds on feature branches.
+
+Artifacts:
+- [Release candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38158879498/artifacts/11709508222)
+- [JAR + SHA-256 manifest](https://github.com/syllater/minecolonies-history/actions/runs/38158879498/artifacts/11709238816)
+- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38158879498/artifacts/11709563184)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38158879498/artifacts/11709154307)
+
+## 2026-10-11 — Treasury conservation and membership guards (fully verified)
+
+### Change
+- Added a deterministic 100-step alternating transfer test (province ⇄ imperial reserve) that asserts the combined total never changes, balances stay within limits, only successful transfers append audit entries, and the post-transfer SavedData round trip preserves both balances and audit history.
+- Added direct coverage that zero/negative amounts, negative day indices and provinces outside a realm are rejected without moving crowns or writing audit entries.
+- Existing transfer tests continue to cover insufficient source funds, full destination treasuries and success-only audit history.
+
+### Verification
+- Source commit: `fe9284d0faa098b27cb02b1cf904ab0d38af3f7d`
+- Full green Actions run: https://github.com/syllater/minecolonies-history/actions/runs/38158411131
+- English/Dutch translations, generated tier progression, release/dependency metadata and cross-dimension command contracts passed.
+- `./gradlew --no-daemon test build`, JAR checksum verification and self-checking RC packaging passed.
+- Headless client startup passed.
+- Dedicated-server startup and all 10/10 Structurize blueprint/anchor validations passed.
+
+Artifacts:
+- [Release candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709477514)
+- [JAR + SHA-256 manifest](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709796642)
+- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11709226976)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38158411131/artifacts/11708867734)
+
+### Release gates still open
+- Physical hut placement/upgrades and worker behavior in a real survival world.
+- Interactive GUI click-through in a real client.
+- Two-player permission/concurrency/reconnect/save-reload testing.
+- Final balance/package review and an explicit distribution-license decision.
+
+## 2026-10-11 — Atomic treasury transfers and stricter identity validation (fully verified)
+
+### Change
+- Added server-side transfer operations to `EmpireStateSavedData` for moving crowns from a provincial treasury to the imperial reserve and back.
+- Preflight checks validate positive amount, province/realm membership, source balance and destination capacity before mutating either balance.
+- Defensive rollback guards preserve money if the second balance mutation unexpectedly fails.
+- Audit entries are added only after successful transfers; failed transactions leave balances and audit history untouched.
+- Command handlers now route through the transaction service instead of implementing debit/credit/rollback separately.
+- Added EN/NL fallback text for the unexpected transaction-failure path.
+- Extended unit tests for success, insufficient local/imperial funds, full reserve/province caps, audit behavior and treasury/audit NBT round trip.
+- Strengthened dimension identity parsing; malformed SavedData records with empty paths, invalid characters or non-canonical IDs are isolated without discarding neighboring valid records.
+
+### Verification
+- Source commit: `a22d79f64c4a41601feaf7608f12d86950b75698`
+- Full GitHub Actions run: https://github.com/syllater/minecolonies-history/actions/runs/38157810821
+- Translation, blueprint, release metadata and cross-dimension command validators passed.
+- `./gradlew --no-daemon test build` passed.
+- JAR checksum and self-checking RC bundle validation passed.
+- Headless client startup passed.
+- Dedicated-server startup/blueprint validation passed, including all 10/10 Structurize schematics.
+
+Artifacts:
+- [Release candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38157810821/artifacts/11709157384)
+- [Mod JAR + SHA-256 manifest](https://github.com/syllater/minecolonies-history/actions/runs/38157810821/artifacts/11709232110)
+- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38157810821/artifacts/11709785938)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38157810821/artifacts/11709161486)
+
+### Still pending
+- Real survival-world hut building/hiring/upgrades and in-world save/reload.
+- Interactive GUI click-through with a real realm.
+- Real two-player permissions, concurrent treasury actions, reconnect and multiplayer save/reload.
+- Distribution-license decision and final release approval.
+
+## 2026-10-10 — Five-tier worker capacity and blueprint progression validation
 
 ### Repository
-
 - Repository: https://github.com/syllater/minecolonies-history
 - Branch: `milestone-2/colony-integration`
 
-### Implemented files
+### Latest fully verified commit
+Commit `6ceed484e4ca0d567e9b81555351eae1abadd422` passed the complete GitHub Actions workflow:
+- 265 literal/dynamic EN/NL localization keys validated, including placeholder indices/types.
+- Gradle compile, tests and JAR upload passed.
+- Headless client startup smoke test passed.
+- Dedicated server startup and all 10 Structurize schematic checks passed.
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38075771050
 
-- `src/main/java/com/imperium/realms/colony/ColonyIdentity.java`
-- `src/main/java/com/imperium/realms/colony/EmpireState.java`
-- `src/main/java/com/imperium/realms/colony/EmpireStateSavedData.java`
-- `src/main/java/com/imperium/realms/colony/MineColoniesIntegration.java`
-- `src/main/java/com/imperium/realms/colony/MineColoniesLifecycleEvents.java`
-- `src/test/java/com/imperium/realms/colony/ColonyIdentityTest.java`
-- `src/test/java/com/imperium/realms/colony/EmpireStateTest.java`
+### New verified functionality
+- `ImperialBuildingProgression.workerLimitForLevel`: level 0/negative -> 0; level 1–5 -> one through five; over-cap input -> five.
+- All six Archive/Guard Tower worker modules use that shared rule.
+- Unit tests cover valid tiers, unbuilt/negative levels and values above five.
+- Existing tests cover NBT persistence, strategic map geometry, route priority and defensive orders.
 
-### Integration decisions
+### Added in this commit, pending CI
+- `tools/validate_blueprint_progression.py` generates test payloads from the original generator and checks five unique tiers per building family, non-shrinking dimensions with at least one dimension increasing per tier, and valid hut anchor offsets.
+- `.github/workflows/verify.yml` runs the new validation before the Gradle build.
+- The new validator still needs its own green workflow result.
 
-- Use the public API from the exact MineColonies tag `v1.21.1-1.1.1403`.
-- Look up colonies on the logical server through `IMinecoloniesAPI.getInstance().getColonyManager()`.
-- Identify records by dimension ID + colony ID, not by the editable name or center position.
-- Store Imperium-owned records in an overworld SavedData registry so all dimensions share a single index.
-- Periodically reconcile loaded colonies; missing records are inserted, existing records are observed but not reset.
-- Avoid private MineColonies NBT mutation and mixins in this milestone.
+### Still pending
+- Actual in-world building placement, worker hiring, level 1–5 upgrades and save/reload.
+- Actual two-player permissions/economy tests.
+- The map remains a chat grid rather than a full-screen interactive theatre map.
 
-### Build setup added
 
-- Added LDTTeam Maven repository.
-- Pinned MineColonies and its required runtime dependency baseline.
-- Configured JUnit Jupiter.
-- Added `.github/workflows/gradle.yml` for `./gradlew --no-daemon clean build` and JAR artifact upload.
+## 2026-10-11 — Pan/Zoom Strategic Map Viewport (CI pending at edit time)
+
+### Repository
+- Repository: https://github.com/syllater/minecolonies-history
+- Branch: `milestone-2/colony-integration`
+
+### Change
+- Added `StrategicMapGrid.renderViewport` for a stable world-coordinate grid where X increases east and lower Z is north.
+- Added `isVisibleInViewport` so command output lists only visible map markers and reports off-screen same-dimension provinces with their coordinates.
+- Extended `/imperium empire map` with optional `<centerX> <centerZ> <blocksPerCell>` arguments.
+- Updated English and Dutch translations and README/acceptance instructions.
+- Added unit tests for direction, scale, panning, off-screen filtering and invalid viewport dimensions/scale.
+
+### How to use
+- `/imperium empire map`: auto-fitted overview.
+- `/imperium empire map 0 0 128`: stable viewport around world coordinate X=0, Z=0, where one cell represents 128 blocks.
+- Change the center X/Z to pan. Smaller scale values zoom in; larger values zoom out.
+
+### Verification state
+- Last previously fully verified commit: `bce773194c56d70cc3a659287dd7d83e438bd3af`, including localization, blueprint progression validation, Gradle tests/build, client startup and server blueprint checks.
+- This viewport implementation is not considered verified until its own GitHub Actions run passes.
+- This feature remains a text/chat map, not a graphical screen. Real survival-world and two-player acceptance remain pending.
+
+
+## 2026-10-11 — Interactive Imperial Theatre GUI (verified by CI)
+
+### Implementation
+- Added bounded custom network payloads for a strategic map request and server-produced realm snapshot.
+- Server resolves the requesting player to their actual MineColonies colony, then resolves that colony's realm; the client does not provide an empire or province ID.
+- Added `ImperialMapScreen`, opened from the BlockUI ledger's Empire Map button.
+- GUI supports arrow-key panning, mouse-wheel and button zoom, recentering with R, province selection and display of province stability, unrest and loyalty.
+- Map payloads cap the number of provinces at 64 and normalize field lengths and metric values.
+- Isolated the client receiver through a client-only callback so dedicated servers do not link the new screen class.
+
+### Verification
+- Commit: `bbf52c41bb16a82f3c0f2cb9c3744f9b21398f73`
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38119451312
+- Localization check, blueprint progression validation, Gradle build/tests, client-start smoke and dedicated-server schematic validation all passed.
+- Artifact uploaded: `imperium-realms-bbf52c41bb16a82f3c0f2cb9c3744f9b21398f73`.
+
+### Still pending
+- A human must open the BlockUI ledger and interact with the map in a real survival world.
+- Save/reload and two-player realm-permission tests remain required before release.
+
+
+## 2026-10-11 — Five-tier architectural detail progression (verified by CI)
+
+### Implemented
+- Extended the deterministic blueprint palette with oriented vanilla stair states, slabs, lanterns, bars, fences and chiseled masonry.
+- Tier 2+ adds oriented roof eaves.
+- Archive levels 3–5 add a ridge and progressively more shelving; levels 4–5 add lantern details; level 5 adds raised rooftop ornaments.
+- Guard Tower levels 3–5 add defensive barred window courses, structural corner piers, battlements/fence trim and tier-5 lanterns.
+- Higher levels also add extra window courses and materials rather than relying solely on exterior dimensions.
+- The generator now raises an error if expected tier-specific visual details are absent; the progression validator exercises all 10 tiers.
+
+### Verification
+- Commit: `139cfd5b70eda962c6c2e830d6e18049b77ef833`
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38119918288
+- English/Dutch keys, visual blueprint progression, Gradle tests/build/JAR, headless client startup and dedicated-server validation of all 10 schematics passed.
+
+### Still pending
+- Inspect the actual rendered schematics placed in Minecraft to tune proportions/material choices.
+- Verify in-world construction, upgrade placement and save/reload; automated NBT/schema validation cannot replace that playtest.
+
+
+## 2026-10-11 — Tier-scaled Archive economy and Guard Tower training (verified by CI)
+
+### Implementation
+- Philosopher production uses the actual Archive level: tier 1–2 grants 1 knowledge point, tier 3–4 grants 2, and tier 5 grants 3 per successful 1,200-tick work interval.
+- Tax Collector efficiency uses the same 1/2/3 tier brackets, still capped at 25 percent and gated by the existing work interval.
+- Diplomat influence uses the same 1/2/3 tier brackets, with the existing influence cap and work interval.
+- Guard level-ups grant tier-based military training: tiers 1–2 add 1, tiers 3–4 add 2 and tier 5 adds 3 points to the corresponding discipline; Military province focus doubles the gain.
+- Siege Engineer, Field Medic and Cavalier pass the current Guard Tower level to the server-side training recorder.
+- The old no-tier method signatures remain as tier-1 compatibility overloads. Unbuilt huts return no work yield; discipline-specific and economy caps still apply.
+- Unit tests cover tiers 1, 3 and 5, level-zero rejection and Military-focus multiplication.
+
+### Verification
+- Commit: `0030bd873678a812ee821601002535f58c61878c`
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38120356669
+- Localization validation, blueprint progression validation, Gradle build/tests and JAR upload passed.
+- Headless client startup passed.
+- Dedicated-server startup and all ten Structurize schematic checks passed.
+- Artifact uploaded: `imperium-realms-0030bd873678a812ee821601002535f58c61878c`.
+
+### Still pending
+- Human in-world test of worker behavior, actual tier upgrades, save/reload and multiplayer permissions; CI startup is not a substitute.
+
+
+## 2026-10-11 — Tier-scaled economy and military persistence test (verified)
+
+### Regression coverage
+- Added an `EmpireStateSavedDataTest` NBT round-trip that records tier-5 Philosopher, Tax Collector and Diplomat output plus tier-5 Field Medic training under Military province focus.
+- Confirms knowledge points, collection efficiency, diplomatic influence, discipline points, province focus and work interval timestamps survive serialization/deserialization.
+- Confirms loading does not permit the same game tick to generate duplicate work rewards.
+- Updated the test and project status to reflect the verified tier-scaled behavior.
+
+### Verification
+- Commit: `a647f1a9876aa83c386a023b5a2da078c06785be`
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38120649287
+- Translation checks, blueprint progression validation, Gradle build/unit tests, JAR upload, client startup and dedicated-server validation of all ten Structurize schematics passed.
+- Artifact: `imperium-realms-a647f1a9876aa83c386a023b5a2da078c06785be`.
+
+### Still pending
+- Human survival-world testing and two-player permission/concurrency/reconnect acceptance; automated startup and unit tests do not exercise a real multiplayer world.
+
+
+## 2026-10-11 — Per-citizen Archive production (verified before cooldown-bound test)
+
+### Change
+- Philosopher, Tax Collector and Diplomat work now uses the worker UUID as a cooldown key.
+- Different workers can contribute within the same colony work interval; repeated work callbacks from the same citizen are throttled.
+- Per-citizen cooldown timestamps are serialized in three SavedData lists and restored independently on world load.
+- Existing saves without the new lists use their old colony-wide timestamps as a one-time migration safety guard.
+- Expired entries are pruned and stored cooldown history is bounded at 64 worker records per profession.
+- Incremented the SavedData schema version to 22.
+- Added unit coverage for per-worker output, same-worker duplicate blocking, a worker becoming due again after the interval and the bounded cooldown map.
+
+### Previously green verification
+- Commit: `eb0b9a9d4011e5abb63de424d76655f0395e8694`
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38121078239
+- Translation validation, blueprint validation, Gradle build/tests/JAR, client start and dedicated-server validation all passed.
+- The schema bump and cooldown-cap test in the current commit are pending their own CI run.
+
+
+## 2026-10-11 — Verified Build and Release Gate Update
+
+- Verified code commit: `117da4d4b97693902d90dd2b490d5a18cd4c8b01`.
+- Workflow: https://github.com/syllater/minecolonies-history/actions/runs/38121255613.
+- Translation validation, blueprint tier validation, Gradle tests/build and JAR upload passed.
+- Headless client startup and dedicated-server startup with all ten generated Structurize schematics passed.
+- Latest code includes bounded persisted per-citizen Archive cooldown history and save-schema version 22.
+- Estimated overall completion: ~75% as a planning estimate, not a measured metric.
+- Still pending: survival-world construction/hiring/upgrades/save-reload, real graphical map playtest, dedicated-server two-player permission/concurrency/reconnect tests, balance review, release notes/package review and distribution-license decision.
+- JAR artifact name: `imperium-realms-117da4d4b97693902d90dd2b490d5a18cd4c8b01` (temporary CI artifact; regenerate when expired).
+
+
+## 2026-10-11 — Cross-dimension management and Imperial Theatre view
+
+### Changes
+
+- Added cross-dimension commands for supply routes, defensive orders and governor appointment/dismissal.
+- Added a map dimension selector that cycles through dimensions represented by provinces in the player's current realm.
+- Changed the map request payload to carry only a bounded display-dimension preference.
+- Server-side dimension selection checks the realm's own province list; invalid/unrelated dimensions default to the capital dimension.
+- Added unit tests for dimension request bounds and server-side map-dimension allowlisting.
+- Updated English and Dutch translations and the end-to-end playtest checklist.
+
+### Verification evidence
+
+The complete CI workflow passed on code commit `12a748d92b8cc648ce3b954a0d3b801d107c9e48`:
+- [Build, tests, client smoke and dedicated-server blueprint smoke](https://github.com/syllater/minecolonies-history/actions/runs/38132956614)
+- [Built mod JAR artifact](https://github.com/syllater/minecolonies-history/actions/runs/38132956614/artifacts/11700370329)
+
+This verifies compilation, unit tests, startup and loading of the ten generated schematics. It does not verify in-world placement/upgrades or two-player multiplayer interaction.
+
+### Remaining acceptance gates
+
+Follow `docs/PLAYTEST_RELEASE_CHECKLIST.md` for the real-world hut upgrade/save-load, interactive Theatre map, two-player permission/concurrency, balance, final packaging and license checks.
+
+
+## 2026-10-11 — Map snapshot rate limiting and elapsed-time cleanup (verified)
+
+### Change
+
+- Added server-side per-player map snapshot cooldown of 10 overworld ticks (half a second at normal game speed).
+- Uses the authenticated server player UUID and the shared overworld clock, so switching dimensions does not bypass the cooldown.
+- Stale entries expire after 24,000 ticks. Housekeeping now runs when the elapsed cleanup deadline passes rather than only when a client sends a request at an exact multiple of 200 ticks.
+- A backwards-moving world clock clears stale session entries, covering an integrated-server restart in the same development JVM.
+- Added unit coverage for spam blocking, player isolation, stale entry pruning when the request tick is not an exact interval boundary, and clock reset handling.
+- Updated README and changelog with the current map and cross-dimension administration behavior.
 
 ### Verification
 
-The GitHub file API has confirmed the writes were accepted, but no Gradle command has been executed by this session. Wait for the actual GitHub Actions result before stating the source compiles.
+The complete GitHub Actions workflow passed on code commit `329c6ccde562bcfd8fb9b18c2cb372373e0d0c43`:
+- [Build, tests, client startup and dedicated-server blueprint smoke test](https://github.com/syllater/minecolonies-history/actions/runs/38133512797)
+- [Built mod JAR artifact](https://github.com/syllater/minecolonies-history/actions/runs/38133512797/artifacts/11700226575)
+- [Dedicated-server schematic log](https://github.com/syllater/minecolonies-history/actions/runs/38133512797/artifacts/11700405519)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38133512797/artifacts/11700361099)
 
-### Critical correction
+All workflow jobs passed, including translation/placeholder validation, visual blueprint progression, Gradle unit tests/build, headless client start and dedicated-server validation of 10/10 schematics.
 
-A prior investigation referenced MineColonies `version/main`, but that branch is the older Minecraft line. It is not used as evidence for the 1.21.1 implementation. The 1.21.1 signatures were reviewed against the official tag `v1.21.1-1.1.1403`.
+### Still pending
 
-### Next
+This does not substitute for the required manual survival-world, GUI click-through or two-player dedicated-server tests listed in `docs/PLAYTEST_RELEASE_CHECKLIST.md`.
 
-Check Actions run status, fix any actual compile/dependency failures, and only then present Milestone 2 for approval.
+
+## 2026-10-11 — Verified checksum-gated JAR packaging (full CI green)
+
+### Build pipeline
+
+- Added a `Generate JAR SHA-256 manifest` step after the Gradle build.
+- Added a `Verify generated JAR checksum manifest` step that runs `sha256sum --check SHA256SUMS.txt`.
+- The JAR bundle is uploaded only if manifest generation and verification pass; the artifact contains both the JAR and `SHA256SUMS.txt`.
+- Updated README and changelog instructions accordingly.
+
+### Verification
+
+- Branch head: `eb6b790ebf5f58ef6ea52a36ae7ba5ca33a8f4ab`
+- [Full CI workflow](https://github.com/syllater/minecolonies-history/actions/runs/38133948650)
+- [JAR + checksum manifest bundle](https://github.com/syllater/minecolonies-history/actions/runs/38133948650/artifacts/11700525650)
+- Artifact ZIP SHA-256: `0eb6d4c0393ffa072ad10ae711d4860161fd9565b2bca7e8cfa5f9eccb327fd3`
+- [Dedicated-server schematic validation log](https://github.com/syllater/minecolonies-history/actions/runs/38133948650/artifacts/11700520830)
+- [Client startup smoke log](https://github.com/syllater/minecolonies-history/actions/runs/38133948650/artifacts/11700421184)
+
+The run passed translation validation, blueprint progression validation, Gradle build/tests, JAR checksum verification, client startup and dedicated-server startup with 10/10 generated schematics.
+
+### Known non-blocking warnings
+
+The compiler currently reports the pinned NeoForge line's deprecation warnings for `EventBusSubscriber.bus()`; Gradle/GitHub Actions also report future-compatibility warnings. They do not affect this successful build and should be handled before the next platform/toolchain upgrade.
+
+### Remaining acceptance
+
+Actual survival-world building/hiring/upgrade/save-reload testing, real interactive GUI usage, two-player multiplayer permissions/concurrency/reconnect tests, balance review and the distribution-license decision remain open.
+
+
+## 2026-10-11 — 0.1.0-rc1 package assembled and CI green
+
+### Branch and candidate
+
+- Repository: https://github.com/syllater/minecolonies-history
+- Branch: `milestone-2/colony-integration`
+- Candidate version: `0.1.0-rc1`
+- Candidate source head: `e9a58c1a071cc54178a806c855726ed60c533ce2`
+- Review PR: [#2 — WIP: Imperium European Realms 0.1.0-rc1](https://github.com/syllater/minecolonies-history/pull/2)
+
+### Verification evidence
+
+The full workflow passed at [run 38154793458](https://github.com/syllater/minecolonies-history/actions/runs/38154793458), including:
+- EN/NL translation coverage validation.
+- Generated blueprint progression validation.
+- Release/dependency metadata validation.
+- `./gradlew --no-daemon test build`.
+- JAR checksum manifest generation and verification.
+- Deterministic RC bundle packaging and embedded JAR checksum verification.
+- Headless client startup smoke.
+- Dedicated server registry/blueprint smoke: 10/10 Structurize schematics with valid dimensions/hut anchors.
+
+Artifacts:
+- [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11708051777)
+- [JAR + checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11708256448)
+- [Server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11708471103)
+- [Client smoke log](https://github.com/syllater/minecolonies-history/actions/runs/38154793458/artifacts/11707259036)
+
+### New RC packaging
+
+- Added `docs/RELEASE_CANDIDATE_NOTES.md`.
+- Added `tools/package_release_candidate.py`, which validates the RC version, required documents, JAR filename, manifest digest and complete package contents. It creates a deterministic ZIP, checks ZIP integrity and verifies that the bundled JAR matches its bundled checksum.
+- Added CI steps to assemble the candidate bundle after checksum verification and upload it as a separate 30-day artifact.
+- Added a release metadata validator for dependency declarations and stale milestone versions.
+- Added regression tests for legacy SavedData with missing fields and malformed colony records.
+
+### Still not certified by automation
+
+- Actual survival-world placement/upgrades and worker hiring/work/save-reload.
+- In-client interaction with the Imperial Theatre.
+- Real two-player realm permissions, concurrent treasury operations, reconnect and multiplayer save/reload.
+- Explicit distribution-license choice and final release package/legal review.
+
+Do not promote `0.1.0-rc1` to a final release until these gates are completed.
+
+
+## 2026-10-11 — Cross-dimension strategy commands and RC1 workflow green
+
+### Implementation
+- Added dimension-aware variants while preserving dimension-local syntax:
+  - `/imperium diplomacy improve-at <dimension> <colonyId>`
+  - `/imperium campaign launch-at <type> <dimension> <colonyId>`
+  - `/imperium governor appoint-at <dimension> <colonyId> <player>`
+  - `/imperium governor dismiss-at <dimension> <colonyId>`
+  - `/imperium empire route build-at <dimension> <colonyId>`
+  - `/imperium empire defense-at <dimension> <colonyId>`
+  - `/imperium empire resolve-at <dimension> <colonyId> <reassure|crackdown>`
+- Shared target resolver validates the namespaced dimension, looks up a real colony through MineColonies' public API, and verifies dimension + colony ID identity.
+- Existing permission, realm membership, capital-protection and resource-cost checks remain in the common handler paths.
+- Updated English/Dutch help messages and added `tools/validate_cross_dimension_commands.py` so command registrations and help text cannot silently drift apart.
+
+### Verification evidence
+The full workflow passed at [run 38155865389](https://github.com/syllater/minecolonies-history/actions/runs/38155865389):
+- EN/NL translation/placeholder validation.
+- Blueprint tier progression validation.
+- Dependency/release metadata validation.
+- Cross-dimension command and localized help contract validation.
+- `./gradlew --no-daemon test build`.
+- JAR SHA-256 and self-checking RC bundle validation.
+- Headless client startup and dedicated-server startup.
+- Dedicated-server validation of MineColonies registration and all 10/10 Structurize blueprints.
+
+Artifacts:
+- [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38155865389/artifacts/11707704528)
+- [JAR + checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38155865389/artifacts/11708735039)
+- [Server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38155865389/artifacts/11708552679)
+- [Client smoke log](https://github.com/syllater/minecolonies-history/actions/runs/38155865389/artifacts/11708263500)
+
+### Still not certified by automation
+- Actual in-world hut placement/upgrades and worker hiring/work/save-reload.
+- In-client click-through of the Imperial Theatre and new cross-dimension command variants.
+- Real two-player permissions, treasury concurrency, reconnect and multiplayer save/reload.
+- Explicit distribution-license choice and final package/legal review.
+
+Do not promote `0.1.0-rc1` to a final release until these gates are completed.
+
+
+## 2026-10-11 — Saved-state bounds and cross-dimension command cleanup
+
+### Changes
+- Restored the saved `next_realm_id` counter, keeping IDs monotonic after reload and after realm removals. Added a regression test for persisted counters and active-realm collision prevention.
+- Capped loaded realm membership and invitations, with malformed NBT coverage.
+- Bounded parsing of historical proposals, diplomatic relations, campaign records, audit history, and related per-province lists; a regression test verifies newest supported records are retained.
+- Removed the obsolete duplicate registrar for diplomacy and campaigns, so the authoritative command tree alone owns those two `*-at` command paths.
+- Switched remaining dimension-aware realm aliases to `ResourceLocationArgument.id()` / `getId(...).toString()`, avoiding namespace parsing ambiguity.
+- Hardened `tools/validate_cross_dimension_commands.py` to reject a restored duplicate registrar or an incorrect dimension parser.
+
+### Verification evidence
+- Saved-state hardening and nested-history tests passed in [workflow 38161434615](https://github.com/syllater/minecolonies-history/actions/runs/38161434615) on commit `9e02f41c8ca56288ad1bc76b021116a9ab0b51e5`.
+- That full workflow passed translation checks, blueprint/dependency/command validators, Gradle unit tests/build, checksum and RC packaging, headless client startup, and dedicated-server startup with 10/10 Structurize blueprints.
+- The subsequent command registrar cleanup is on a newer commit; its dedicated full workflow must complete before this cleanup is recorded as verified.
+
+Artifacts from the last completed green workflow:
+- [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38161434615/artifacts/11710257739)
+- [JAR + checksum](https://github.com/syllater/minecolonies-history/actions/runs/38161434615/artifacts/11710407530)
+- [Dedicated server validation](https://github.com/syllater/minecolonies-history/actions/runs/38161434615/artifacts/11710966853)
+- [Client smoke log](https://github.com/syllater/minecolonies-history/actions/runs/38161434615/artifacts/11709893984)
+
+### Still open
+Real survival-world hut construction/upgrades, worker hiring and work, interactive GUI use, save/reload, genuine two-player permissions/concurrency/reconnect, balance review, and a distribution-license decision.
+
+
+## 2026-10-11 — Latest full RC verification (all jobs green)
+
+### Source and fixes
+- Source head verified: `d5dc286d2e3e1e1b4ac30b5c7d6af48810fd0952`.
+- The SavedData invitation loader caps oversized records while retaining the latest `MAX_INVITATIONS` records.
+- The invitation regression test covers the first retained, first excluded, and final retained IDs from an oversized list.
+- The parser uses `Math.toIntExact(EmpireRealm.MAX_INVITATIONS)` for the bounded index calculation, avoiding a narrowing-conversion compile error.
+- Cross-dimension command cleanup removes the obsolete duplicate registrar and enforces namespaced dimension parsing through CI validation.
+
+### Verification
+- [Full green workflow 38162651747](https://github.com/syllater/minecolonies-history/actions/runs/38162651747).
+- Translation, blueprint-tier, release/dependency and cross-dimension command validators passed.
+- `./gradlew --no-daemon test build` passed.
+- JAR SHA-256 and self-checking RC packaging passed; JAR SHA-256 is `67ae860f656926b27a2fb30b2bf65d6e880a322629e44b0ce005060ca0e8fd26`.
+- Headless client startup passed.
+- Dedicated-server startup and all 10/10 Structurize schematics/hut anchors passed.
+
+Artifacts:
+- [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38162651747/artifacts/11710624257)
+- [JAR + checksum](https://github.com/syllater/minecolonies-history/actions/runs/38162651747/artifacts/11710779160)
+- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38162651747/artifacts/11710389689)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38162651747/artifacts/11710722865)
+
+### Still open
+Hands-on survival-world hut construction/upgrades, worker hiring/work, real in-world save/reload, interactive GUI use, two-player permissions/concurrency/reconnect, balance review, and a distribution-license decision.
+
+
+## 2026-10-12 — Live Minecraft GameTest and full CI green
+
+### Source
+- Verified commit: `9d2cf82ca3a9a7cc909785e1b39b6dc57233b82c`.
+- Workflow: [38219495032 — all four jobs green](https://github.com/syllater/minecolonies-history/actions/runs/38219495032).
+
+### Added runtime coverage
+- Added `EmpireRuntimeGameTests`, executed in a real Minecraft 1.21.1 GameTest server.
+- Generated a minimal vanilla `imperium_realms:flat` test structure during resource generation so the test runner can place its fixture.
+- Fixed the runtime fixture to respect the realm-name limit of 3–32 visible characters.
+- Test passed: `IMPERIUM_GAMETEST_PASS: live SavedData economy, worker cooldown, realm and treasury round-trip`.
+- It validates persisted synthetic colony identity records, treasury balances, Philosopher/Tax Collector/Diplomat cooldown/progress, realm membership, inherited tax/economic law, treasury transfer and success-only audit entry.
+- Synthetic identities are used intentionally: this test does not claim to create or mutate a genuine MineColonies colony, nor replace real survival-world hiring/building/multiplayer acceptance.
+
+### CI evidence
+- Build/unit tests, release package, JAR checksum verification, headless client launch, dedicated server launch with `10/10` Structurize blueprints, and the new GameTest all passed.
+- Current candidate JAR SHA-256: `5220c9fc9ce992e258086f2153d848f4dd18731582ad149c8f232194948f6299`.
+- [RC package](https://github.com/syllater/minecolonies-history/actions/runs/38219495032/artifacts/11733657660)
+- [JAR and checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38219495032/artifacts/11733072967)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38219495032/artifacts/11733234549)
+- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38219495032/artifacts/11732794716)
+- [Client smoke log](https://github.com/syllater/minecolonies-history/actions/runs/38219495032/artifacts/11733414413)
+
+### Remaining release gates
+Real survival-world placement/upgrades, job/guard hiring and actual behavior, save/reload of genuine MineColonies colony state, interactive GUI, two-player permissions/treasury concurrency/reconnect, balance review, and distribution-license choice remain open.
+
+
+## 2026-10-12 — Daily-tax idempotency GameTest and latest RC build green
+
+### Source
+- Fully verified source commit: `0e96ba3ba809ad7e09735891593322b2514383fd`.
+- [GitHub Actions workflow 38220155005](https://github.com/syllater/minecolonies-history/actions/runs/38220155005): all four jobs passed.
+
+### Added runtime assertions
+- The live Minecraft GameTest now calls `collectDailyTaxes(dayIndex, 10)` twice for a synthetic province and asserts the first call collects 10 crowns while the second returns 0.
+- After saving/loading `EmpireStateSavedData`, the test checks the stored `lastTaxDay` and calls the same day again; it must return 0 rather than collect twice.
+- Following a 125-crown provincial-to-imperial transfer, the loaded province balance is checked at 385 crowns (500 initial + 10 daily tax − 125 transfer). The central treasury and success-only audit entry are also checked.
+- Success marker: `IMPERIUM_GAMETEST_PASS: live SavedData daily tax idempotency, economy, worker cooldown, realm and treasury round-trip`.
+
+### Full validation
+- Build, unit tests, static validators, SHA-256 manifest and self-checking release-candidate packaging passed.
+- Headless client startup passed; log contains `Sound engine started`.
+- Dedicated server started and validated MineColonies registries plus all `10/10` Structurize blueprints.
+- Minecraft GameTest server started and reported `All 1 required tests passed`.
+
+### Candidate
+- Candidate remains `0.1.0-rc1`, not a final release.
+- JAR SHA-256: `a138ce2eb57adbb7572962a59a844a091ff2cbe958e1e336ce18d62a859ffd6e`.
+- [Self-checking RC package](https://github.com/syllater/minecolonies-history/actions/runs/38220155005/artifacts/11733153882)
+- [JAR and checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38220155005/artifacts/11733033873)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38220155005/artifacts/11734255934)
+- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38220155005/artifacts/11734335936)
+- [Client smoke log](https://github.com/syllater/minecolonies-history/actions/runs/38220155005/artifacts/11734166005)
+
+### Not claimed as automated
+The test uses synthetic colony identity records; it does not test building a hut, hiring a real worker, the real MineColonies colony discovery lifecycle, GUI interaction or genuine two-player permissions/concurrency/reconnect. The in-world checklist and distribution-license decision remain open.
+
+
+## 2026-10-12 — Real Archive and Guard Tower runtime integration (fully verified)
+
+### Implementation
+- Added `MineColoniesBlockEntityCompatibility` using NeoForge's supported `BlockEntityTypeAddBlocksEvent`. MineColonies creates its shared `minecolonies:colonybuilding` block-entity type from a built-in hut list; custom addon huts do not join that list merely by extending `AbstractBlockHut`. The event now adds both Imperial Archive and Imperial Guard Tower, fixing the invalid block-entity error when the Archive anchor was placed.
+- Added live Minecraft GameTests that create disposable real MineColonies colonies, place the custom hut anchors, resolve the registered MineColonies building instances and assign real custom job entries.
+- The Archive test assigns Philosopher, Tax Collector and Diplomat jobs and verifies the hiring cap scales from 1 to 5 workers per role from hut level 1 to level 5.
+- The Guard Tower test assigns Siege Engineer, Imperial Field Medic and Cavalier jobs and verifies shared guard capacity of 1 at level 1 and 5 at level 5.
+- The real-colony test validates public API discovery by position, dimension + colony-ID identity, colony-name refresh, treasury preservation and Imperium SavedData NBT round-trip.
+
+### Verification
+- Fully green GitHub Actions run: [38226482725](https://github.com/syllater/minecolonies-history/actions/runs/38226482725), source commit `337a51000fe0889b854cc607994cab5d1b05f447`.
+- `./gradlew --no-daemon test build` passed, as did EN/NL, blueprint-progression, dependency/release-metadata and cross-dimension-command validators.
+- JAR checksum manifest verification and self-checking RC ZIP validation passed.
+- Dedicated server passed: `jobs=6 buildings=2 guardTypes=3 modules=6` and `10/10` Structurize schematics.
+- Headless client passed the `Sound engine started` marker.
+- All four live GameTests passed:
+  - `IMPERIUM_GAMETEST_PASS: live SavedData daily tax idempotency, economy, worker cooldown, realm and treasury round-trip`
+  - `IMPERIUM_GAMETEST_PASS: real MineColonies colony discovery, rename preservation and Imperium SavedData round-trip`
+  - `IMPERIUM_GAMETEST_PASS: real Imperial Archive hut registration, MineColonies jobs and level-scaled worker capacity`
+  - `IMPERIUM_GAMETEST_PASS: real Guard Tower hut registration, military specialist jobs and level-scaled shared capacity`
+
+### Artifacts
+- [Self-checking RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11736788200)
+- [JAR and checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11737026081)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11735878195)
+- [Dedicated-server/blueprint log](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11735948022)
+- [Client smoke-test log](https://github.com/syllater/minecolonies-history/actions/runs/38226482725/artifacts/11736267720)
+
+### Release status
+- Version remains `0.1.0-rc1`; candidate JAR SHA-256: `31c771467f7787fe8fa75ff4489aa8d87874dd5057b35f3f3d1c1f71fd514b12`.
+- Full Structurize survival placement/upgrades, sustained worker AI behavior, in-world save/reload, interactive GUI and true two-player permission/concurrency/reconnect tests still require hands-on playtesting.
+- The project owner's distribution-license decision remains a release gate. No final public release is claimed.
+
+
+## 2026-10-12 — BlockUI command wiring validator and fresh RC package (fully verified)
+
+### Change
+- Added `tools/validate_ledger_controls.py` and wired it into `.github/workflows/verify.yml`.
+- The checker parses the real BlockUI XML and `ImperiumLedgerWindow` handler table, rejects duplicate/unwired/unused buttons, and checks fixed command paths against registered Brigadier literals.
+- Dedicated GUI actions (`close`, `empire_map`) are explicitly checked as dedicated handlers, not treated as command strings.
+
+### Verification
+- Full green workflow: [38227463363](https://github.com/syllater/minecolonies-history/actions/runs/38227463363) on source commit `fa50cc2d67ee890b061fea30cb27598c808a3ac9`.
+- EN/NL localization validator passed for 298 literal/dynamic keys with matching format signatures.
+- BlockUI validation passed: `40 BlockUI buttons, 38 command handlers, 2 dedicated actions`.
+- All static validators and `./gradlew --no-daemon test build` passed.
+- JAR checksum manifest and self-checking release-candidate bundle passed.
+- Headless client startup reached `Sound engine started`.
+- Dedicated server validated `jobs=6 buildings=2 guardTypes=3 modules=6` and all `10/10` Structurize blueprints.
+- All four live Minecraft GameTests passed, including real colony discovery, real Archive and Guard Tower registration/job assignment, and level-scaled hiring capacity.
+
+### Artifacts
+- [Self-checking RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11736869886)
+- [JAR + SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737190134)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737395115)
+- [Dedicated-server validation log](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737195332)
+- [Client smoke-test log](https://github.com/syllater/minecolonies-history/actions/runs/38227463363/artifacts/11737150342)
+
+### Candidate
+- Version: `0.1.0-rc1`.
+- JAR SHA-256: `0c734afd29c2aed195f58169f2ba3e00988472ea17d39d88447d55224fd4b379`.
+- Still not a final public release: real survival-world blueprint upgrades/worker longevity/save-reload, interactive GUI playtest, two-player acceptance and a distribution-license decision remain open.
+
+
+## 2026-10-12 — Reproducible release-candidate build fully verified
+
+- Source commit: `61d7f9c9cb66fca8d9f96f9773878b6b196c43be`.
+- Change: Gradle archive tasks now disable variable file timestamps and use reproducible archive ordering.
+- Full CI: [workflow 38228182714](https://github.com/syllater/minecolonies-history/actions/runs/38228182714) completed successfully across all four jobs.
+- Checks passed: localization and static command/UI/dependency validators; `./gradlew --no-daemon test build`; JAR SHA-256 manifest; self-checking release ZIP; headless `runClient`; real MineColonies/GameTest integration; dedicated-server registry and 10/10 schematic validation.
+- JAR SHA-256: `4d44a38535747159a93d22ca46744852931d1929e3dfefc02c37747333685bdb`.
+- Artifacts: [RC ZIP](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737131416), [JAR + manifest](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737226311), [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737920417), [server schematic log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737576125), [client smoke log](https://github.com/syllater/minecolonies-history/actions/runs/38228182714/artifacts/11737760664).
+- User-visible completion estimate remains approximately 90%. All software milestones are implemented at core level; remaining release blockers are genuine survival-world construction/upgrades, sustained AI behavior/save-reload, GUI click-through, true two-player permissions/concurrency/reconnect, balance review, and license decision. The final release has not been published.
+
+
+## 2026-10-12 — Live command authorization test and full CI verified
+
+### Change
+- Added a live Minecraft GameTest that executes tax/policy commands through the real Brigadier dispatcher.
+- The colony owner can submit a tax bill. A non-owner placed in the same colony is denied both tax and policy changes without mutating the stored Parliament proposal list.
+- Added the expected GameTest marker to `.github/workflows/verify.yml` so the job fails if this protection regresses.
+
+### Verification
+- Source commit: `e3e4e7c541ffc0de78daf1a3d8b3483db28d2b22`.
+- Full green workflow: [38285019437](https://github.com/syllater/minecolonies-history/actions/runs/38285019437) — all four jobs passed.
+- Static validators, `./gradlew --no-daemon test build`, JAR checksum manifest/package, headless `runClient`, dedicated server with 10/10 Structurize blueprints, and all five live GameTests passed.
+- Candidate JAR SHA-256: `4c4720cadf82f82e944f67134bab8d11ac8d0f74b1056653e274a1868482fbd0`.
+
+### Artifacts
+- [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11763166421)
+- [JAR + checksum manifest](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11762818347)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11763480400)
+- [Dedicated server log](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11762294179)
+- [Client smoke-test log](https://github.com/syllater/minecolonies-history/actions/runs/38285019437/artifacts/11762678784)
+
+### Release gate
+- Overall progress remains approximately **90%**. Automated command authorization coverage is improved, but it is not a substitute for the real two-player permissions/concurrency/reconnect test.
+- Physical survival placement/upgrades, sustained worker behavior/world reload, graphical UI click-through, two-player session, balance review and license decision remain open. No final release has been published.
+
+
+## 2026-10-12 — Treasury command authorization integration test green
+
+- Source commit: `8d75647dd41f2527976f142a1361978a7619282b`.
+- Full workflow [38287296842](https://github.com/syllater/minecolonies-history/actions/runs/38287296842) passed all four jobs: build/tests/package, headless client, dedicated server/blueprints and live GameTests.
+- The fifth live GameTest executes commands through the real Brigadier dispatcher. The owner may submit tax and perform treasury deposit/withdraw; a non-owner is denied tax, policy, deposit and withdrawal. Denied commands leave treasury balances and Parliament proposals unchanged.
+- The test uses the actual opening provincial balance and checks exact transfer deltas rather than assuming the province starts at zero.
+- JAR SHA-256: `a7aa3b3bf6fde8d62eecb6b26079cf694e23f3913e924e8906dbaa137002aee4`.
+- Artifacts: [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11764435629); [JAR + manifest](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763264551); [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763737489); [server/blueprint log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763947174); [client log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763882201).
+- Overall completion remains approximately **90%**. Real survival construction/upgrades, sustained worker behavior/save-reload, graphical UI click-through, genuine two-player permissions/concurrency/reconnect, balance review and a distribution-license decision remain open. No final public release has been published.
+
+
+## 2026-10-12 — Insufficient-funds treasury rollback GameTest green
+
+- Source commit: `eb002edc10253472f235f367d226b42d12d1d709`.
+- Full CI [38288316185](https://github.com/syllater/minecolonies-history/actions/runs/38288316185) passed all four jobs: build/tests/package, headless client, dedicated server with 10/10 schematics, and live GameTests.
+- The fifth live GameTest executes actual Brigadier commands: owner tax/deposit/withdraw succeeds; non-owner tax/policy/deposit/withdraw is denied; and underfunded authorised deposit/withdraw attempts are rejected with provincial/imperial balances and audit history unchanged.
+- The test uses the actual opening provincial balance rather than assuming an empty treasury.
+- JAR SHA-256: `a7dd3f42bf49b7703d15f94f7903b3e625d189d86b26919bfcf19b3e505f1940`.
+- Artifacts: [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764163159), [JAR + manifest](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764183051), [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11763763931), [server log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764487140), [client log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11763913074).
+- Remaining gates: survival construction/upgrades, sustained workers/save-reload, actual GUI click-through, genuine multiplayer, balance review and distribution-license decision.
+
+
+## 2026-10-12 — Cross-dimension realm and parliamentary authorization integration verified
+
+### Changes
+- Added a live Minecraft GameTest with real temporary MineColonies colonies in separate dimensions.
+- Verified an Emperor can invite a remote province, an unrelated non-owner cannot accept, the invited colony owner can join, repeat joins are denied and dimension + colony ID membership survives NBT round-trip.
+- Isolated the temporary capital in the End and province in the Nether. GameTests can reuse numeric colony IDs; keeping this fixture out of the Overworld prevents its temporary realm membership from colliding with another permission test's reused Overworld ID.
+- Extended the real Brigadier permission test: an unrelated player cannot assent to or veto a bill, those denied attempts leave the bill open with no resolution actor, and the Emperor can then veto the same bill under the Emperor's identity.
+
+### Verification
+- Source commit: `a2bf703628c25379dd1c4f4acb1a8aa1e3dc457a`.
+- Full green workflow: [38296167316](https://github.com/syllater/minecolonies-history/actions/runs/38296167316) — all four jobs passed.
+- Static EN/NL, generated-tier, release/dependency, cross-dimension command and ledger wiring validators passed.
+- `./gradlew --no-daemon test build`, JAR checksum verification and self-checking RC bundle passed.
+- Headless `runClient`, dedicated server, all ten Structurize blueprints and all six live GameTests passed.
+- JAR SHA-256: `351eeafb48e8e6bea538a701c55ae24f10b806df2a3ed15c8979c7701d13bebe`.
+
+Artifacts:
+- [RC bundle](https://github.com/syllater/minecolonies-history/actions/runs/38296167316/artifacts/11768472386)
+- [JAR + manifest](https://github.com/syllater/minecolonies-history/actions/runs/38296167316/artifacts/11768327658)
+- [GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38296167316/artifacts/11767998216)
+- [Dedicated-server log](https://github.com/syllater/minecolonies-history/actions/runs/38296167316/artifacts/11768902441)
+- [Client log](https://github.com/syllater/minecolonies-history/actions/runs/38296167316/artifacts/11768358033)
+
+### Remaining acceptance gates
+Real survival build/upgrade and sustained worker tests, actual GUI click-through, genuine two-player concurrency/reconnect/save-reload, balance review and the distribution-license decision remain open. No final public release is claimed.

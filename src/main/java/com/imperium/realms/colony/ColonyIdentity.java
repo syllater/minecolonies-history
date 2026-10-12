@@ -1,6 +1,7 @@
 package com.imperium.realms.colony;
 
 import com.minecolonies.api.colony.IColony;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
 
@@ -13,11 +14,31 @@ import java.util.Objects;
 public record ColonyIdentity(String dimensionId, int colonyId) {
     public ColonyIdentity {
         Objects.requireNonNull(dimensionId, "dimensionId");
-        if (dimensionId.isBlank() || !dimensionId.contains(":")) {
+        final int separator = dimensionId.indexOf(':');
+        if (dimensionId.isBlank() || separator <= 0 || separator == dimensionId.length() - 1) {
             throw new IllegalArgumentException("dimensionId must be a namespaced dimension key");
         }
+
+        // A colon alone is not enough to make a valid Minecraft identifier. Check
+        // the resource-location grammar here so malformed NBT cannot create keys
+        // that will never resolve through MineColonies' dimension lookup.
+        final ResourceLocation parsed = parseDimensionId(dimensionId);
+        if (!parsed.toString().equals(dimensionId)) {
+            throw new IllegalArgumentException("dimensionId must be canonical: " + dimensionId);
+        }
+
         if (colonyId < 0) {
             throw new IllegalArgumentException("colonyId must not be negative");
+        }
+    }
+
+    private static ResourceLocation parseDimensionId(final String dimensionId) {
+        try {
+            return ResourceLocation.parse(dimensionId);
+        } catch (final RuntimeException invalidResourceLocation) {
+            throw new IllegalArgumentException(
+                    "dimensionId must be a valid namespaced dimension key: " + dimensionId,
+                    invalidResourceLocation);
         }
     }
 

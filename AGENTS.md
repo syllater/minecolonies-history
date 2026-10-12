@@ -3,13 +3,13 @@
 ## Session Start
 
 1. Read `AGENTS.md`, `PROJECT_GOAL.md`, `ROADMAP.md`, `STATUS.md`, `DECISIONS.md`, and `CHECKPOINTS.md`.
-2. Inspect current repository state and branch.
-3. Review the latest checkpoint and verify its claims against current files.
-4. Identify the next uncompleted task in the active milestone.
+2. Inspect current repository state and branch head.
+3. Review the latest checkpoint and verify its claims against files and CI evidence.
+4. Identify the next incomplete, high-value project task.
 5. Make targeted changes without overwriting user work.
 6. Run the smallest relevant check, then wider checks when possible.
 7. Record only actual command/test results.
-8. Update status and checkpoints after each task group.
+8. Update status and checkpoints after each coherent task group.
 
 ## Development Rules
 
@@ -23,12 +23,15 @@
 - Prefer public extension APIs and events over mixins.
 - Do not disable tests or add fake implementations to make a build appear successful.
 - Never claim a build, test or client launch succeeded unless it was actually executed.
-- Request approval after each milestone.
+- The project owner explicitly requested on 2026-10-10 that development continue across the remaining milestones without waiting for approval at every milestone boundary; follow that instruction.
+- Do not merge or publish a release without the owner's explicit direction.
 
-## Milestone Gate
+## Milestone Continuation
 
-Active gate: **Milestone 2 — MineColonies Integration**.
+Continue through the roadmap toward a usable final mod/JAR, carrying forward non-blocking polish items and prioritizing features that build, test, and work. When a task group is implemented, commit a checkpoint and move directly to the next missing high-value task rather than waiting for another approval.
 
-Within this milestone, implement the public colony lookup adapter and Imperium-owned saved state; add verification tests; verify dependency resolution and compile in an environment with shell access. Do not start Milestone 3 until the Milestone 2 acceptance criteria are documented and user approval is obtained.
+This authorization does not waive correctness: do not represent a milestone as accepted unless its evidence is real. Keep survival and multiplayer playtests marked pending unless actually performed.
 
-The GitHub-only tool interface can read and write source files but cannot itself execute a local Gradle shell. Where direct execution is unavailable, use repository CI if configured and otherwise record the verification as pending.
+## Environment Limitations
+
+The GitHub-connected interface can edit repository files and read Actions logs but cannot execute a local Gradle shell. Use repository CI for compile/test/client/server checks and record exact current-commit results. Actual in-world survival and multiplayer acceptance testing must remain open unless performed in-game.

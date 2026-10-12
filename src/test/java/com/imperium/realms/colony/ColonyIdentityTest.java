@@ -13,11 +13,13 @@ final class ColonyIdentityTest {
         final ColonyIdentity sameColony = new ColonyIdentity("minecraft:overworld", 7);
         final ColonyIdentity differentId = new ColonyIdentity("minecraft:overworld", 8);
         final ColonyIdentity differentDimension = new ColonyIdentity("minecraft:the_nether", 7);
+        final ColonyIdentity moddedDimension = new ColonyIdentity("example:crystal_caves", 2);
 
         assertEquals(overworldColony, sameColony);
         assertEquals("minecraft:overworld#7", overworldColony.storageKey());
         assertNotEquals(overworldColony, differentId);
         assertNotEquals(overworldColony, differentDimension);
+        assertEquals("example:crystal_caves#2", moddedDimension.storageKey());
     }
 
     @Test
@@ -25,6 +27,10 @@ final class ColonyIdentityTest {
         assertThrows(NullPointerException.class, () -> new ColonyIdentity(null, 1));
         assertThrows(IllegalArgumentException.class, () -> new ColonyIdentity("", 1));
         assertThrows(IllegalArgumentException.class, () -> new ColonyIdentity("overworld", 1));
+        assertThrows(IllegalArgumentException.class, () -> new ColonyIdentity(":overworld", 1));
+        assertThrows(IllegalArgumentException.class, () -> new ColonyIdentity("minecraft:", 1));
+        assertThrows(IllegalArgumentException.class, () -> new ColonyIdentity("minecraft:the nether", 1));
+        assertThrows(IllegalArgumentException.class, () -> new ColonyIdentity("Minecraft:Overworld", 1));
         assertThrows(IllegalArgumentException.class, () -> new ColonyIdentity("minecraft:overworld", -1));
     }
 }

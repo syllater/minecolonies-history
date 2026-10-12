@@ -1,0 +1,66 @@
+<window size="420 528" lightbox="true" type="OVERSIZED_VANILLA">
+    <text id="title" pos="15 12" size="390 18" textalign="MIDDLE" color="white"
+          label="$(imperium_realms.gui.title)"/>
+    <text id="help" pos="18 32" size="384 20" textalign="MIDDLE" color="white"
+          label="$(imperium_realms.gui.help)"/>
+
+    <button id="status" pos="22 58" size="112 20" label="$(imperium_realms.gui.status)"/>
+    <button id="province" pos="154 58" size="112 20" label="$(imperium_realms.gui.province)"/>
+    <button id="parliament" pos="286 58" size="112 20" label="$(imperium_realms.gui.parliament)"/>
+
+    <text id="taxLabel" pos="22 89" size="376 12" color="white"
+          label="$(imperium_realms.gui.tax_heading)"/>
+    <button id="tax0" pos="22 105" size="58 20" label="$(imperium_realms.gui.tax0)"/>
+    <button id="tax5" pos="84 105" size="58 20" label="$(imperium_realms.gui.tax5)"/>
+    <button id="tax10" pos="146 105" size="58 20" label="$(imperium_realms.gui.tax10)"/>
+    <button id="tax15" pos="208 105" size="58 20" label="$(imperium_realms.gui.tax15)"/>
+    <button id="tax20" pos="270 105" size="58 20" label="$(imperium_realms.gui.tax20)"/>
+    <button id="tax25" pos="332 105" size="58 20" label="$(imperium_realms.gui.tax25)"/>
+
+    <text id="policyLabel" pos="22 137" size="376 12" color="white"
+          label="$(imperium_realms.gui.policy_heading)"/>
+    <button id="policy_balanced" pos="22 153" size="88 20" label="$(imperium_realms.gui.policy_balanced)"/>
+    <button id="policy_mercantile" pos="114 153" size="88 20" label="$(imperium_realms.gui.policy_mercantile)"/>
+    <button id="policy_welfare" pos="206 153" size="88 20" label="$(imperium_realms.gui.policy_welfare)"/>
+    <button id="policy_austerity" pos="298 153" size="88 20" label="$(imperium_realms.gui.policy_austerity)"/>
+
+    <text id="investLabel" pos="22 185" size="376 12" color="white"
+          label="$(imperium_realms.gui.invest_heading)"/>
+    <button id="invest10" pos="22 201" size="80 20" label="$(imperium_realms.gui.invest10)"/>
+    <button id="invest50" pos="106 201" size="80 20" label="$(imperium_realms.gui.invest50)"/>
+    <button id="invest100" pos="190 201" size="80 20" label="$(imperium_realms.gui.invest100)"/>
+    <button id="close" pos="298 201" size="88 20" label="$(imperium_realms.gui.close)"/>
+
+    <text id="provinceFocusHeading" pos="22 231" size="376 12" color="white"
+          label="$(imperium_realms.gui.province_focus_heading)"/>
+    <button id="focus_agriculture" pos="16 247" size="72 20" label="$(imperium_realms.province_focus.agriculture)"/>
+    <button id="focus_trade" pos="94 247" size="72 20" label="$(imperium_realms.province_focus.trade)"/>
+    <button id="focus_scholarship" pos="172 247" size="72 20" label="$(imperium_realms.province_focus.scholarship)"/>
+    <button id="focus_military" pos="250 247" size="72 20" label="$(imperium_realms.province_focus.military)"/>
+    <button id="focus_civic" pos="328 247" size="72 20" label="$(imperium_realms.province_focus.civic)"/>
+    <button id="develop_province" pos="22 275" size="170 20" label="$(imperium_realms.gui.province_develop)"/>
+    <button id="campaign" pos="208 275" size="190 20" label="$(imperium_realms.gui.campaigns)"/>
+    <button id="empire" pos="22 301" size="170 20" label="$(imperium_realms.gui.empire)"/>
+    <button id="empire_deposit50" pos="208 301" size="88 20" label="$(imperium_realms.gui.empire_deposit50)"/>
+    <button id="empire_withdraw50" pos="300 301" size="98 20" label="$(imperium_realms.gui.empire_withdraw50)"/>
+    <button id="empire_audit" pos="22 329" size="170 20" label="$(imperium_realms.gui.empire_audit)"/>
+    <button id="governors" pos="208 329" size="190 20" label="$(imperium_realms.gui.governors)"/>
+    <button id="empire_events" pos="22 357" size="170 20" label="$(imperium_realms.gui.empire_events)"/>
+    <button id="empire_petitions" pos="208 357" size="190 20" label="$(imperium_realms.gui.empire_petitions)"/>
+    <button id="empire_routes" pos="22 385" size="170 20" label="$(imperium_realms.gui.empire_routes)"/>
+    <button id="empire_defenses" pos="208 385" size="190 20" label="$(imperium_realms.gui.empire_defenses)"/>
+    <button id="empire_theatre" pos="22 413" size="170 20" label="$(imperium_realms.gui.empire_theatre)"/>
+    <button id="empire_map" pos="208 413" size="190 20" label="$(imperium_realms.gui.empire_map)"/>
+    <text id="strategyHeading" pos="22 441" size="376 12" color="white"
+          label="$(imperium_realms.gui.strategy_heading)"/>
+    <button id="posture_balanced" pos="22 457" size="112 20"
+            label="$(imperium_realms.gui.strategy_posture_balanced)"/>
+    <button id="posture_defensive" pos="154 457" size="112 20"
+            label="$(imperium_realms.gui.strategy_posture_defensive)"/>
+    <button id="posture_offensive" pos="286 457" size="112 20"
+            label="$(imperium_realms.gui.strategy_posture_offensive)"/>
+    <button id="priority_route" pos="22 485" size="184 20"
+            label="$(imperium_realms.gui.strategy_route_priority)"/>
+    <button id="priority_defense" pos="214 485" size="184 20"
+            label="$(imperium_realms.gui.strategy_defense_priority)"/>
+</window>

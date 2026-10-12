@@ -3,7 +3,12 @@ package com.imperium.realms.colony;
 import com.minecolonies.api.IMinecoloniesAPI;
 import com.minecolonies.api.colony.IColony;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -26,6 +31,42 @@ public final class MineColoniesIntegration {
                 IMinecoloniesAPI.getInstance()
                         .getColonyManager()
                         .getColonyByPosFromWorld(level, position));
+    }
+
+    /** Resolve a real MineColonies colony in the specified dimension by its ID. */
+    public static Optional<IColony> colonyById(final ServerLevel level, final int colonyId) {
+        Objects.requireNonNull(level, "level");
+        if (colonyId < 0) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(
+                IMinecoloniesAPI.getInstance()
+                        .getColonyManager()
+                        .getColonyByWorld(colonyId, level));
+    }
+
+    /**
+     * Resolve a persisted colony identity back to a real MineColonies colony.
+     * This allows strategic commands to locate colonies across dimensions
+     * instead of incorrectly assuming IDs only belong to the current level.
+     */
+    public static Optional<IColony> colonyByIdentity(
+            final MinecraftServer server, final ColonyIdentity identity) {
+        Objects.requireNonNull(server, "server");
+        Objects.requireNonNull(identity, "identity");
+
+        final ResourceLocation dimensionLocation = ResourceLocation.tryParse(identity.dimensionId());
+        if (dimensionLocation == null) {
+            return Optional.empty();
+        }
+        final ResourceKey<Level> dimensionKey = ResourceKey.create(
+                Registries.DIMENSION, dimensionLocation);
+        final ServerLevel level = server.getLevel(dimensionKey);
+        if (level == null) {
+            return Optional.empty();
+        }
+        return colonyById(level, identity.colonyId())
+                .filter(colony -> identity.equals(ColonyIdentity.from(colony)));
     }
 
     /**
