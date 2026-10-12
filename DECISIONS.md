@@ -83,3 +83,13 @@ Rationale:
 - Map requests traverse realm membership and MineColonies colony lookups and should not be rebuilt on every packet from a modified client.
 - The client sends a request preference only; this limit does not alter realm data or gameplay state.
 - A small pure-Java utility keeps the cooldown testable without a live Minecraft world.
+
+
+## 2026-10-12 — Add live GameTest persistence gate
+
+Decision: Keep a small, headless Minecraft GameTest in CI for the most important SavedData economy/realm serialization contract, in addition to pure unit tests and client/server smoke launches.
+
+Rationale:
+- Unit tests are fast, but an actual GameTest server exercises Minecraft's CompoundTag and SavedData code in its mapped runtime.
+- The test uses synthetic colony identity keys and does not create fake MineColonies colonies or write into MineColonies internals.
+- Physical hut placement, worker AI in survival, GUI click-through and two-player network/permission acceptance remain manual release gates; passing the GameTest is not used to certify those behaviors.
