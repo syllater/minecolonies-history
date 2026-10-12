@@ -73,19 +73,19 @@ The project currently uses `All Rights Reserved` metadata for its own code and h
 
 ## Latest verified candidate — 2026-10-12
 
-All four jobs passed in [workflow 38287296842](https://github.com/syllater/minecolonies-history/actions/runs/38287296842) on source commit `8d75647dd41f2527976f142a1361978a7619282b`:
+All four jobs passed in [workflow 38288316185](https://github.com/syllater/minecolonies-history/actions/runs/38288316185) on source commit `eb002edc10253472f235f367d226b42d12d1d709`:
 - EN/NL localization, tier progression, release/dependency metadata, cross-dimension command validators and BlockUI ledger wiring passed.
 - `./gradlew --no-daemon test build`, reproducible archive checks, JAR SHA-256 manifest and self-checking RC package passed.
 - Headless client startup, dedicated-server startup and all 10/10 Structurize blueprint validations passed.
 - Five live Minecraft GameTests passed. The latest verifies that the owner can submit tax and perform treasury deposit/withdraw, while a non-owner is denied tax, policy, deposit and withdrawal commands without mutating treasury or Parliament state.
 
-Current JAR SHA-256: `a7aa3b3bf6fde8d62eecb6b26079cf694e23f3913e924e8906dbaa137002aee4`.
+Current JAR SHA-256: `a7dd3f42bf49b7703d15f94f7903b3e625d189d86b26919bfcf19b3e505f1940`.
 
 Artifacts:
-- [Self-checking release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11764435629)
-- [Mod JAR + SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763264551)
-- [Live GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763737489)
-- [Dedicated-server/blueprint log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763947174)
-- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38287296842/artifacts/11763882201)
+- [Self-checking release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764163159)
+- [Mod JAR + SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764183051)
+- [Live GameTest log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11763763931)
+- [Dedicated-server/blueprint log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11764487140)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38288316185/artifacts/11763913074)
 
 This remains a release candidate, not a final public release. Survival construction/upgrades, sustained worker/guard behavior, in-world save/reload, actual GUI click-through, a genuine two-player test, balance review and the distribution-license decision remain open.
