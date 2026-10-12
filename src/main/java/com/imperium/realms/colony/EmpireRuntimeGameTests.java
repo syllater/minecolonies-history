@@ -436,14 +436,14 @@ public final class EmpireRuntimeGameTests {
 
             // Realm setup and a funded provincial treasury let this test exercise real
             // treasury command paths as well as the basic tax/policy authorization.
-            final int foundResult = executeCommand(level, owner, "imperium found Permission Realm");
+            final int foundResult = executeCommand(level, owner, "imperium empire found Permission Realm");
             require(foundResult > 0, "The colony owner should be able to found the test realm");
             final EmpireRealm realm = data.realmForProvince(identity).orElseThrow(
                     () -> new AssertionError("Authorized realm creation did not register its capital"));
             require(state.creditTreasury(250L), "Could not fund the test province treasury");
             data.markChanged();
 
-            final int ownerDepositResult = executeCommand(level, owner, "imperium deposit 50");
+            final int ownerDepositResult = executeCommand(level, owner, "imperium empire deposit 50");
             require(ownerDepositResult > 0, "The realm owner should be able to deposit into the imperial treasury");
             require(state.treasuryCrowns() == 200L && realm.imperialTreasuryCrowns() == 50L,
                     "Authorized treasury deposit did not move the expected crowns");
@@ -456,10 +456,10 @@ public final class EmpireRuntimeGameTests {
             final int outsiderPolicyResult = executeCommand(level, outsider, "imperium policy mercantile");
             require(outsiderPolicyResult == 0,
                     "A non-owner without MANAGE_HUTS must not submit an economic policy proposal");
-            final int outsiderDepositResult = executeCommand(level, outsider, "imperium deposit 25");
+            final int outsiderDepositResult = executeCommand(level, outsider, "imperium empire deposit 25");
             require(outsiderDepositResult == 0,
                     "A non-owner without MANAGE_HUTS must not transfer provincial funds");
-            final int outsiderWithdrawResult = executeCommand(level, outsider, "imperium withdraw 10");
+            final int outsiderWithdrawResult = executeCommand(level, outsider, "imperium empire withdraw 10");
             require(outsiderWithdrawResult == 0,
                     "A non-Emperor must not withdraw funds from the imperial reserve");
 
