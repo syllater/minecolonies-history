@@ -422,30 +422,61 @@ public final class EmpireRuntimeGameTests {
             final ServerPlayer outsider = FakePlayerFactory.get(level, outsiderProfile);
             outsider.setPos(center.getX() + 0.5D, center.getY(), center.getZ() + 0.5D);
 
+            final EmpireStateSavedData data = EmpireStateSavedData.get(level);
+            final ColonyIdentity identity = ColonyIdentity.from(colony);
             final EmpireState state = MineColoniesIntegration.getOrCreateState(level, colony);
 
             // Prove the command route itself is valid: the colony owner can submit
             // a bill through the same Brigadier dispatcher used by real players.
-            final int ownerResult = executeCommand(level, owner, "imperium tax 10");
-            require(ownerResult > 0, "The colony owner should be able to submit a tax proposal");
+            final int ownerTaxResult = executeCommand(level, owner, "imperium tax 10");
+            require(ownerTaxResult > 0, "The colony owner should be able to submit a tax proposal");
             require(state.recentParliamentProposals().size() == 1,
                     "The authorized tax command did not create exactly one proposal");
             final long originalProposalId = state.recentParliamentProposals().get(0).id();
 
+            // Realm setup and a funded provincial treasury let this test exercise real
+            // treasury command paths as well as the basic tax/policy authorization.
+            final int foundResult = executeCommand(level, owner, "imperium found Permission Realm");
+            require(foundResult > 0, "The colony owner should be able to found the test realm");
+            final EmpireRealm realm = data.realmForProvince(identity).orElseThrow(
+                    () -> new AssertionError("Authorized realm creation did not register its capital"));
+            require(state.creditTreasury(250L), "Could not fund the test province treasury");
+            data.markChanged();
+
+            final int ownerDepositResult = executeCommand(level, owner, "imperium deposit 50");
+            require(ownerDepositResult > 0, "The realm owner should be able to deposit into the imperial treasury");
+            require(state.treasuryCrowns() == 200L && realm.imperialTreasuryCrowns() == 50L,
+                    "Authorized treasury deposit did not move the expected crowns");
+
             // A second player standing in the same colony must not be able to use
-            // proximity alone to change colony economy or parliament state.
+            // proximity alone to change policy, province funds or the imperial reserve.
             final int outsiderTaxResult = executeCommand(level, outsider, "imperium tax 15");
             require(outsiderTaxResult == 0,
                     "A non-owner without MANAGE_HUTS must not submit a tax proposal");
             final int outsiderPolicyResult = executeCommand(level, outsider, "imperium policy mercantile");
             require(outsiderPolicyResult == 0,
                     "A non-owner without MANAGE_HUTS must not submit an economic policy proposal");
+            final int outsiderDepositResult = executeCommand(level, outsider, "imperium deposit 25");
+            require(outsiderDepositResult == 0,
+                    "A non-owner without MANAGE_HUTS must not transfer provincial funds");
+            final int outsiderWithdrawResult = executeCommand(level, outsider, "imperium withdraw 10");
+            require(outsiderWithdrawResult == 0,
+                    "A non-Emperor must not withdraw funds from the imperial reserve");
 
+            require(state.treasuryCrowns() == 200L && realm.imperialTreasuryCrowns() == 50L,
+                    "Denied treasury commands changed provincial or imperial balances");
             final var afterDeniedCommands = state.recentParliamentProposals();
             require(afterDeniedCommands.size() == 1 && afterDeniedCommands.get(0).id() == originalProposalId,
                     "Unauthorized commands changed the stored parliament proposals");
 
-            LOGGER.info("IMPERIUM_GAMETEST_PASS: colony-owner economy commands succeed and non-owner tax/policy mutations are denied");
+            // The legitimate Emperor remains able to withdraw; this guards against
+            // a test that only passes because all treasury actions are broken.
+            final int ownerWithdrawResult = executeCommand(level, owner, "imperium withdraw 10");
+            require(ownerWithdrawResult > 0, "The Emperor should be able to withdraw from the imperial treasury");
+            require(state.treasuryCrowns() == 210L && realm.imperialTreasuryCrowns() == 40L,
+                    "Authorized treasury withdrawal did not move the expected crowns");
+
+            LOGGER.info("IMPERIUM_GAMETEST_PASS: owner tax/deposit/withdraw succeed; non-owner tax/policy/deposit/withdraw are denied without state mutation");
         } finally {
             IColonyManager.getInstance().deleteColonyByWorld(colony.getID(), false, level);
         }
