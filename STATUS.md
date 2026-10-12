@@ -1,6 +1,6 @@
 # Status
 
-Last updated: 2026-10-11 Europe/Amsterdam.
+Last updated: 2026-10-12 Europe/Amsterdam.
 
 ## Current release candidate
 
@@ -9,13 +9,13 @@ Last updated: 2026-10-11 Europe/Amsterdam.
 - Active branch: `milestone-2/colony-integration`
 - Candidate version: `0.1.0-rc1`
 - Target: Minecraft Java 1.21.1, Java 21, NeoForge 21.1.x, required MineColonies dependency set.
-- Candidate source commit: `d5dc286d2e3e1e1b4ac30b5c7d6af48810fd0952`
-- Overall completion estimate: approximately **86%**. This is a planning estimate, not a measured metric.
+- Latest fully verified source commit: `9d2cf82ca3a9a7cc909785e1b39b6dc57233b82c` (new GameTest structure/name fixes).
+- Overall completion estimate: approximately **87%**. This is a planning estimate, not a measured metric.
 - Release status: **release candidate only**. No final public release has been published.
 
 ## Automated verification — green
 
-The latest full workflow passed at [GitHub Actions run 38162651747](https://github.com/syllater/minecolonies-history/actions/runs/38162651747), against source commit `d5dc286d2e3e1e1b4ac30b5c7d6af48810fd0952`.
+The latest full workflow passed at [GitHub Actions run 38219495032](https://github.com/syllater/minecolonies-history/actions/runs/38219495032), against source commit `9d2cf82ca3a9a7cc909785e1b39b6dc57233b82c`. All four jobs passed: Gradle/unit/build and RC integrity, headless client startup, dedicated-server startup, and a live Minecraft GameTest.
 
 - English/Dutch translation-key and placeholder validation passed.
 - Generated blueprint tier-progression validation passed.
@@ -26,14 +26,15 @@ The latest full workflow passed at [GitHub Actions run 38162651747](https://gith
 - The self-checking `0.1.0-rc1` bundle assembled and its embedded checksum verified.
 - Headless `runClient` startup passed: Minecraft reached the `Sound engine started` marker.
 - Dedicated-server startup passed; MineColonies registration validated and all **10/10** Structurize schematics/hut anchors loaded.
+- The new `runGameTestServer` test passed inside Minecraft: state/NBT round-trip for synthetic colony identities, realm membership, imperial tax/policy law, treasury transfer/audit, and worker cooldown persistence. The test deliberately avoids creating or mutating a real MineColonies colony, so actual in-world colony playtesting remains open.
 
 Artifact links:
-- [Self-checking 0.1.0-rc1 release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38162651747/artifacts/11710624257)
-- [Mod JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38162651747/artifacts/11710779160)
-- [Dedicated-server blueprint/registry log](https://github.com/syllater/minecolonies-history/actions/runs/38162651747/artifacts/11710389689)
-- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38162651747/artifacts/11710722865)
+- [Self-checking 0.1.0-rc1 release-candidate bundle](https://github.com/syllater/minecolonies-history/actions/runs/38219495032/artifacts/11733657660)
+- [Mod JAR and SHA256SUMS.txt](https://github.com/syllater/minecolonies-history/actions/runs/38219495032/artifacts/11733072967)
+- [Dedicated-server blueprint/registry log](https://github.com/syllater/minecolonies-history/actions/runs/38219495032/artifacts/11732794716)
+- [Client startup log](https://github.com/syllater/minecolonies-history/actions/runs/38219495032/artifacts/11733414413)
 
-The built JAR SHA-256 is `67ae860f656926b27a2fb30b2bf65d6e880a322629e44b0ce005060ca0e8fd26`. The workflow artifact links are temporary GitHub Actions artifacts, not permanent release assets.
+The latest fully verified candidate JAR SHA-256 is `5220c9fc9ce992e258086f2153d848f4dd18731582ad149c8f232194948f6299` (workflow 38219495032). The workflow artifact links are temporary GitHub Actions artifacts, not permanent release assets.
 
 ## Implemented systems
 
@@ -72,12 +73,12 @@ These require a person to interact with a real Minecraft world; headless CI cann
 ## Review links
 
 - [Draft release-candidate PR #2](https://github.com/syllater/minecolonies-history/pull/2)
-- [Latest full green verification workflow](https://github.com/syllater/minecolonies-history/actions/runs/38162651747)
+- [Latest full green verification workflow](https://github.com/syllater/minecolonies-history/actions/runs/38219495032)
 - [End-to-end survival and multiplayer checklist](docs/PLAYTEST_RELEASE_CHECKLIST.md)
 - [Release-candidate notes](docs/RELEASE_CANDIDATE_NOTES.md)
 
 
-## 2026-10-11 — Latest full verification checkpoint
+## 2026-10-12 — Runtime GameTest and four-job verification checkpoint
 
 - Saved realm IDs remain monotonic after save/load; a stale lower counter is reconciled against active realm IDs.
 - Oversized saved membership, invitations, parliament/diplomacy/campaign history and audit lists are bounded.
